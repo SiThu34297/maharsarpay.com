@@ -45,6 +45,13 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
   - `src/components/providers/app-theme-provider.tsx`
   - `src/app/layout.tsx`
 
+## Localization
+
+- Locales configured: `en` (English), `my` (Myanmar)
+- Localized routes: `/:lang` using App Router segment `src/app/[lang]`
+- Locale redirect and detection: `proxy.ts` (uses `Accept-Language` with fallback to `my`)
+- Dictionaries: `src/lib/i18n/dictionaries/*`
+
 ## Folder Conventions
 
 ```text

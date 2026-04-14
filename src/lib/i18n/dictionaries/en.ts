@@ -1,0 +1,78 @@
+import type { Dictionary } from "@/lib/i18n/types";
+
+export const enDictionary: Dictionary = {
+  localeSwitcher: {
+    en: "English",
+    my: "မြန်မာ",
+  },
+  header: {
+    logo: "Mahar Sarpay",
+    slogan: "Read Better Everyday",
+    desktopNavigationLabel: "Primary navigation",
+    searchLabel: "Search books",
+    accountLabel: "Open account",
+    wishlistLabel: "Open wishlist",
+    cartLabel: "Open cart",
+    menuLabel: "Open menu",
+  },
+  navigation: {
+    home: "Home",
+    books: "Books",
+    authors: "Authors",
+    categories: "Categories",
+    media: "Media",
+    contact: "Contact",
+  },
+  hero: {
+    badge: "Curated Reading Destination",
+    primaryCta: "Shop Now",
+    secondaryCta: "Explore Books",
+    previousSlide: "Previous slide",
+    nextSlide: "Next slide",
+  },
+  categorySpotlight: {
+    title: "Browse by Category",
+    description: "Start fast with focused categories tailored to your interests and reading goals.",
+  },
+  bestsellers: {
+    title: "Bestsellers",
+    description: "Top reader picks this week, from literary gems to modern essentials.",
+    addToCart: "Add to Cart",
+  },
+  authors: {
+    title: "Featured Authors",
+    description: "Discover impactful voices from Myanmar and beyond.",
+  },
+  media: {
+    title: "Explore Media",
+    description: "Watch, listen, and discover stories around your next favorite read.",
+    playLabel: "Play media",
+    videoLabel: "Video",
+    photoLabel: "Photo",
+  },
+  reviews: {
+    title: "What Our Readers Say",
+    description: "Real feedback from readers who trust Mahar Sarpay for every book journey.",
+  },
+  promo: {
+    cta: "Shop Collection",
+  },
+  footer: {
+    description:
+      "Mahar Sarpay is your modern neighborhood bookstore for quality books, expert picks, and joyful reading moments.",
+    navigationTitle: "Navigation",
+    supportTitle: "Support",
+    supportFaq: "FAQ",
+    supportHelp: "Help Center",
+    supportContact: "Contact",
+    contactTitle: "Contact Info",
+    address: "No. 12, Pansodan Road, Yangon, Myanmar",
+    phone: "+95 9 123 456 789",
+    email: "hello@maharsarpay.com",
+    socialLabel: "Follow us",
+    newsletterLabel: "Get updates and new arrivals",
+    newsletterPlaceholder: "Enter your email",
+    newsletterButton: "Subscribe",
+    rights: "© 2026 Mahar Sarpay. All rights reserved.",
+  },
+};

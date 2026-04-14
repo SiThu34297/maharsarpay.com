@@ -8,7 +8,7 @@ type AppThemeProviderProps = Readonly<{
 
 export function AppThemeProvider({ children }: AppThemeProviderProps) {
   return (
-    <Theme accentColor="blue" grayColor="sand" radius="large" scaling="100%">
+    <Theme accentColor="grass" grayColor="slate" radius="large" scaling="100%">
       {children}
     </Theme>
   );

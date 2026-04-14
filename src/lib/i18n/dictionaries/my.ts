@@ -1,0 +1,78 @@
+import type { Dictionary } from "@/lib/i18n/types";
+
+export const myDictionary: Dictionary = {
+  localeSwitcher: {
+    en: "English",
+    my: "မြန်မာ",
+  },
+  header: {
+    logo: "မဟာစာပေ",
+    slogan: "နေ့စဉ် ပိုကောင်းစွာ ဖတ်ရှုပါ",
+    desktopNavigationLabel: "အဓိက လမ်းညွှန်မီနူး",
+    searchLabel: "စာအုပ်ရှာရန်",
+    accountLabel: "အကောင့်ဖွင့်ရန်",
+    wishlistLabel: "စိတ်ကြိုက်စာရင်းဖွင့်ရန်",
+    cartLabel: "စျေးဝယ်ခြင်းကိုဖွင့်ရန်",
+    menuLabel: "မီနူးဖွင့်ရန်",
+  },
+  navigation: {
+    home: "ပင်မ",
+    books: "စာအုပ်များ",
+    authors: "စာရေးသူများ",
+    categories: "အမျိုးအစားများ",
+    media: "မီဒီယာ",
+    contact: "ဆက်သွယ်ရန်",
+  },
+  hero: {
+    badge: "ရွေးချယ်ဖတ်ရှုရန် အကောင်းဆုံးနေရာ",
+    primaryCta: "ယခုဝယ်မည်",
+    secondaryCta: "စာအုပ်များကြည့်မည်",
+    previousSlide: "ယခင် slide",
+    nextSlide: "နောက် slide",
+  },
+  categorySpotlight: {
+    title: "အမျိုးအစားအလိုက် ကြည့်ရှုပါ",
+    description: "သင့်စိတ်ဝင်စားမှုနဲ့ ဖတ်ရှုရည်မှန်းချက်အလိုက် အလွယ်တကူ စတင်ရွေးချယ်နိုင်ပါတယ်။",
+  },
+  bestsellers: {
+    title: "လူကြိုက်အများဆုံး",
+    description: "ဒီတစ်ပတ်အတွင်း စာဖတ်သူများရွေးချယ်ထားတဲ့ အကောင်းဆုံးစာအုပ်များ။",
+    addToCart: "စျေးဝယ်စာရင်းထဲ ထည့်မည်",
+  },
+  authors: {
+    title: "အထူးရွေးချယ်ထားသော စာရေးသူများ",
+    description: "မြန်မာနှင့် နိုင်ငံတကာမှ စာရေးသူများ၏ အရေးပါတဲ့လက်ရာများကို ရှာဖွေပါ။",
+  },
+  media: {
+    title: "မီဒီယာလေ့လာရန်",
+    description: "သင့်နောက်ထပ်ဖတ်ရှုချင်တဲ့ စာအုပ်ကို ဗီဒီယိုများနဲ့ ပိုမိုနီးကပ်စွာ ရှာဖွေပါ။",
+    playLabel: "မီဒီယာဖွင့်ရန်",
+    videoLabel: "ဗီဒီယို",
+    photoLabel: "ဓာတ်ပုံ",
+  },
+  reviews: {
+    title: "စာဖတ်သူများ၏ အမြင်များ",
+    description: "မဟာစာပေကို ယုံကြည်အသုံးပြုနေတဲ့ စာဖတ်သူများ၏ တကယ့်အတွေ့အကြုံများ။",
+  },
+  promo: {
+    cta: "စုစည်းမှုကို ဝယ်ယူမည်",
+  },
+  footer: {
+    description:
+      "မဟာစာပေသည် အရည်အသွေးမြင့်စာအုပ်များ၊ အကြံပြုရွေးချယ်မှုများနှင့် ပျော်ရွှင်ဖတ်ရှုမှုအတွက် ခေတ်မီစာအုပ်ဆိုင်တစ်ခုဖြစ်သည်။",
+    navigationTitle: "လမ်းညွှန်",
+    supportTitle: "ကူညီမှု",
+    supportFaq: "မေးလေ့ရှိသော မေးခွန်းများ",
+    supportHelp: "ကူညီမှုစင်တာ",
+    supportContact: "ဆက်သွယ်ရန်",
+    contactTitle: "ဆက်သွယ်ရန် အချက်အလက်",
+    address: "အမှတ် ၁၂၊ ပန်းဆိုးတန်းလမ်း၊ ရန်ကုန်၊ မြန်မာ",
+    phone: "+95 9 123 456 789",
+    email: "hello@maharsarpay.com",
+    socialLabel: "Follow us",
+    newsletterLabel: "စာအုပ်အသစ်နှင့် အထူးသတင်းများကို ရယူပါ",
+    newsletterPlaceholder: "အီးမေးလ်ထည့်ပါ",
+    newsletterButton: "စာရင်းသွင်းမည်",
+    rights: "© 2026 မဟာစာပေ။ မူပိုင်ခွင့်အားလုံးရှိသည်။",
+  },
+};
