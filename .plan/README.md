@@ -4,7 +4,6 @@ This folder stores implementation history by page.
 
 ## Structure
 
-- `.plan/histories/<page>.md` for canonical page history logs.
 - `.plan/pages/<page>.md` kept for backward compatibility while transitioning.
 - Use one section per change entry with date and summary.
 
