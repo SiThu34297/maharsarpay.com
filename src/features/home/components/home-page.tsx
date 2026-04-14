@@ -5,7 +5,6 @@ import {
   BackpackIcon,
   CameraIcon,
   GlobeIcon,
-  HamburgerMenuIcon,
   InstagramLogoIcon,
   LinkedInLogoIcon,
   PersonIcon,
@@ -13,6 +12,7 @@ import {
 } from "@radix-ui/react-icons";
 
 import { HomeHeroSlider } from "@/features/home/components/home-hero-slider";
+import { HomePageMobileHeader } from "@/features/home/components/home-page-mobile-header";
 import { getHomePageData } from "@/features/home/server/get-home-page-data";
 import type { NavItem } from "@/features/home/schemas/home";
 import type { Dictionary, Locale } from "@/lib/i18n";
@@ -174,19 +174,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
           </button>
         </div>
 
-        <div className="home-shell flex h-[72px] items-center justify-between md:hidden">
-          <button type="button" className="icon-button" aria-label={copy.header.menuLabel}>
-            <HamburgerMenuIcon />
-          </button>
-
-          <div aria-hidden className="h-10 w-10" />
-
-          <div className="flex items-center gap-2">
-            <button type="button" className="icon-button" aria-label={copy.header.accountLabel}>
-              <PersonIcon />
-            </button>
-          </div>
-        </div>
+        <HomePageMobileHeader copy={copy} navigation={data.navigation} />
       </header>
 
       <Link
@@ -198,15 +186,8 @@ export async function HomePage({ copy, locale }: HomePageProps) {
       </Link>
 
       <main>
-        <section className="home-shell section-gap pb-12 pt-10 md:pt-14">
-          <HomeHeroSlider
-            slides={data.heroSlides}
-            badge={copy.hero.badge}
-            primaryCta={copy.hero.primaryCta}
-            secondaryCta={copy.hero.secondaryCta}
-            previousLabel={copy.hero.previousSlide}
-            nextLabel={copy.hero.nextSlide}
-          />
+        <section className="mb-8 w-full md:mb-12 lg:mb-16">
+          <HomeHeroSlider slides={data.heroSlides} />
         </section>
 
         <section id="categories" className="home-shell pb-5">

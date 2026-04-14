@@ -197,3 +197,74 @@
   - To fix `Cannot find module '@/lib/i18n/config'` issue on root middleware file.
 - Files touched:
   - `tsconfig.json`
+
+### 2026-04-14 - Mobile Hamburger Navbar Interaction
+
+- What changed:
+  - Added interactive hamburger behavior for the mobile navbar (`<md`) with open/close state.
+  - Implemented a collapsible mobile navigation panel that lists existing nav links and closes on link tap.
+  - Replaced static mobile header markup in homepage with a dedicated client component.
+- Why it changed:
+  - To make the mobile navbar actionable and improve navigation usability on small screens.
+- Files touched:
+  - `src/features/home/components/home-page-mobile-header.tsx`
+  - `src/features/home/components/home-page.tsx`
+
+### 2026-04-14 - Hero Slider Minimal Fullscreen Mode
+
+- What changed:
+  - Simplified hero slider content to only show slide title and image.
+  - Removed badge, description, CTA buttons, dots, and arrow controls from the hero section.
+  - Updated hero image to render full-screen (`100svh`) with cover behavior.
+- Why it changed:
+  - To match the requested minimal slider layout and full-screen image presentation.
+- Files touched:
+  - `src/features/home/components/home-hero-slider.tsx`
+  - `src/features/home/components/home-page.tsx`
+
+### 2026-04-14 - Hero Slider Height Tuning
+
+- What changed:
+  - Reduced hero slider height from full screen (`100svh`) to slightly shorter (`92svh`).
+- Why it changed:
+  - To keep the same visual style while decreasing vertical dominance.
+- Files touched:
+  - `src/features/home/components/home-hero-slider.tsx`
+
+### 2026-04-14 - Slider Bottom Spacing
+
+- What changed:
+  - Added responsive bottom spacing below the hero slider wrapper (`mb-8 md:mb-12 lg:mb-16`).
+- Why it changed:
+  - To create clear separation between the slider and the section below.
+- Files touched:
+  - `src/features/home/components/home-page.tsx`
+
+### 2026-04-14 - Responsive Hero Image (Mobile + Desktop)
+
+- What changed:
+  - Updated hero slider height to responsive breakpoints for mobile/tablet/desktop.
+  - Added explicit `next/image` responsive sizing (`sizes=\"100vw\"`) for full-width hero rendering.
+  - Tuned hero title typography so it scales better on smaller screens.
+- Why it changed:
+  - To ensure the slider image and title layout adapt cleanly across both mobile and desktop views.
+- Files touched:
+  - `src/features/home/components/home-hero-slider.tsx`
+
+### 2026-04-14 - Hero Title Size Reduction
+
+- What changed:
+  - Reduced slider title font sizes across breakpoints (`text-xl sm:text-2xl md:text-4xl lg:text-5xl`).
+- Why it changed:
+  - To make hero title scale less dominant on both mobile and desktop.
+- Files touched:
+  - `src/features/home/components/home-hero-slider.tsx`
+
+### 2026-04-14 - Hero Title Size Exact Breakpoints
+
+- What changed:
+  - Set hero title to exactly `text-2xl` on mobile and `text-3xl` on desktop (`lg` and up).
+- Why it changed:
+  - To match the requested typography scale precisely for mobile and desktop.
+- Files touched:
+  - `src/features/home/components/home-hero-slider.tsx`
