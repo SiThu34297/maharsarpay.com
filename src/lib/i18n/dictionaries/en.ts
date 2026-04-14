@@ -57,6 +57,25 @@ export const enDictionary: Dictionary = {
   promo: {
     cta: "Shop Collection",
   },
+  booksList: {
+    title: "All Books",
+    searchPlaceholder: "Search books, authors, categories...",
+    searchButton: "Search",
+    categoryLabel: "Category",
+    showingResults: "Showing {count} results",
+    clearAllFilters: "Clear all filters",
+    noBooksFound: "No books found",
+    tryDifferentFilters: "Try different filters",
+    browseCategories: "Browse Categories",
+    loadingMore: "Loading more books...",
+    loadMoreError: "Something went wrong while loading more books.",
+    retry: "Retry",
+    addToCart: "Add to Cart",
+    addedToCart: "Added",
+    addToWishlist: "Wishlist",
+    addedToWishlist: "Wishlisted",
+    removeFilterLabel: "Remove filter",
+  },
   footer: {
     description:
       "Mahar Sarpay is your modern neighborhood bookstore for quality books, expert picks, and joyful reading moments.",

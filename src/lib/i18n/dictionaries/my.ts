@@ -57,6 +57,25 @@ export const myDictionary: Dictionary = {
   promo: {
     cta: "စုစည်းမှုကို ဝယ်ယူမည်",
   },
+  booksList: {
+    title: "စာအုပ်အားလုံး",
+    searchPlaceholder: "စာအုပ်၊ စာရေးသူ၊ အမျိုးအစားဖြင့် ရှာဖွေပါ...",
+    searchButton: "ရှာဖွေမည်",
+    categoryLabel: "အမျိုးအစား",
+    showingResults: "ရလဒ် {count} ခု ပြနေသည်",
+    clearAllFilters: "စစ်ထုတ်မှုအားလုံး ဖျက်မည်",
+    noBooksFound: "စာအုပ်မတွေ့ပါ",
+    tryDifferentFilters: "အခြားစစ်ထုတ်မှုများ စမ်းကြည့်ပါ",
+    browseCategories: "အမျိုးအစားများ ကြည့်မည်",
+    loadingMore: "စာအုပ်များ ထပ်မံတင်နေသည်...",
+    loadMoreError: "စာအုပ်များ ထပ်တင်ရာတွင် ပြဿနာဖြစ်ပွားသည်။",
+    retry: "ထပ်စမ်းမည်",
+    addToCart: "ဈေးဝယ်စာရင်းထဲ ထည့်မည်",
+    addedToCart: "ထည့်ပြီး",
+    addToWishlist: "စိတ်ကြိုက်ထားမည်",
+    addedToWishlist: "စိတ်ကြိုက်ထားပြီး",
+    removeFilterLabel: "စစ်ထုတ်မှု ဖယ်ရှားမည်",
+  },
   footer: {
     description:
       "မဟာစာပေသည် အရည်အသွေးမြင့်စာအုပ်များ၊ အကြံပြုရွေးချယ်မှုများနှင့် ပျော်ရွှင်ဖတ်ရှုမှုအတွက် ခေတ်မီစာအုပ်ဆိုင်တစ်ခုဖြစ်သည်။",

@@ -7,6 +7,52 @@
 
 ## Entries
 
+### 2026-04-15 - Remove Rating Stars from Home Book Cards
+
+- What changed:
+  - Removed star rating display from Home page book cards in both mobile carousel cards and desktop grid cards.
+  - Kept book title, author, price, and add-to-cart button unchanged.
+  - Left testimonial/review star ratings unchanged.
+- Why it changed:
+  - To simplify the Home books card UI per latest requirement.
+- Files touched:
+  - `src/features/home/components/home-page.tsx`
+- Notes:
+  - This affects only the `#books` section on Home.
+
+### 2026-04-15 - Mobile Navbar Expandable Books Submenu + Scrollable Overflow
+
+- What changed:
+  - Updated shared marketing mobile header to make `စာအုပ်များ` submenu expandable/collapsible with a dedicated toggle button.
+  - Added animated open/close behavior with chevron rotation for submenu state.
+  - Added overflow handling for large datasets:
+    - Mobile nav panel now has max viewport height and vertical scrolling.
+    - Books submenu category list now has max height with internal vertical scrolling.
+  - Kept menu-close behavior consistent when a nav link or category link is selected.
+- Why it changed:
+  - To improve mobile usability for long category lists and match expected expandable navigation behavior.
+- Files touched:
+  - `src/components/layout/marketing/marketing-mobile-header.tsx`
+- Notes:
+  - Change applies to all pages using `MarketingSiteHeader`, including Home and Books routes.
+
+### 2026-04-15 - Categories Navigation to Books + Filtered Category Chips
+
+- What changed:
+  - Updated top navigation `အမျိုးအစား` route to open the Books page (`/:lang/books`) instead of in-page `#categories`.
+  - Converted category chips in `အမျိုးအစားအလိုက် ကြည့်ရှုပါ` from static blocks to clickable links.
+  - Wired each category chip (for example, `ဝတ္ထု`) to open `/:lang/books` with the related `category` query filter.
+  - Added fallback query behavior (`q=<category label>`) when a category label does not have a direct category-id match.
+  - Added hover/focus styles for linked category chips.
+- Why it changed:
+  - To make category interactions route users directly into the books discovery flow with relevant filtered results.
+- Files touched:
+  - `src/components/layout/marketing/navigation.ts`
+  - `src/features/home/components/home-page.tsx`
+  - `src/styles/globals.css`
+- Notes:
+  - Category-id mappings are sourced from `getBookFilterOptions(locale)` to keep home links aligned with the books filter dataset.
+
 ### 2026-04-14 - Homepage V1 Implementation
 
 - What changed:

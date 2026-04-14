@@ -55,6 +55,25 @@ export type Dictionary = {
   promo: {
     cta: string;
   };
+  booksList: {
+    title: string;
+    searchPlaceholder: string;
+    searchButton: string;
+    categoryLabel: string;
+    showingResults: string;
+    clearAllFilters: string;
+    noBooksFound: string;
+    tryDifferentFilters: string;
+    browseCategories: string;
+    loadingMore: string;
+    loadMoreError: string;
+    retry: string;
+    addToCart: string;
+    addedToCart: string;
+    addToWishlist: string;
+    addedToWishlist: string;
+    removeFilterLabel: string;
+  };
   footer: {
     description: string;
     navigationTitle: string;

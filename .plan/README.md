@@ -6,6 +6,7 @@ This folder stores implementation history by page.
 
 - `.plan/pages/<page>.md` kept for backward compatibility while transitioning.
 - Use one section per change entry with date and summary.
+- Update `.plan` in the same change whenever code is modified.
 
 ## Naming
 

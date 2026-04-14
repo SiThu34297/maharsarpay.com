@@ -1,20 +1,17 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import {
-  BackpackIcon,
-  CameraIcon,
-  GlobeIcon,
-  InstagramLogoIcon,
-  LinkedInLogoIcon,
-  PersonIcon,
-  PlayIcon,
-} from "@radix-ui/react-icons";
+import { BackpackIcon, CameraIcon, PlayIcon, PlusIcon } from "@radix-ui/react-icons";
 
+import {
+  MarketingSiteFooter,
+  MarketingSiteHeader,
+  MarketingTopBrandStrip,
+  getMarketingNavigation,
+} from "@/components/layout/marketing";
+import { getBookFilterOptions } from "@/features/books";
 import { HomeHeroSlider } from "@/features/home/components/home-hero-slider";
-import { HomePageMobileHeader } from "@/features/home/components/home-page-mobile-header";
 import { getHomePageData } from "@/features/home/server/get-home-page-data";
-import type { NavItem } from "@/features/home/schemas/home";
 import type { Dictionary, Locale } from "@/lib/i18n";
 
 type HomePageProps = Readonly<{
@@ -26,25 +23,6 @@ type SectionHeadingProps = Readonly<{
   title: string;
   description: string;
 }>;
-
-function getNavigationLabel(copy: Dictionary["navigation"], id: NavItem["id"]) {
-  switch (id) {
-    case "home":
-      return copy.home;
-    case "books":
-      return copy.books;
-    case "authors":
-      return copy.authors;
-    case "categories":
-      return copy.categories;
-    case "media":
-      return copy.media;
-    case "contact":
-      return copy.contact;
-    default:
-      return copy.home;
-  }
-}
 
 function formatPrice(locale: Locale, value: number) {
   if (locale === "my") {
@@ -81,10 +59,19 @@ function getMediaLabel(copy: Dictionary["media"], mediaType: "video" | "photo") 
 }
 
 export async function HomePage({ copy, locale }: HomePageProps) {
-  const data = await getHomePageData(locale);
+  const [data, bookFilterOptions] = await Promise.all([
+    getHomePageData(locale),
+    getBookFilterOptions(locale),
+  ]);
   const isMyanmar = locale === "my";
-  const categoriesItem = data.navigation.find((item) => item.id === "categories");
-  const primaryNavigation = data.navigation.filter((item) => item.id !== "categories");
+  const navigation = getMarketingNavigation(locale);
+  const bookCategoryLinks = bookFilterOptions.categories.map((category) => ({
+    label: category.label,
+    href: `/${locale}/books?category=${encodeURIComponent(category.value)}`,
+  }));
+  const categoryHrefByLabel = new Map(
+    bookCategoryLinks.map((category) => [category.label, category.href]),
+  );
 
   return (
     <div
@@ -93,141 +80,16 @@ export async function HomePage({ copy, locale }: HomePageProps) {
         isMyanmar ? "locale-my" : ""
       }`}
     >
-      <section className="border-b border-[var(--color-border)] bg-white">
-        <div className="home-shell py-4 md:py-5">
-          <div className="mx-auto flex max-w-4xl flex-col items-center gap-2 text-center">
-            <Image
-              src="/images/brand/maharsarpay-logo.png"
-              alt="မဟာစာပေ logo"
-              width={500}
-              height={219}
-              className="h-16 w-auto object-contain md:h-20"
-              priority
-            />
-            <h2 className="text-2xl font-semibold text-[var(--color-text-main)] md:text-3xl">
-              မဟာစာပေ
-            </h2>
-            <p className="max-w-3xl text-sm text-[var(--color-text-muted)] md:text-base">
-              သိမ်းထားတဲ့အရာတွေ ပုပ်သိုးမသွားခင် လိုအပ်သူကို ပေးအပ်လိုက်ဖို့ ၀န်မလေးပါနဲ့
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-white/95 backdrop-blur-md">
-        <div className="home-shell hidden h-20 items-center gap-8 xl:grid xl:grid-cols-[1fr_auto_1fr]">
-          <div aria-hidden />
-
-          <nav aria-label={copy.header.desktopNavigationLabel}>
-            <ul className="flex items-center justify-center gap-5 lg:gap-7">
-              {primaryNavigation.map((item) => {
-                const isActive = item.id === "home";
-
-                if (item.id === "books" && categoriesItem) {
-                  return (
-                    <li key={item.id} className="group relative">
-                      <Link
-                        href={item.href}
-                        aria-current={isActive ? "page" : undefined}
-                        className={`nav-link ${isActive ? "nav-link-active" : ""}`}
-                      >
-                        {getNavigationLabel(copy.navigation, item.id)}
-                      </Link>
-                      <div className="pointer-events-none absolute left-0 top-full z-40 pt-2 opacity-0 transition group-hover:pointer-events-auto group-hover:opacity-100">
-                        <div className="min-w-[190px] rounded-xl border border-[var(--color-border)] bg-white p-2 shadow-[var(--shadow-soft)]">
-                          <Link
-                            href={categoriesItem.href}
-                            className="block rounded-lg px-3 py-2 text-sm font-semibold text-[var(--color-text-main)] transition hover:bg-[var(--color-brand-subtle)] hover:text-[var(--color-brand)]"
-                          >
-                            {getNavigationLabel(copy.navigation, categoriesItem.id)}
-                          </Link>
-                        </div>
-                      </div>
-                    </li>
-                  );
-                }
-
-                return (
-                  <li key={item.id}>
-                    <Link
-                      href={item.href}
-                      aria-current={isActive ? "page" : undefined}
-                      className={`nav-link ${isActive ? "nav-link-active" : ""}`}
-                    >
-                      {getNavigationLabel(copy.navigation, item.id)}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </nav>
-
-          <div className="flex items-center justify-end gap-2 lg:gap-3">
-            <button type="button" className="icon-button" aria-label={copy.header.accountLabel}>
-              <PersonIcon />
-            </button>
-          </div>
-        </div>
-
-        <div className="home-shell hidden items-center gap-3 py-3 md:flex xl:hidden">
-          <nav
-            aria-label={copy.header.desktopNavigationLabel}
-            className="min-w-0 flex-1 whitespace-nowrap"
-          >
-            <ul className="flex items-center gap-5 pr-2">
-              {primaryNavigation.map((item) => {
-                const isActive = item.id === "home";
-
-                if (item.id === "books" && categoriesItem) {
-                  return (
-                    <li key={`tablet-${item.id}`} className="group relative">
-                      <Link
-                        href={item.href}
-                        aria-current={isActive ? "page" : undefined}
-                        className={`nav-link ${isActive ? "nav-link-active" : ""}`}
-                      >
-                        {getNavigationLabel(copy.navigation, item.id)}
-                      </Link>
-                      <div className="pointer-events-none absolute left-0 top-full z-40 pt-2 opacity-0 transition group-hover:pointer-events-auto group-hover:opacity-100">
-                        <div className="min-w-[190px] rounded-xl border border-[var(--color-border)] bg-white p-2 shadow-[var(--shadow-soft)]">
-                          <Link
-                            href={categoriesItem.href}
-                            className="block rounded-lg px-3 py-2 text-sm font-semibold text-[var(--color-text-main)] transition hover:bg-[var(--color-brand-subtle)] hover:text-[var(--color-brand)]"
-                          >
-                            {getNavigationLabel(copy.navigation, categoriesItem.id)}
-                          </Link>
-                        </div>
-                      </div>
-                    </li>
-                  );
-                }
-
-                return (
-                  <li key={`tablet-${item.id}`}>
-                    <Link
-                      href={item.href}
-                      aria-current={isActive ? "page" : undefined}
-                      className={`nav-link ${isActive ? "nav-link-active" : ""}`}
-                    >
-                      {getNavigationLabel(copy.navigation, item.id)}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </nav>
-
-          <button
-            type="button"
-            className="icon-button shrink-0"
-            aria-label={copy.header.accountLabel}
-          >
-            <PersonIcon />
-          </button>
-        </div>
-
-        <HomePageMobileHeader copy={copy} navigation={data.navigation} />
-      </header>
+      <MarketingTopBrandStrip
+        title="မဟာစာပေ"
+        message="သိမ်းထားတဲ့အရာတွေ ပုပ်သိုးမသွားခင် လိုအပ်သူကို ပေးအပ်လိုက်ဖို့ ၀န်မလေးပါနဲ့"
+      />
+      <MarketingSiteHeader
+        copy={copy}
+        navigation={navigation}
+        activeNavId="home"
+        bookCategoryLinks={bookCategoryLinks}
+      />
 
       <Link
         href="#books"
@@ -253,9 +115,16 @@ export async function HomePage({ copy, locale }: HomePageProps) {
           />
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {data.categories.map((category) => (
-              <div key={category.id} className="category-chip">
+              <Link
+                key={category.id}
+                href={
+                  categoryHrefByLabel.get(category.name) ??
+                  `/${locale}/books?q=${encodeURIComponent(category.name)}`
+                }
+                className="category-chip"
+              >
                 {category.name}
-              </div>
+              </Link>
             ))}
           </div>
         </section>
@@ -282,16 +151,11 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                   <p className="mt-3 text-base font-semibold text-[var(--color-brand)]">
                     {formatPrice(locale, book.price)}
                   </p>
-                  <p
-                    className="mt-2 text-sm text-[var(--color-text-muted)]"
-                    aria-label={`${book.rating} stars`}
-                  >
-                    {renderStars(book.rating)}
-                  </p>
                   <button
                     type="button"
-                    className="mt-4 w-full rounded-full bg-[var(--color-brand)] px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)]"
+                    className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--color-brand)] px-4 py-2.5 text-xs font-semibold text-white transition hover:brightness-95 sm:text-sm"
                   >
+                    <PlusIcon />
                     {copy.bestsellers.addToCart}
                   </button>
                 </li>
@@ -315,17 +179,12 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                   <p className="text-base font-semibold text-[var(--color-brand)]">
                     {formatPrice(locale, book.price)}
                   </p>
-                  <p
-                    className="text-sm text-[var(--color-text-muted)]"
-                    aria-label={`${book.rating} stars`}
-                  >
-                    {renderStars(book.rating)}
-                  </p>
                 </div>
                 <button
                   type="button"
-                  className="mt-4 w-full rounded-full bg-[var(--color-brand)] px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)]"
+                  className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--color-brand)] px-4 py-2.5 text-xs font-semibold text-white transition hover:brightness-95 sm:text-sm"
                 >
+                  <PlusIcon />
                   {copy.bestsellers.addToCart}
                 </button>
               </article>
@@ -497,110 +356,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
           </div>
         </section>
       </main>
-
-      <footer id="contact" className="border-t border-[var(--color-border)] bg-white">
-        <div className="home-shell py-10 md:py-14">
-          <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-4">
-            <div>
-              <h3 className="text-xl font-semibold">{copy.header.logo}</h3>
-              <p className="mt-4 text-sm leading-relaxed text-[var(--color-text-muted)]">
-                {copy.footer.description}
-              </p>
-            </div>
-
-            <div>
-              <h4 className="text-base font-semibold">{copy.footer.navigationTitle}</h4>
-              <ul className="mt-4 space-y-2 text-sm">
-                {data.navigation.map((item) => (
-                  <li key={`footer-nav-${item.id}`}>
-                    <Link href={item.href} className="footer-link">
-                      {getNavigationLabel(copy.navigation, item.id)}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="text-base font-semibold">{copy.footer.supportTitle}</h4>
-              <ul className="mt-4 space-y-2 text-sm">
-                <li>
-                  <Link href="#" className="footer-link">
-                    {copy.footer.supportFaq}
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="footer-link">
-                    {copy.footer.supportHelp}
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#contact" className="footer-link">
-                    {copy.footer.supportContact}
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="text-base font-semibold">{copy.footer.contactTitle}</h4>
-              <div className="mt-4 space-y-2 text-sm text-[var(--color-text-muted)]">
-                <p>{copy.footer.address}</p>
-                <p>{copy.footer.phone}</p>
-                <p>{copy.footer.email}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-10 flex flex-col gap-6 border-t border-[var(--color-border)] pt-6 md:mt-12 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <p className="mb-3 text-sm font-medium text-[var(--color-text-main)]">
-                {copy.footer.newsletterLabel}
-              </p>
-              <form
-                className="flex max-w-md flex-wrap gap-2"
-                action="#"
-                method="post"
-                suppressHydrationWarning
-              >
-                <label htmlFor="newsletter-email" className="sr-only">
-                  {copy.footer.newsletterLabel}
-                </label>
-                <input
-                  id="newsletter-email"
-                  type="email"
-                  placeholder={copy.footer.newsletterPlaceholder}
-                  suppressHydrationWarning
-                  className="min-w-[220px] flex-1 rounded-full border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm text-[var(--color-text-main)] outline-none placeholder:text-[var(--color-text-muted)] focus-visible:border-[var(--color-brand)]"
-                />
-                <button
-                  type="submit"
-                  className="rounded-full bg-[var(--color-brand)] px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)]"
-                >
-                  {copy.footer.newsletterButton}
-                </button>
-              </form>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-[var(--color-text-muted)]">
-                {copy.footer.socialLabel}
-              </span>
-              <Link href="#" className="icon-button" aria-label="Global">
-                <GlobeIcon />
-              </Link>
-              <Link href="#" className="icon-button" aria-label="Instagram">
-                <InstagramLogoIcon />
-              </Link>
-              <Link href="#" className="icon-button" aria-label="LinkedIn">
-                <LinkedInLogoIcon />
-              </Link>
-            </div>
-          </div>
-
-          <p className="mt-6 text-xs text-[var(--color-text-muted)]">{copy.footer.rights}</p>
-        </div>
-      </footer>
+      <MarketingSiteFooter copy={copy} navigation={navigation} />
     </div>
   );
 }
