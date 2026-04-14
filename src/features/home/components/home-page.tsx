@@ -83,6 +83,8 @@ function getMediaLabel(copy: Dictionary["media"], mediaType: "video" | "photo") 
 export async function HomePage({ copy, locale }: HomePageProps) {
   const data = await getHomePageData(locale);
   const isMyanmar = locale === "my";
+  const categoriesItem = data.navigation.find((item) => item.id === "categories");
+  const primaryNavigation = data.navigation.filter((item) => item.id !== "categories");
 
   return (
     <div
@@ -118,8 +120,33 @@ export async function HomePage({ copy, locale }: HomePageProps) {
 
           <nav aria-label={copy.header.desktopNavigationLabel}>
             <ul className="flex items-center justify-center gap-5 lg:gap-7">
-              {data.navigation.map((item) => {
+              {primaryNavigation.map((item) => {
                 const isActive = item.id === "home";
+
+                if (item.id === "books" && categoriesItem) {
+                  return (
+                    <li key={item.id} className="group relative">
+                      <Link
+                        href={item.href}
+                        aria-current={isActive ? "page" : undefined}
+                        className={`nav-link ${isActive ? "nav-link-active" : ""}`}
+                      >
+                        {getNavigationLabel(copy.navigation, item.id)}
+                      </Link>
+                      <div className="pointer-events-none absolute left-0 top-full z-40 pt-2 opacity-0 transition group-hover:pointer-events-auto group-hover:opacity-100">
+                        <div className="min-w-[190px] rounded-xl border border-[var(--color-border)] bg-white p-2 shadow-[var(--shadow-soft)]">
+                          <Link
+                            href={categoriesItem.href}
+                            className="block rounded-lg px-3 py-2 text-sm font-semibold text-[var(--color-text-main)] transition hover:bg-[var(--color-brand-subtle)] hover:text-[var(--color-brand)]"
+                          >
+                            {getNavigationLabel(copy.navigation, categoriesItem.id)}
+                          </Link>
+                        </div>
+                      </div>
+                    </li>
+                  );
+                }
+
                 return (
                   <li key={item.id}>
                     <Link
@@ -145,11 +172,36 @@ export async function HomePage({ copy, locale }: HomePageProps) {
         <div className="home-shell hidden items-center gap-3 py-3 md:flex xl:hidden">
           <nav
             aria-label={copy.header.desktopNavigationLabel}
-            className="min-w-0 flex-1 overflow-x-auto whitespace-nowrap pb-1"
+            className="min-w-0 flex-1 whitespace-nowrap"
           >
-            <ul className="flex w-max items-center gap-5 pr-2">
-              {data.navigation.map((item) => {
+            <ul className="flex items-center gap-5 pr-2">
+              {primaryNavigation.map((item) => {
                 const isActive = item.id === "home";
+
+                if (item.id === "books" && categoriesItem) {
+                  return (
+                    <li key={`tablet-${item.id}`} className="group relative">
+                      <Link
+                        href={item.href}
+                        aria-current={isActive ? "page" : undefined}
+                        className={`nav-link ${isActive ? "nav-link-active" : ""}`}
+                      >
+                        {getNavigationLabel(copy.navigation, item.id)}
+                      </Link>
+                      <div className="pointer-events-none absolute left-0 top-full z-40 pt-2 opacity-0 transition group-hover:pointer-events-auto group-hover:opacity-100">
+                        <div className="min-w-[190px] rounded-xl border border-[var(--color-border)] bg-white p-2 shadow-[var(--shadow-soft)]">
+                          <Link
+                            href={categoriesItem.href}
+                            className="block rounded-lg px-3 py-2 text-sm font-semibold text-[var(--color-text-main)] transition hover:bg-[var(--color-brand-subtle)] hover:text-[var(--color-brand)]"
+                          >
+                            {getNavigationLabel(copy.navigation, categoriesItem.id)}
+                          </Link>
+                        </div>
+                      </div>
+                    </li>
+                  );
+                }
+
                 return (
                   <li key={`tablet-${item.id}`}>
                     <Link
@@ -187,7 +239,11 @@ export async function HomePage({ copy, locale }: HomePageProps) {
 
       <main>
         <section className="mb-8 w-full md:mb-12 lg:mb-16">
-          <HomeHeroSlider slides={data.heroSlides} />
+          <HomeHeroSlider
+            slides={data.heroSlides}
+            previousLabel={copy.hero.previousSlide}
+            nextLabel={copy.hero.nextSlide}
+          />
         </section>
 
         <section id="categories" className="home-shell pb-5">
@@ -501,7 +557,12 @@ export async function HomePage({ copy, locale }: HomePageProps) {
               <p className="mb-3 text-sm font-medium text-[var(--color-text-main)]">
                 {copy.footer.newsletterLabel}
               </p>
-              <form className="flex max-w-md flex-wrap gap-2" action="#" method="post">
+              <form
+                className="flex max-w-md flex-wrap gap-2"
+                action="#"
+                method="post"
+                suppressHydrationWarning
+              >
                 <label htmlFor="newsletter-email" className="sr-only">
                   {copy.footer.newsletterLabel}
                 </label>
@@ -509,6 +570,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                   id="newsletter-email"
                   type="email"
                   placeholder={copy.footer.newsletterPlaceholder}
+                  suppressHydrationWarning
                   className="min-w-[220px] flex-1 rounded-full border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm text-[var(--color-text-main)] outline-none placeholder:text-[var(--color-text-muted)] focus-visible:border-[var(--color-brand)]"
                 />
                 <button

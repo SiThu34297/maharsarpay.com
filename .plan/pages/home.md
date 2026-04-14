@@ -268,3 +268,94 @@
   - To match the requested typography scale precisely for mobile and desktop.
 - Files touched:
   - `src/features/home/components/home-hero-slider.tsx`
+
+### 2026-04-14 - Hero Slider Manual Navigation Buttons
+
+- What changed:
+  - Added previous/next navigation buttons overlayed on the hero slider.
+  - Wired slider button accessibility labels from localized hero copy.
+- Why it changed:
+  - To enable direct manual navigation between slides in addition to auto-rotation.
+- Files touched:
+  - `src/features/home/components/home-hero-slider.tsx`
+  - `src/features/home/components/home-page.tsx`
+
+### 2026-04-14 - Hero Slider Transition + Navigator Bar
+
+- What changed:
+  - Added smooth crossfade/zoom transition between hero slides.
+  - Added a bottom navigator bar with clickable slide indicators.
+- Why it changed:
+  - To make manual slider navigation feel smoother and provide direct slide jumping.
+- Files touched:
+  - `src/features/home/components/home-hero-slider.tsx`
+
+### 2026-04-14 - Mobile Slider Arrow Button Visibility
+
+- What changed:
+  - Hid hero slider previous/next arrow buttons on mobile and kept them visible from `md` and up.
+- Why it changed:
+  - To reduce control clutter in mobile responsive view as requested.
+- Files touched:
+  - `src/features/home/components/home-hero-slider.tsx`
+
+### 2026-04-14 - Real Mobile Interaction Reliability Fixes
+
+- What changed:
+  - Added legacy `MediaQueryList` listener fallback for mobile header menu behavior on older mobile browsers.
+  - Increased mobile header interaction layer priority and added touch-optimized interaction class for menu button.
+  - Updated hero slider interaction layers to avoid overlay tap interception and improve mobile navigator tap handling.
+- Why it changed:
+  - To address reports that mobile navbar menu and slider navigation actions were not responding on real devices.
+- Files touched:
+  - `src/features/home/components/home-page-mobile-header.tsx`
+  - `src/features/home/components/home-hero-slider.tsx`
+
+### 2026-04-14 - Hydration Warning Tolerance (Newsletter Form)
+
+- What changed:
+  - Added `suppressHydrationWarning` to newsletter `<form>` and `<input>` in footer.
+- Why it changed:
+  - To avoid hydration mismatch warnings when browser extensions inject runtime attributes (e.g. `__gcruniqueid`) on real devices/browsers.
+- Files touched:
+  - `src/features/home/components/home-page.tsx`
+
+### 2026-04-14 - Root HTML Hydration Warning Tolerance
+
+- What changed:
+  - Added `suppressHydrationWarning` to the root `<html>` element in app layout.
+- Why it changed:
+  - To avoid hydration mismatch warnings when browser extensions inject runtime attributes on `<html>` (e.g. `__gcrremoteframetoken`) before React hydration.
+- Files touched:
+  - `src/app/layout.tsx`
+
+### 2026-04-14 - Books Navbar Dropdown For Categories
+
+- What changed:
+  - Removed `အမျိုးအစားများ` from top-level navbar items.
+  - Added dropdown under `စာအုပ်များ` that contains `အမျိုးအစားများ` link.
+  - Implemented desktop/tablet hover/focus dropdown and mobile expandable submenu behavior.
+- Why it changed:
+  - To keep navbar cleaner while preserving access to categories through `စာအုပ်များ`.
+- Files touched:
+  - `src/features/home/components/home-page.tsx`
+  - `src/features/home/components/home-page-mobile-header.tsx`
+
+### 2026-04-14 - Books Dropdown Rehide Behavior
+
+- What changed:
+  - Removed focus-persistent behavior from desktop/tablet `စာအုပ်များ` dropdown visibility.
+  - Kept hover-based dropdown visibility so submenu does not remain stuck after click.
+- Why it changed:
+  - To ensure `အမျိုးအစားများ` submenu rehides when users click `စာအုပ်များ` or `အမျိုးအစားများ`.
+- Files touched:
+  - `src/features/home/components/home-page.tsx`
+
+### 2026-04-14 - Brand Favicon Update
+
+- What changed:
+  - Replaced app favicon with an `.ico` generated from the Mahar Sarpay logo asset.
+- Why it changed:
+  - To align browser tab icon branding with the official site logo.
+- Files touched:
+  - `src/app/favicon.ico`

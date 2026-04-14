@@ -30,7 +30,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`h-full antialiased ${inter.variable} ${playfairDisplay.variable}`}>
+    <html
+      lang="en"
+      className={`h-full antialiased ${inter.variable} ${playfairDisplay.variable}`}
+      suppressHydrationWarning
+    >
       <body className="min-h-full flex flex-col">
         <AppThemeProvider>{children}</AppThemeProvider>
       </body>
