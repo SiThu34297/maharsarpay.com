@@ -264,6 +264,83 @@ h6 {
   background: rgba(122, 172, 35, 0.9);
 }
 
+.multimedia-hero {
+  position: relative;
+  margin-bottom: var(--space-4);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--color-border) 72%, var(--color-brand) 28%);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(122, 172, 35, 0.18), transparent 44%),
+    radial-gradient(circle at 90% 8%, rgba(217, 123, 45, 0.2), transparent 45%),
+    linear-gradient(135deg, #ffffff, #f3f8eb 65%, #fdf4ea);
+  padding: clamp(22px, 4vw, 40px);
+  box-shadow: 0 18px 42px rgba(31, 41, 51, 0.08);
+}
+
+.multimedia-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--color-border) 65%, var(--color-brand) 35%);
+  background: color-mix(in srgb, var(--color-brand-subtle) 74%, #ffffff 26%);
+  padding: 6px 12px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-brand);
+}
+
+.multimedia-filter-chip {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: #ffffff;
+  padding-inline: 14px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.multimedia-filter-chip:hover {
+  border-color: var(--color-brand);
+  color: var(--color-brand);
+}
+
+.multimedia-filter-chip-active {
+  border-color: var(--color-brand);
+  background: var(--color-brand);
+  color: #ffffff;
+}
+
+.multimedia-filter-chip-active:hover {
+  color: #ffffff;
+}
+
+.multimedia-list-card {
+  border: 1px solid var(--color-border);
+  background: var(--color-card-bg);
+  border-radius: var(--radius-card);
+  padding: 14px;
+  box-shadow: 0 10px 25px rgba(31, 41, 51, 0.06);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.multimedia-list-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-soft);
+}
+
 .footer-link {
   color: var(--color-text-muted);
   transition: color 0.2s ease;

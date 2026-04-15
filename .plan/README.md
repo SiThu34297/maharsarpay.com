@@ -15,5 +15,6 @@ This folder stores implementation plans by page.
 - `books-plan.md`
 - `authors-plan.md`
 - `contact-plan.md`
+- `multimedia-plan.md`
 
 Use lowercase kebab-case for plan file names.

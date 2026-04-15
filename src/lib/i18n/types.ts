@@ -89,6 +89,28 @@ export type Dictionary = {
     retry: string;
     removeFilterLabel: string;
   };
+  multimediaList: {
+    heroBadge: string;
+    title: string;
+    description: string;
+    searchPlaceholder: string;
+    searchButton: string;
+    allFilterLabel: string;
+    videoFilterLabel: string;
+    photoFilterLabel: string;
+    mediaTypeLabel: string;
+    showingResults: string;
+    clearAllFilters: string;
+    noMediaFound: string;
+    tryDifferentFilters: string;
+    browseHome: string;
+    loadingMore: string;
+    loadMoreError: string;
+    retry: string;
+    removeFilterLabel: string;
+    byLabel: string;
+    publishedOnLabel: string;
+  };
   footer: {
     description: string;
     navigationTitle: string;

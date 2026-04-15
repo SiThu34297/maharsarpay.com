@@ -4,6 +4,7 @@
 
 - Homepage: `.plan/homepage-plan.md`
 - Books: `.plan/books-plan.md`
+- Multimedia: `.plan/multimedia-plan.md`
 
 ## Notes
 
