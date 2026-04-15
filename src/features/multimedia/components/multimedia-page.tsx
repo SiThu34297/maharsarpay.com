@@ -38,6 +38,7 @@ export async function MultimediaPage({ copy, locale, data }: MultimediaPageProps
       />
       <MarketingSiteHeader
         copy={copy}
+        locale={locale}
         navigation={navigation}
         activeNavId="media"
         bookCategoryLinks={bookCategoryLinks}

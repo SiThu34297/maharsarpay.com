@@ -124,6 +124,18 @@ export type Dictionary = {
     mapTitle: string;
     mapDescription: string;
   };
+  cartPage: {
+    title: string;
+    itemCount: string;
+    clearCart: string;
+    emptyTitle: string;
+    emptyDescription: string;
+    continueShopping: string;
+    decreaseQuantity: string;
+    increaseQuantity: string;
+    removeItem: string;
+    subtotalLabel: string;
+  };
   footer: {
     description: string;
     navigationTitle: string;

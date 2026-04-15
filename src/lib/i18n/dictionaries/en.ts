@@ -130,6 +130,18 @@ export const enDictionary: Dictionary = {
     mapTitle: "Find us on Google Map",
     mapDescription: "Visit our flagship location in downtown Yangon.",
   },
+  cartPage: {
+    title: "Your Cart",
+    itemCount: "{count} item(s) in cart",
+    clearCart: "Clear cart",
+    emptyTitle: "Your cart is empty",
+    emptyDescription: "Add books from our collection to see them here.",
+    continueShopping: "Continue Shopping",
+    decreaseQuantity: "Decrease quantity",
+    increaseQuantity: "Increase quantity",
+    removeItem: "Remove",
+    subtotalLabel: "Subtotal",
+  },
   footer: {
     description:
       "Mahar Sarpay is your modern neighborhood bookstore for quality books, expert picks, and joyful reading moments.",

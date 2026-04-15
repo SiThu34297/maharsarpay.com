@@ -1,5 +1,6 @@
 export type BookListItem = {
   id: string;
+  cartProductId: string;
   title: string;
   author: string;
   authorId: string;

@@ -1,8 +1,9 @@
 import Link from "next/link";
 
-import { BackpackIcon, PersonIcon } from "@radix-ui/react-icons";
+import { PersonIcon } from "@radix-ui/react-icons";
 
-import type { Dictionary } from "@/lib/i18n";
+import { CartFloatingButton } from "@/features/cart";
+import type { Dictionary, Locale } from "@/lib/i18n";
 
 import { MarketingMobileHeader } from "./marketing-mobile-header";
 import { getNavigationLabel, type MarketingNavId, type MarketingNavItem } from "./navigation";
@@ -14,6 +15,7 @@ type BookCategoryLink = {
 
 type MarketingSiteHeaderProps = Readonly<{
   copy: Dictionary;
+  locale: Locale;
   navigation: MarketingNavItem[];
   activeNavId: MarketingNavId;
   bookCategoryLinks?: BookCategoryLink[];
@@ -21,11 +23,11 @@ type MarketingSiteHeaderProps = Readonly<{
 
 export function MarketingSiteHeader({
   copy,
+  locale,
   navigation,
   activeNavId,
   bookCategoryLinks = [],
 }: MarketingSiteHeaderProps) {
-  const booksItem = navigation.find((item) => item.id === "books");
   const categoriesItem = navigation.find((item) => item.id === "categories");
   const effectiveBookCategoryLinks =
     bookCategoryLinks.length > 0
@@ -167,13 +169,7 @@ export function MarketingSiteHeader({
           bookCategoryLinks={effectiveBookCategoryLinks}
         />
       </header>
-      <Link
-        href={booksItem?.href ?? "/books"}
-        aria-label={copy.header.cartLabel}
-        className="fixed bottom-6 right-5 z-[70] inline-flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-brand)] text-white shadow-[0_10px_24px_rgba(122,172,35,0.4)] transition hover:brightness-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)] md:right-7"
-      >
-        <BackpackIcon />
-      </Link>
+      <CartFloatingButton locale={locale} ariaLabel={copy.header.cartLabel} />
     </>
   );
 }

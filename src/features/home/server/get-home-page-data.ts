@@ -20,7 +20,20 @@ const navigation: NavItem[] = [
   { id: "contact", href: "#contact" },
 ];
 
-const booksByLocale: Record<Locale, BookItem[]> = {
+const cartProductIdByHomeBookId: Record<string, string> = {
+  "book-1": "book:quiet-orchard",
+  "book-2": "book:golden-rain-in-bagan",
+  "book-3": "book:letters-from-inle",
+  "book-4": "book:stories-of-mandalay",
+  "book-5": "book:midnight-tea-house",
+  "book-6": "book:shan-hills-journal",
+  "book-7": "book:river-of-fireflies",
+  "book-8": "book:after-the-monsoon",
+};
+
+type HomeBookSeedItem = Omit<BookItem, "cartProductId">;
+
+const booksByLocale: Record<Locale, HomeBookSeedItem[]> = {
   en: [
     {
       id: "book-1",
@@ -488,7 +501,10 @@ export async function getHomePageData(locale: Locale): Promise<HomePageData> {
       },
     ],
     categories: categoriesByLocale[locale],
-    books: booksByLocale[locale],
+    books: booksByLocale[locale].map((book) => ({
+      ...book,
+      cartProductId: cartProductIdByHomeBookId[book.id] ?? `book:${book.id}`,
+    })),
     authors: authorsByLocale[locale],
     mediaItems: mediaItemsByLocale[locale],
     reviews: reviewsByLocale[locale],

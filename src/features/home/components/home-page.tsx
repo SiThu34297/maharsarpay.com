@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { CameraIcon, PlayIcon, PlusIcon } from "@radix-ui/react-icons";
+import { CameraIcon, PlayIcon } from "@radix-ui/react-icons";
 
 import {
   MarketingSiteFooter,
@@ -13,6 +13,7 @@ import { getBookFilterOptions } from "@/features/books";
 import { HomeHeroSlider } from "@/features/home/components/home-hero-slider";
 import { getHomePageData } from "@/features/home/server/get-home-page-data";
 import type { Dictionary, Locale } from "@/lib/i18n";
+import { HomeAddToCartButton } from "./home-add-to-cart-button";
 
 type HomePageProps = Readonly<{
   copy: Dictionary;
@@ -86,6 +87,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
       />
       <MarketingSiteHeader
         copy={copy}
+        locale={locale}
         navigation={navigation}
         activeNavId="home"
         bookCategoryLinks={bookCategoryLinks}
@@ -143,13 +145,11 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                   <p className="mt-3 text-base font-semibold text-[var(--color-brand)]">
                     {formatPrice(locale, book.price)}
                   </p>
-                  <button
-                    type="button"
-                    className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--color-brand)] px-4 py-2.5 text-xs font-semibold text-white transition hover:brightness-95 sm:text-sm"
-                  >
-                    <PlusIcon />
-                    {copy.bestsellers.addToCart}
-                  </button>
+                  <HomeAddToCartButton
+                    book={book}
+                    addLabel={copy.bestsellers.addToCart}
+                    addedLabel={copy.booksList.addedToCart}
+                  />
                 </li>
               ))}
             </ul>
@@ -172,13 +172,11 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                     {formatPrice(locale, book.price)}
                   </p>
                 </div>
-                <button
-                  type="button"
-                  className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--color-brand)] px-4 py-2.5 text-xs font-semibold text-white transition hover:brightness-95 sm:text-sm"
-                >
-                  <PlusIcon />
-                  {copy.bestsellers.addToCart}
-                </button>
+                <HomeAddToCartButton
+                  book={book}
+                  addLabel={copy.bestsellers.addToCart}
+                  addedLabel={copy.booksList.addedToCart}
+                />
               </article>
             ))}
           </div>

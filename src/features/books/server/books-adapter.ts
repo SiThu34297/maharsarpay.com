@@ -33,6 +33,7 @@ type BookTemplate = {
 
 type SeedBook = {
   id: string;
+  cartProductId: string;
   title: LocalizedValue;
   author: LocalizedValue;
   authorId: string;
@@ -151,9 +152,11 @@ const seedBooks: SeedBook[] = Array.from({ length: 48 }, (_, index) => {
   const template = bookTemplates[index % bookTemplates.length];
   const cycle = Math.floor(index / bookTemplates.length);
   const volume = cycle > 0 ? cycle + 1 : null;
+  const cartProductId = volume ? `book:${template.slug}:vol-${volume}` : `book:${template.slug}`;
 
   return {
     id: `book-list-${index + 1}`,
+    cartProductId,
     title: {
       en: volume ? `${template.title.en} Vol. ${volume}` : template.title.en,
       my: volume ? `${template.title.my} အပိုင်း ${volume}` : template.title.my,
@@ -223,6 +226,7 @@ function toUrlSearchParams(raw: RawSearchParams): URLSearchParams {
 function toLocalizedBook(locale: Locale, book: SeedBook): BookListItem {
   return {
     id: book.id,
+    cartProductId: book.cartProductId,
     title: book.title[locale],
     author: book.author[locale],
     authorId: book.authorId,

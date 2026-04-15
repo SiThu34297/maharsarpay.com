@@ -36,6 +36,7 @@ export function BooksPage({ copy, locale, data }: BooksPageProps) {
       />
       <MarketingSiteHeader
         copy={copy}
+        locale={locale}
         navigation={navigation}
         activeNavId="books"
         bookCategoryLinks={bookCategoryLinks}

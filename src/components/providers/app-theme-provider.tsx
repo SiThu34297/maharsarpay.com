@@ -2,6 +2,8 @@
 
 import { Theme } from "@radix-ui/themes";
 
+import { CartProvider } from "@/features/cart";
+
 type AppThemeProviderProps = Readonly<{
   children: React.ReactNode;
 }>;
@@ -9,7 +11,7 @@ type AppThemeProviderProps = Readonly<{
 export function AppThemeProvider({ children }: AppThemeProviderProps) {
   return (
     <Theme accentColor="grass" grayColor="slate" radius="large" scaling="100%">
-      {children}
+      <CartProvider>{children}</CartProvider>
     </Theme>
   );
 }

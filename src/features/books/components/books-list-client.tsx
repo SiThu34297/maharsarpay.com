@@ -5,8 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
-import { CheckIcon, Cross2Icon, MagnifyingGlassIcon, PlusIcon } from "@radix-ui/react-icons";
+import { Cross2Icon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 
+import { AddToCartButton } from "@/features/cart";
 import type {
   BookFilterOptions,
   BookListQuery,
@@ -83,7 +84,6 @@ export function BooksListClient({
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [loadMoreError, setLoadMoreError] = useState(false);
   const [searchInput, setSearchInput] = useState(initialQuery.q ?? "");
-  const [addedToCartItems, setAddedToCartItems] = useState<Record<string, boolean>>({});
 
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
@@ -253,20 +253,6 @@ export function BooksListClient({
     [pushQuery, searchInput],
   );
 
-  const addToCart = useCallback((bookId: string) => {
-    setAddedToCartItems((current) => ({
-      ...current,
-      [bookId]: true,
-    }));
-
-    window.setTimeout(() => {
-      setAddedToCartItems((current) => ({
-        ...current,
-        [bookId]: false,
-      }));
-    }, 1300);
-  }, []);
-
   return (
     <section className="section-gap">
       <div className="home-shell">
@@ -336,8 +322,6 @@ export function BooksListClient({
           {items.length > 0 ? (
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-3 xl:grid-cols-4">
               {items.map((book) => {
-                const addedToCart = Boolean(addedToCartItems[book.id]);
-
                 return (
                   <article key={book.id} className="book-list-card">
                     <div className="relative overflow-hidden rounded-xl">
@@ -362,15 +346,19 @@ export function BooksListClient({
                       </p>
                     </div>
 
-                    <button
-                      type="button"
-                      aria-label={addedToCart ? copy.addedToCart : copy.addToCart}
+                    <AddToCartButton
+                      item={{
+                        cartProductId: book.cartProductId,
+                        title: book.title,
+                        author: book.author,
+                        price: book.price,
+                        coverImageSrc: book.coverImageSrc,
+                        coverImageAlt: book.coverImageAlt,
+                      }}
+                      addLabel={copy.addToCart}
+                      addedLabel={copy.addedToCart}
                       className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--color-brand)] px-4 py-2.5 text-xs font-semibold text-white transition hover:brightness-95 sm:text-sm"
-                      onClick={() => addToCart(book.id)}
-                    >
-                      {addedToCart ? <CheckIcon /> : <PlusIcon />}
-                      <span>{addedToCart ? copy.addedToCart : copy.addToCart}</span>
-                    </button>
+                    />
                   </article>
                 );
               })}

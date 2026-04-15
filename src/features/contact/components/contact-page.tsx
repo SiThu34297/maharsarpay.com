@@ -61,6 +61,7 @@ export async function ContactPage({ copy, locale, data }: ContactPageProps) {
       />
       <MarketingSiteHeader
         copy={copy}
+        locale={locale}
         navigation={navigation}
         activeNavId="contact"
         bookCategoryLinks={bookCategoryLinks}

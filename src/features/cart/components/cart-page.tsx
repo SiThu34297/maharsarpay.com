@@ -5,17 +5,16 @@ import {
   getMarketingNavigation,
 } from "@/components/layout/marketing";
 import { getBookFilterOptions } from "@/features/books";
-import type { AuthorsPageData } from "@/features/authors/schemas/authors";
 import type { Dictionary, Locale } from "@/lib/i18n";
-import { AuthorsListClient } from "./authors-list-client";
 
-type AuthorsPageProps = Readonly<{
+import { CartPageClient } from "./cart-page-client";
+
+type CartPageProps = Readonly<{
   copy: Dictionary;
   locale: Locale;
-  data: AuthorsPageData;
 }>;
 
-export async function AuthorsPage({ copy, locale, data }: AuthorsPageProps) {
+export async function CartPage({ copy, locale }: CartPageProps) {
   const isMyanmar = locale === "my";
   const navigation = getMarketingNavigation(locale);
   const bookFilterOptions = await getBookFilterOptions(locale);
@@ -39,17 +38,12 @@ export async function AuthorsPage({ copy, locale, data }: AuthorsPageProps) {
         copy={copy}
         locale={locale}
         navigation={navigation}
-        activeNavId="authors"
+        activeNavId="books"
         bookCategoryLinks={bookCategoryLinks}
       />
 
       <main>
-        <AuthorsListClient
-          copy={copy.authorsList}
-          locale={locale}
-          initialResponse={data.initialResponse}
-          initialQuery={data.initialQuery}
-        />
+        <CartPageClient copy={copy.cartPage} locale={locale} />
       </main>
 
       <MarketingSiteFooter copy={copy} navigation={navigation} />
