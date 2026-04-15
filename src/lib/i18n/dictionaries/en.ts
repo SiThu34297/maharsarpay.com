@@ -114,6 +114,22 @@ export const enDictionary: Dictionary = {
     byLabel: "By",
     publishedOnLabel: "Published",
   },
+  contactPage: {
+    metaTitle: "Contact",
+    metaDescription:
+      "Get in touch with Mahar Sarpay, follow our social media channels, and find our Yangon location.",
+    heroBadge: "We are happy to hear from you",
+    title: "Contact Mahar Sarpay",
+    description:
+      "Connect with our team for reader support, partnership opportunities, and community events.",
+    websiteTitleLabel: "Website title",
+    websiteDescriptionLabel: "Website description",
+    socialTitle: "Social media",
+    socialDescription:
+      "Stay connected for new arrivals, literary events, and reading recommendations.",
+    mapTitle: "Find us on Google Map",
+    mapDescription: "Visit our flagship location in downtown Yangon.",
+  },
   footer: {
     description:
       "Mahar Sarpay is your modern neighborhood bookstore for quality books, expert picks, and joyful reading moments.",

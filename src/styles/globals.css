@@ -341,6 +341,102 @@ h6 {
   box-shadow: var(--shadow-soft);
 }
 
+.contact-hero {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--color-border) 72%, var(--color-brand) 28%);
+  border-radius: 22px;
+  padding: clamp(22px, 4vw, 42px);
+  box-shadow: 0 18px 42px rgba(31, 41, 51, 0.12);
+}
+
+.contact-hero-content {
+  position: relative;
+  z-index: 10;
+  max-width: 780px;
+}
+
+.contact-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      120deg,
+      rgba(12, 17, 22, 0.8),
+      rgba(12, 17, 22, 0.46) 55%,
+      rgba(15, 27, 12, 0.56)
+    ),
+    radial-gradient(circle at 82% 16%, rgba(122, 172, 35, 0.34), transparent 42%);
+}
+
+.contact-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.9);
+  padding: 6px 12px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #13201a;
+}
+
+.contact-surface {
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  background: #ffffff;
+  padding: clamp(20px, 3vw, 30px);
+  box-shadow: 0 12px 28px rgba(31, 41, 51, 0.06);
+}
+
+.contact-social-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 11px 12px;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.contact-social-link:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--color-brand) 70%, var(--color-border) 30%);
+  box-shadow: 0 10px 20px rgba(31, 41, 51, 0.07);
+}
+
+.contact-social-link:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+.contact-social-icon {
+  display: inline-flex;
+  height: 36px;
+  width: 36px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--color-brand) 35%, var(--color-border) 65%);
+  background: color-mix(in srgb, var(--color-brand-subtle) 82%, #ffffff 18%);
+  color: var(--color-brand);
+}
+
+.contact-map-surface {
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(31, 41, 51, 0.06);
+}
+
 .footer-link {
   color: var(--color-text-muted);
   transition: color 0.2s ease;
@@ -349,11 +445,6 @@ h6 {
 .footer-link:hover {
   color: var(--color-brand);
 }
-
-/* :is(a, button, input):focus-visible {
-  outline: 2px solid var(--color-brand);
-  outline-offset: 2px;
-} */
 
 /* Myanmar copy reads better with slightly smaller type and roomier lines. */
 .locale-my .text-5xl {

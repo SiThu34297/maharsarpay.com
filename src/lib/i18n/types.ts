@@ -111,6 +111,19 @@ export type Dictionary = {
     byLabel: string;
     publishedOnLabel: string;
   };
+  contactPage: {
+    metaTitle: string;
+    metaDescription: string;
+    heroBadge: string;
+    title: string;
+    description: string;
+    websiteTitleLabel: string;
+    websiteDescriptionLabel: string;
+    socialTitle: string;
+    socialDescription: string;
+    mapTitle: string;
+    mapDescription: string;
+  };
   footer: {
     description: string;
     navigationTitle: string;
