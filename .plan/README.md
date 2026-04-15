@@ -1,18 +1,19 @@
-# .plan History
+# .plan Plans
 
-This folder stores implementation history by page.
+This folder stores implementation plans by page.
 
 ## Structure
 
-- `.plan/pages/<page>.md` kept for backward compatibility while transitioning.
-- Use one section per change entry with date and summary.
+- `.plan/<page>-plan.md` is the source of truth.
+- Homepage plan file: `.plan/homepage-plan.md`
+- Use one section per plan update with date and summary.
 - Update `.plan` in the same change whenever code is modified.
 
 ## Naming
 
-- `home.md`
-- `books.md`
-- `authors.md`
-- `contact.md`
+- `homepage-plan.md`
+- `books-plan.md`
+- `authors-plan.md`
+- `contact-plan.md`
 
-Use lowercase kebab-case for page file names.
+Use lowercase kebab-case for plan file names.

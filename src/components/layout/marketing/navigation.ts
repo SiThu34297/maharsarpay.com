@@ -7,7 +7,7 @@ export type MarketingNavItem = {
   href: string;
 };
 
-export type MarketingPageId = "home" | "books";
+export type MarketingPageId = "home" | "books" | "authors";
 
 export function getNavigationLabel(copy: Dictionary["navigation"], id: MarketingNavId) {
   switch (id) {
@@ -34,7 +34,7 @@ export function getMarketingNavigation(locale: Locale): MarketingNavItem[] {
   return [
     { id: "home", href: base },
     { id: "books", href: `${base}/books` },
-    { id: "authors", href: `${base}#authors` },
+    { id: "authors", href: `${base}/authors` },
     { id: "categories", href: `${base}/books` },
     { id: "media", href: `${base}#media` },
     { id: "contact", href: `${base}#contact` },

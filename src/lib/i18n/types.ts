@@ -74,6 +74,21 @@ export type Dictionary = {
     addedToWishlist: string;
     removeFilterLabel: string;
   };
+  authorsList: {
+    title: string;
+    description: string;
+    searchPlaceholder: string;
+    searchButton: string;
+    showingResults: string;
+    clearAllFilters: string;
+    noAuthorsFound: string;
+    tryDifferentFilters: string;
+    browseBooks: string;
+    loadingMore: string;
+    loadMoreError: string;
+    retry: string;
+    removeFilterLabel: string;
+  };
   footer: {
     description: string;
     navigationTitle: string;

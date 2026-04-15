@@ -76,6 +76,21 @@ export const myDictionary: Dictionary = {
     addedToWishlist: "စိတ်ကြိုက်ထားပြီး",
     removeFilterLabel: "စစ်ထုတ်မှု ဖယ်ရှားမည်",
   },
+  authorsList: {
+    title: "စာရေးသူအားလုံး",
+    description: "စာရေးသူအမည်ဖြင့် ရှာဖွေပါ။",
+    searchPlaceholder: "စာရေးသူအမည်ဖြင့် ရှာဖွေပါ...",
+    searchButton: "ရှာဖွေမည်",
+    showingResults: "စာရေးသူ {count} ဦး ပြနေသည်",
+    clearAllFilters: "ရှာဖွေမှု ဖျက်မည်",
+    noAuthorsFound: "စာရေးသူ မတွေ့ပါ",
+    tryDifferentFilters: "အခြားစာလုံးဖြင့် ထပ်ရှာကြည့်ပါ",
+    browseBooks: "စာအုပ်များ ကြည့်မည်",
+    loadingMore: "စာရေးသူများ ထပ်မံတင်နေသည်...",
+    loadMoreError: "စာရေးသူများ ထပ်တင်ရာတွင် ပြဿနာဖြစ်ပွားသည်။",
+    retry: "ထပ်စမ်းမည်",
+    removeFilterLabel: "စစ်ထုတ်မှု ဖယ်ရှားမည်",
+  },
   footer: {
     description:
       "မဟာစာပေသည် အရည်အသွေးမြင့်စာအုပ်များ၊ အကြံပြုရွေးချယ်မှုများနှင့် ပျော်ရွှင်ဖတ်ရှုမှုအတွက် ခေတ်မီစာအုပ်ဆိုင်တစ်ခုဖြစ်သည်။",
