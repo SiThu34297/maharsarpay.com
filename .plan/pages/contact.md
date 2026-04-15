@@ -7,6 +7,20 @@
 
 ## Entries
 
+### 2026-04-15 - Restore Books Categories Dropdown + Shared Floating Cart
+
+- What changed:
+  - Added localized Books category links to Contact header dropdown so Books hover categories are available outside homepage.
+  - Floating cart button is now rendered by the shared marketing header, so it appears on Contact page too.
+- Why it changed:
+  - Keep Books navigation behavior and cart access consistent across all marketing pages.
+- Files touched:
+  - `src/features/contact/components/contact-page.tsx`
+  - `src/components/layout/marketing/marketing-site-header.tsx`
+  - `.plan/pages/contact.md`
+- Notes:
+  - Contact hero and content layout remain unchanged.
+
 ### 2026-04-15 - Remove Profile Overlay Layout
 
 - What changed:

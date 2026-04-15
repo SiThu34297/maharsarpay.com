@@ -4,6 +4,7 @@ import {
   MarketingTopBrandStrip,
   getMarketingNavigation,
 } from "@/components/layout/marketing";
+import { getBookFilterOptions } from "@/features/books";
 import type { MultimediaPageData } from "@/features/multimedia/schemas/multimedia";
 import type { Dictionary, Locale } from "@/lib/i18n";
 
@@ -15,9 +16,14 @@ type MultimediaPageProps = Readonly<{
   data: MultimediaPageData;
 }>;
 
-export function MultimediaPage({ copy, locale, data }: MultimediaPageProps) {
+export async function MultimediaPage({ copy, locale, data }: MultimediaPageProps) {
   const isMyanmar = locale === "my";
   const navigation = getMarketingNavigation(locale);
+  const bookFilterOptions = await getBookFilterOptions(locale);
+  const bookCategoryLinks = bookFilterOptions.categories.map((category) => ({
+    label: category.label,
+    href: `/${locale}/books?category=${encodeURIComponent(category.value)}`,
+  }));
 
   return (
     <div
@@ -30,7 +36,12 @@ export function MultimediaPage({ copy, locale, data }: MultimediaPageProps) {
         title="မဟာစာပေ"
         message="သိမ်းထားတဲ့အရာတွေ ပုပ်သိုးမသွားခင် လိုအပ်သူကို ပေးအပ်လိုက်ဖို့ ၀န်မလေးပါနဲ့"
       />
-      <MarketingSiteHeader copy={copy} navigation={navigation} activeNavId="media" />
+      <MarketingSiteHeader
+        copy={copy}
+        navigation={navigation}
+        activeNavId="media"
+        bookCategoryLinks={bookCategoryLinks}
+      />
 
       <main>
         <MultimediaListClient

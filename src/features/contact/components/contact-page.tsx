@@ -14,6 +14,7 @@ import {
   MarketingTopBrandStrip,
   getMarketingNavigation,
 } from "@/components/layout/marketing";
+import { getBookFilterOptions } from "@/features/books";
 import type { ContactPageData, ContactSocialIcon } from "@/features/contact/schemas/contact";
 import type { Dictionary, Locale } from "@/lib/i18n";
 
@@ -38,9 +39,14 @@ function getSocialIcon(icon: ContactSocialIcon) {
   }
 }
 
-export function ContactPage({ copy, locale, data }: ContactPageProps) {
+export async function ContactPage({ copy, locale, data }: ContactPageProps) {
   const isMyanmar = locale === "my";
   const navigation = getMarketingNavigation(locale);
+  const bookFilterOptions = await getBookFilterOptions(locale);
+  const bookCategoryLinks = bookFilterOptions.categories.map((category) => ({
+    label: category.label,
+    href: `/${locale}/books?category=${encodeURIComponent(category.value)}`,
+  }));
 
   return (
     <div
@@ -53,7 +59,12 @@ export function ContactPage({ copy, locale, data }: ContactPageProps) {
         title="မဟာစာပေ"
         message="သိမ်းထားတဲ့အရာတွေ ပုပ်သိုးမသွားခင် လိုအပ်သူကို ပေးအပ်လိုက်ဖို့ ၀န်မလေးပါနဲ့"
       />
-      <MarketingSiteHeader copy={copy} navigation={navigation} activeNavId="contact" />
+      <MarketingSiteHeader
+        copy={copy}
+        navigation={navigation}
+        activeNavId="contact"
+        bookCategoryLinks={bookCategoryLinks}
+      />
 
       <main className="home-shell section-gap space-y-8 md:space-y-10">
         <section className="contact-hero">

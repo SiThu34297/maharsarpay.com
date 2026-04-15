@@ -4,6 +4,8 @@
 
 - Date: 2026-04-15
 - Summary: Added a dedicated localized multimedia browse page with search, media type filtering, and cursor-based pagination.
+- Date: 2026-04-15
+- Summary: Added shared Books category dropdown data to multimedia header so hover categories match homepage behavior.
 
 ## Goal
 

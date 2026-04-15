@@ -7,6 +7,21 @@
 
 ## Entries
 
+### 2026-04-15 - Restore Books Categories Dropdown + Shared Floating Cart
+
+- What changed:
+  - Restored full shared marketing navigation on Authors page (stopped filtering out `categories`).
+  - Added localized Books category links to the Authors header dropdown so Books hover behavior matches homepage.
+  - Floating cart button is now rendered by the shared marketing header, so it appears on Authors page too.
+- Why it changed:
+  - Books category hover menu and floating cart must be consistent across all marketing pages.
+- Files touched:
+  - `src/features/authors/components/authors-page.tsx`
+  - `src/components/layout/marketing/marketing-site-header.tsx`
+  - `.plan/pages/authors.md`
+- Notes:
+  - Footer now uses full marketing navigation on Authors page.
+
 ### 2026-04-15 - Remove Genre/Category Text From Author Cards
 
 - What changed:

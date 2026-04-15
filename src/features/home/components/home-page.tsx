@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { BackpackIcon, CameraIcon, PlayIcon, PlusIcon } from "@radix-ui/react-icons";
+import { CameraIcon, PlayIcon, PlusIcon } from "@radix-ui/react-icons";
 
 import {
   MarketingSiteFooter,
@@ -90,14 +90,6 @@ export async function HomePage({ copy, locale }: HomePageProps) {
         activeNavId="home"
         bookCategoryLinks={bookCategoryLinks}
       />
-
-      <Link
-        href="#books"
-        aria-label={copy.header.cartLabel}
-        className="fixed bottom-6 right-5 z-[70] inline-flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-brand)] text-white shadow-[0_10px_24px_rgba(122,172,35,0.4)] transition hover:brightness-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)] md:right-7"
-      >
-        <BackpackIcon />
-      </Link>
 
       <main>
         <section className="mb-8 w-full md:mb-12 lg:mb-16">

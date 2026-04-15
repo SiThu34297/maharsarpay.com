@@ -1,5 +1,10 @@
 # Mahar Sarpay Homepage Plan (Saved)
 
+## Plan Update
+
+- Date: 2026-04-15
+- Summary: Moved floating cart button into shared marketing header so it appears on every marketing page, and removed the duplicate home-only button.
+
 ## Goal
 
 Deliver a Myanmar-first bookstore homepage that is clean, modern, responsive, and ready for future data/API integration.

@@ -4,6 +4,7 @@ import {
   MarketingTopBrandStrip,
   getMarketingNavigation,
 } from "@/components/layout/marketing";
+import { getBookFilterOptions } from "@/features/books";
 import type { AuthorsPageData } from "@/features/authors/schemas/authors";
 import type { Dictionary, Locale } from "@/lib/i18n";
 import { AuthorsListClient } from "./authors-list-client";
@@ -14,10 +15,14 @@ type AuthorsPageProps = Readonly<{
   data: AuthorsPageData;
 }>;
 
-export function AuthorsPage({ copy, locale, data }: AuthorsPageProps) {
+export async function AuthorsPage({ copy, locale, data }: AuthorsPageProps) {
   const isMyanmar = locale === "my";
   const navigation = getMarketingNavigation(locale);
-  const authorsNavigation = navigation.filter((item) => item.id !== "categories");
+  const bookFilterOptions = await getBookFilterOptions(locale);
+  const bookCategoryLinks = bookFilterOptions.categories.map((category) => ({
+    label: category.label,
+    href: `/${locale}/books?category=${encodeURIComponent(category.value)}`,
+  }));
 
   return (
     <div
@@ -30,7 +35,12 @@ export function AuthorsPage({ copy, locale, data }: AuthorsPageProps) {
         title="မဟာစာပေ"
         message="သိမ်းထားတဲ့အရာတွေ ပုပ်သိုးမသွားခင် လိုအပ်သူကို ပေးအပ်လိုက်ဖို့ ၀န်မလေးပါနဲ့"
       />
-      <MarketingSiteHeader copy={copy} navigation={authorsNavigation} activeNavId="authors" />
+      <MarketingSiteHeader
+        copy={copy}
+        navigation={navigation}
+        activeNavId="authors"
+        bookCategoryLinks={bookCategoryLinks}
+      />
 
       <main>
         <AuthorsListClient
@@ -41,7 +51,7 @@ export function AuthorsPage({ copy, locale, data }: AuthorsPageProps) {
         />
       </main>
 
-      <MarketingSiteFooter copy={copy} navigation={authorsNavigation} />
+      <MarketingSiteFooter copy={copy} navigation={navigation} />
     </div>
   );
 }
