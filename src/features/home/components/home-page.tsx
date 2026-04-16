@@ -39,6 +39,15 @@ function formatPrice(locale: Locale, value: number) {
   }).format(value);
 }
 
+function formatAuthorBookCount(template: string, locale: Locale, count: number) {
+  const countText =
+    locale === "my"
+      ? new Intl.NumberFormat("my-MM", { maximumFractionDigits: 0 }).format(count)
+      : new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(count);
+
+  return template.replace("{count}", countText);
+}
+
 function renderStars(rating: number) {
   const fullStars = Math.round(rating);
   return `${"★".repeat(fullStars)}${"☆".repeat(Math.max(5 - fullStars, 0))}`;
@@ -241,6 +250,18 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                       {author.name}
                     </Link>
                   </h3>
+                  <p className="mt-1 text-xs font-semibold text-[var(--color-brand)]">
+                    {formatAuthorBookCount(
+                      copy.authors.bookCountTemplate,
+                      locale,
+                      author.bookCount,
+                    )}
+                  </p>
+                  {author.note ? (
+                    <p className="mt-2 line-clamp-2 text-sm text-[var(--color-text-muted)]">
+                      {author.note}
+                    </p>
+                  ) : null}
                 </li>
               ))}
             </ul>
@@ -266,6 +287,14 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                     {author.name}
                   </Link>
                 </h3>
+                <p className="mt-1 text-xs font-semibold text-[var(--color-brand)]">
+                  {formatAuthorBookCount(copy.authors.bookCountTemplate, locale, author.bookCount)}
+                </p>
+                {author.note ? (
+                  <p className="mt-2 line-clamp-3 text-sm text-[var(--color-text-muted)]">
+                    {author.note}
+                  </p>
+                ) : null}
               </article>
             ))}
           </div>

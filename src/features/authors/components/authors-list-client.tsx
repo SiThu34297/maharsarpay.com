@@ -37,6 +37,11 @@ function replaceResultCount(template: string, count: number, locale: Locale) {
   return template.replace("{count}", countText);
 }
 
+function replaceAuthorBookCount(template: string, count: number, locale: Locale) {
+  const countText = locale === "my" ? toMyanmarDigits(groupDigits(count)) : groupDigits(count);
+  return template.replace("{count}", countText);
+}
+
 function buildBaseParams(query: AuthorListQuery) {
   const params = new URLSearchParams();
 
@@ -304,6 +309,14 @@ export function AuthorsListClient({
                       {author.name}
                     </Link>
                   </h2>
+                  <p className="mt-1 text-xs font-semibold text-[var(--color-brand)]">
+                    {replaceAuthorBookCount(copy.bookCountTemplate, author.bookCount, locale)}
+                  </p>
+                  {author.note ? (
+                    <p className="mt-2 line-clamp-2 text-sm text-[var(--color-text-muted)]">
+                      {author.note}
+                    </p>
+                  ) : null}
                 </article>
               ))}
 

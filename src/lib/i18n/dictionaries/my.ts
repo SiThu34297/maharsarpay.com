@@ -42,6 +42,7 @@ export const myDictionary: Dictionary = {
   authors: {
     title: "အထူးရွေးချယ်ထားသော စာရေးသူများ",
     description: "မြန်မာနှင့် နိုင်ငံတကာမှ စာရေးသူများ၏ အရေးပါတဲ့လက်ရာများကို ရှာဖွေပါ။",
+    bookCountTemplate: "စာအုပ် {count} အုပ်",
   },
   media: {
     title: "မီဒီယာလေ့လာရန်",
@@ -99,6 +100,7 @@ export const myDictionary: Dictionary = {
     searchPlaceholder: "စာရေးသူအမည်ဖြင့် ရှာဖွေပါ...",
     searchButton: "ရှာဖွေမည်",
     showingResults: "စာရေးသူ {count} ဦး ပြနေသည်",
+    bookCountTemplate: "စာအုပ် {count} အုပ်",
     clearAllFilters: "ရှာဖွေမှု ဖျက်မည်",
     noAuthorsFound: "စာရေးသူ မတွေ့ပါ",
     tryDifferentFilters: "အခြားစာလုံးဖြင့် ထပ်ရှာကြည့်ပါ",

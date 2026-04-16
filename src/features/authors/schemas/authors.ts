@@ -1,11 +1,34 @@
 import type { BookFilterOptions, BookListItem } from "@/features/books/schemas/books";
 
+export type BackendAuthorRecord = {
+  id: string;
+  name: string;
+  alias: string | null;
+  registrationId: string | null;
+  nameTag: string | null;
+  authorImage: string | null;
+  note: string | null;
+  status: number;
+  bookCount: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type BackendAuthorsResponse = {
+  error: boolean;
+  authorized: boolean;
+  message: string;
+  data: BackendAuthorRecord[];
+};
+
 export type AuthorListItem = {
   id: string;
   slug: string;
   name: string;
   imageSrc: string;
   imageAlt: string;
+  note: string;
+  bookCount: number;
 };
 
 export type AuthorDetail = AuthorListItem & {

@@ -38,6 +38,8 @@ export type AuthorItem = {
   name: string;
   imageSrc: string;
   imageAlt: string;
+  note: string;
+  bookCount: number;
 };
 
 export type MediaItem = {

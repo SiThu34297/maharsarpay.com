@@ -42,6 +42,7 @@ export const enDictionary: Dictionary = {
   authors: {
     title: "Featured Authors",
     description: "Discover impactful voices from Myanmar and beyond.",
+    bookCountTemplate: "{count} books",
   },
   media: {
     title: "Explore Media",
@@ -99,6 +100,7 @@ export const enDictionary: Dictionary = {
     searchPlaceholder: "Search authors...",
     searchButton: "Search",
     showingResults: "Showing {count} authors",
+    bookCountTemplate: "{count} books",
     clearAllFilters: "Clear search",
     noAuthorsFound: "No authors found",
     tryDifferentFilters: "Try a different keyword",

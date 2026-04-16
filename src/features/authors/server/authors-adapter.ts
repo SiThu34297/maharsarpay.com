@@ -2,6 +2,8 @@ import type { Locale } from "@/lib/i18n";
 
 import type {
   AppliedAuthorFilters,
+  BackendAuthorRecord,
+  BackendAuthorsResponse,
   AuthorDetail,
   AuthorListItem,
   AuthorListQuery,
@@ -10,6 +12,8 @@ import type {
 
 const DEFAULT_LIMIT = 12;
 const MAX_LIMIT = 24;
+const AUTHORS_ENDPOINT = "/api/web/authors";
+const BOOK_API_BASE_URL = process.env.BOOK_API_BASE_URL ?? "https://bookapi.sabahna.com";
 
 type RawSearchParams = Record<string, string | string[] | undefined>;
 
@@ -28,6 +32,20 @@ type SeedAuthor = {
   createdAt: string;
   imageSrc: string;
   imageAlt: LocalizedValue;
+};
+
+type RuntimeAuthor = {
+  id: string;
+  slug: string;
+  name: string;
+  shortBio: string;
+  longBio: string;
+  note: string;
+  bookCount: number;
+  createdAt: string;
+  imageSrc: string;
+  imageAlt: string;
+  searchText: string;
 };
 
 const seedAuthors: SeedAuthor[] = [
@@ -237,6 +255,8 @@ const seedAuthors: SeedAuthor[] = [
   },
 ];
 
+const seedAuthorImagePool = seedAuthors.map((author) => author.imageSrc);
+
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
@@ -266,7 +286,174 @@ function normalizeQuery(query: Partial<AuthorListQuery>): AuthorListQuery {
 }
 
 function normalizeSlug(value: string) {
+  try {
+    return decodeURIComponent(value).trim().toLowerCase();
+  } catch {
+    return value.trim().toLowerCase();
+  }
+}
+
+function normalizeSearchText(value: string) {
   return value.trim().toLowerCase();
+}
+
+function normalizeAuthorName(value: string) {
+  return value.trim().replace(/\s+/g, " ");
+}
+
+function toSlug(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/['’]/g, "")
+    .replace(/[^\p{Letter}\p{Number}]+/gu, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function formatBackendImageAlt(locale: Locale, name: string) {
+  return locale === "my" ? `${name} ရုပ်ပုံ` : `Portrait of ${name}`;
+}
+
+function toAuthorListItem(author: RuntimeAuthor): AuthorListItem {
+  return {
+    id: author.id,
+    slug: author.slug,
+    name: author.name,
+    imageSrc: author.imageSrc,
+    imageAlt: author.imageAlt,
+    note: author.note,
+    bookCount: author.bookCount,
+  };
+}
+
+function toAuthorDetail(author: RuntimeAuthor): AuthorDetail {
+  return {
+    ...toAuthorListItem(author),
+    shortBio: author.shortBio,
+    longBio: author.longBio,
+  };
+}
+
+function toFallbackRuntimeAuthor(locale: Locale, author: SeedAuthor): RuntimeAuthor {
+  const name = normalizeAuthorName(author.name[locale]);
+  const note = author.shortBio[locale];
+  const searchText = normalizeSearchText(`${author.name.en} ${author.name.my}`);
+
+  return {
+    id: author.id,
+    slug: author.slug,
+    name,
+    shortBio: author.shortBio[locale],
+    longBio: author.longBio[locale],
+    note,
+    bookCount: 0,
+    createdAt: author.createdAt,
+    imageSrc: author.imageSrc,
+    imageAlt: author.imageAlt[locale],
+    searchText,
+  };
+}
+
+function toBackendRuntimeAuthor(
+  locale: Locale,
+  author: BackendAuthorRecord,
+  slug: string,
+  index: number,
+): RuntimeAuthor {
+  const name = normalizeAuthorName(author.name);
+  const safeName = name || `Author ${author.id.slice(0, 8)}`;
+  const note = author.note?.trim() || "";
+  const fallbackImage = seedAuthorImagePool[index % seedAuthorImagePool.length];
+  const searchText = normalizeSearchText(
+    [author.name, author.alias, author.nameTag].filter(Boolean).join(" "),
+  );
+
+  return {
+    id: author.id,
+    slug,
+    name: safeName,
+    shortBio: note || safeName,
+    longBio: note || safeName,
+    note,
+    bookCount: Number.isFinite(author.bookCount) ? Math.max(0, author.bookCount) : 0,
+    createdAt: author.createdAt,
+    imageSrc: author.authorImage ?? fallbackImage,
+    imageAlt: formatBackendImageAlt(locale, safeName),
+    searchText,
+  };
+}
+
+function toBackendAuthorSlugTuples(authors: BackendAuthorRecord[]) {
+  const seenSlugs = new Set<string>();
+
+  return authors.map((author) => {
+    const baseSlug =
+      toSlug(author.name) || toSlug(author.alias ?? "") || `author-${author.id.slice(0, 8)}`;
+    let slug = baseSlug;
+
+    if (seenSlugs.has(slug)) {
+      slug = `${baseSlug}-${author.id.slice(0, 6).toLowerCase()}`;
+    }
+
+    seenSlugs.add(slug);
+
+    return {
+      author,
+      slug,
+    };
+  });
+}
+
+function sortAuthorsByCreatedAt(authors: RuntimeAuthor[]) {
+  return [...authors].sort(
+    (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
+  );
+}
+
+function toFallbackRuntimeAuthors(locale: Locale) {
+  return seedAuthors.map((author) => toFallbackRuntimeAuthor(locale, author));
+}
+
+async function fetchRuntimeAuthorsFromBackend(locale: Locale): Promise<RuntimeAuthor[]> {
+  const response = await fetch(`${BOOK_API_BASE_URL}${AUTHORS_ENDPOINT}`, {
+    method: "GET",
+    cache: "no-store",
+    headers: {
+      Accept: "application/json",
+      "Accept-Language": locale,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Authors API request failed with status ${response.status}`);
+  }
+
+  const payload = (await response.json()) as Partial<BackendAuthorsResponse>;
+
+  if (payload.error || payload.authorized === false) {
+    throw new Error(payload.message || "Authors API returned an error");
+  }
+
+  if (!Array.isArray(payload.data)) {
+    throw new TypeError("Authors API returned an invalid response payload");
+  }
+
+  const activeAuthors = payload.data.filter((author) => author.status === 1);
+
+  return toBackendAuthorSlugTuples(activeAuthors).map(({ author, slug }, index) =>
+    toBackendRuntimeAuthor(locale, author, slug, index),
+  );
+}
+
+async function getRuntimeAuthors(locale: Locale) {
+  try {
+    const backendAuthors = await fetchRuntimeAuthorsFromBackend(locale);
+    return sortAuthorsByCreatedAt(backendAuthors);
+  } catch {
+    // Fallback to local seed data if backend is unavailable.
+  }
+
+  return sortAuthorsByCreatedAt(toFallbackRuntimeAuthors(locale));
 }
 
 function toUrlSearchParams(raw: RawSearchParams): URLSearchParams {
@@ -288,24 +475,6 @@ function toUrlSearchParams(raw: RawSearchParams): URLSearchParams {
   }
 
   return params;
-}
-
-function toLocalizedAuthorListItem(locale: Locale, author: SeedAuthor): AuthorListItem {
-  return {
-    id: author.id,
-    slug: author.slug,
-    name: author.name[locale],
-    imageSrc: author.imageSrc,
-    imageAlt: author.imageAlt[locale],
-  };
-}
-
-function toLocalizedAuthorDetail(locale: Locale, author: SeedAuthor): AuthorDetail {
-  return {
-    ...toLocalizedAuthorListItem(locale, author),
-    shortBio: author.shortBio[locale],
-    longBio: author.longBio[locale],
-  };
 }
 
 function buildAppliedFilters(query: AuthorListQuery): AppliedAuthorFilters {
@@ -334,13 +503,14 @@ export function normalizeAuthorListQuery(query: Partial<AuthorListQuery>): Autho
 
 export async function getAuthorBySlug(locale: Locale, slug: string): Promise<AuthorDetail | null> {
   const normalizedSlug = normalizeSlug(slug);
-  const author = seedAuthors.find((seedAuthor) => seedAuthor.slug === normalizedSlug);
+  const authors = await getRuntimeAuthors(locale);
+  const author = authors.find((item) => normalizeSlug(item.slug) === normalizedSlug);
 
   if (!author) {
     return null;
   }
 
-  return toLocalizedAuthorDetail(locale, author);
+  return toAuthorDetail(author);
 }
 
 export async function getRelatedAuthors(
@@ -348,32 +518,20 @@ export async function getRelatedAuthors(
   currentAuthorId: string,
   limit = 6,
 ): Promise<AuthorListItem[]> {
-  const currentAuthor = seedAuthors.find((seedAuthor) => seedAuthor.id === currentAuthorId);
+  const authors = await getRuntimeAuthors(locale);
+  const currentAuthor = authors.find((author) => author.id === currentAuthorId);
 
   if (!currentAuthor) {
     return [];
   }
 
   const safeLimit = clamp(limit, 1, 12);
-  const sameGenre = seedAuthors
-    .filter(
-      (seedAuthor) =>
-        seedAuthor.id !== currentAuthor.id && seedAuthor.genreId === currentAuthor.genreId,
-    )
-    .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime())
-    .map((seedAuthor) => toLocalizedAuthorListItem(locale, seedAuthor));
+  const related = authors
+    .filter((author) => author.id !== currentAuthor.id)
+    .slice(0, safeLimit)
+    .map((author) => toAuthorListItem(author));
 
-  if (sameGenre.length >= safeLimit) {
-    return sameGenre.slice(0, safeLimit);
-  }
-
-  const excludedIds = new Set([currentAuthor.id, ...sameGenre.map((author) => author.id)]);
-  const fallbackAuthors = seedAuthors
-    .filter((seedAuthor) => !excludedIds.has(seedAuthor.id))
-    .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime())
-    .map((seedAuthor) => toLocalizedAuthorListItem(locale, seedAuthor));
-
-  return [...sameGenre, ...fallbackAuthors].slice(0, safeLimit);
+  return related;
 }
 
 export async function searchAuthors(
@@ -381,31 +539,26 @@ export async function searchAuthors(
   queryInput: Partial<AuthorListQuery>,
 ): Promise<AuthorListResponse> {
   const query = normalizeQuery(queryInput);
-  const keyword = query.q?.toLowerCase();
-
-  const filtered = seedAuthors.filter((author) => {
+  const keyword = query.q ? normalizeSearchText(query.q) : undefined;
+  const authors = await getRuntimeAuthors(locale);
+  const filtered = authors.filter((author) => {
     if (!keyword) {
       return true;
     }
 
-    const haystack = author.name[locale].toLowerCase();
-    return haystack.includes(keyword);
+    return author.searchText.includes(keyword);
   });
-
-  const sorted = [...filtered].sort(
-    (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
-  );
 
   const offset = Number(query.cursor ?? "0");
   const safeOffset = Number.isFinite(offset) && offset >= 0 ? offset : 0;
-  const pageItems = sorted.slice(safeOffset, safeOffset + query.limit);
-  const items = pageItems.map((author) => toLocalizedAuthorListItem(locale, author));
+  const pageItems = filtered.slice(safeOffset, safeOffset + query.limit);
+  const items = pageItems.map((author) => toAuthorListItem(author));
   const nextOffset = safeOffset + items.length;
-  const nextCursor = nextOffset < sorted.length ? String(nextOffset) : null;
+  const nextCursor = nextOffset < filtered.length ? String(nextOffset) : null;
 
   return {
     items,
-    total: sorted.length,
+    total: filtered.length,
     nextCursor,
     appliedFilters: buildAppliedFilters(query),
   };

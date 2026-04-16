@@ -480,11 +480,31 @@ export async function getBooksByAuthor(
   locale: Locale,
   authorId: string,
   limit = 8,
+  options?: {
+    authorName?: string;
+  },
 ): Promise<BookListItem[]> {
   const safeLimit = clamp(limit, 1, 24);
+  const normalizedAuthorName = options?.authorName
+    ? options.authorName.trim().toLowerCase().replace(/\s+/g, " ")
+    : "";
 
   return seedBooks
-    .filter((seedBook) => seedBook.authorId === authorId)
+    .filter((seedBook) => {
+      if (seedBook.authorId === authorId) {
+        return true;
+      }
+
+      if (!normalizedAuthorName) {
+        return false;
+      }
+
+      const candidateNames = [seedBook.author.en, seedBook.author.my].map((name) =>
+        name.trim().toLowerCase().replace(/\s+/g, " "),
+      );
+
+      return candidateNames.includes(normalizedAuthorName);
+    })
     .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime())
     .slice(0, safeLimit)
     .map((seedBook) => toLocalizedBook(locale, seedBook));

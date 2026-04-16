@@ -40,6 +40,7 @@ export type Dictionary = {
   authors: {
     title: string;
     description: string;
+    bookCountTemplate: string;
   };
   media: {
     title: string;
@@ -97,6 +98,7 @@ export type Dictionary = {
     searchPlaceholder: string;
     searchButton: string;
     showingResults: string;
+    bookCountTemplate: string;
     clearAllFilters: string;
     noAuthorsFound: string;
     tryDifferentFilters: string;

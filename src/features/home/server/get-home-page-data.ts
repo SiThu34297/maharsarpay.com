@@ -1,5 +1,6 @@
 import type { Locale } from "@/lib/i18n";
 
+import { searchAuthors } from "@/features/authors";
 import { getAllCategories } from "@/features/categories";
 import type {
   AuthorItem,
@@ -270,96 +271,10 @@ async function getHomeCategories(locale: Locale): Promise<CategoryItem[]> {
   return pickRandomItems(fallbackCategoriesByLocale[locale], 6);
 }
 
-const authorsByLocale: Record<Locale, AuthorItem[]> = {
-  en: [
-    {
-      id: "author-moe-nadi",
-      slug: "moe-nadi",
-      name: "Moe Nadi",
-      imageSrc: "/images/home/real/authors/author-1.jpg",
-      imageAlt: "Portrait of Moe Nadi",
-    },
-    {
-      id: "author-khin-aye",
-      slug: "khin-aye",
-      name: "Khin Aye",
-      imageSrc: "/images/home/real/authors/author-2.jpg",
-      imageAlt: "Portrait of Khin Aye",
-    },
-    {
-      id: "author-sai-nay-lin",
-      slug: "sai-nay-lin",
-      name: "Sai Nay Lin",
-      imageSrc: "/images/home/real/authors/author-3.jpg",
-      imageAlt: "Portrait of Sai Nay Lin",
-    },
-    {
-      id: "author-thandar-win",
-      slug: "thandar-win",
-      name: "Thandar Win",
-      imageSrc: "/images/home/real/authors/author-4.jpg",
-      imageAlt: "Portrait of Thandar Win",
-    },
-    {
-      id: "author-aung-min",
-      slug: "aung-min",
-      name: "Aung Min",
-      imageSrc: "/images/home/real/authors/author-5.jpg",
-      imageAlt: "Portrait of Aung Min",
-    },
-    {
-      id: "author-nan-hnin",
-      slug: "nan-hnin",
-      name: "Nan Hnin",
-      imageSrc: "/images/home/real/authors/author-6.jpg",
-      imageAlt: "Portrait of Nan Hnin",
-    },
-  ],
-  my: [
-    {
-      id: "author-moe-nadi",
-      slug: "moe-nadi",
-      name: "မိုးနဒီ",
-      imageSrc: "/images/home/real/authors/author-1.jpg",
-      imageAlt: "မိုးနဒီ ရုပ်ပုံ",
-    },
-    {
-      id: "author-khin-aye",
-      slug: "khin-aye",
-      name: "ခင်အေး",
-      imageSrc: "/images/home/real/authors/author-2.jpg",
-      imageAlt: "ခင်အေး ရုပ်ပုံ",
-    },
-    {
-      id: "author-sai-nay-lin",
-      slug: "sai-nay-lin",
-      name: "စိုင်းနေလင်း",
-      imageSrc: "/images/home/real/authors/author-3.jpg",
-      imageAlt: "စိုင်းနေလင်း ရုပ်ပုံ",
-    },
-    {
-      id: "author-thandar-win",
-      slug: "thandar-win",
-      name: "သန္တာဝင်း",
-      imageSrc: "/images/home/real/authors/author-4.jpg",
-      imageAlt: "သန္တာဝင်း ရုပ်ပုံ",
-    },
-    {
-      id: "author-aung-min",
-      slug: "aung-min",
-      name: "အောင်မင်း",
-      imageSrc: "/images/home/real/authors/author-5.jpg",
-      imageAlt: "အောင်မင်း ရုပ်ပုံ",
-    },
-    {
-      id: "author-nan-hnin",
-      slug: "nan-hnin",
-      name: "နန်းနှင်း",
-      imageSrc: "/images/home/real/authors/author-6.jpg",
-      imageAlt: "နန်းနှင်း ရုပ်ပုံ",
-    },
-  ],
-};
+async function getHomeAuthors(locale: Locale): Promise<AuthorItem[]> {
+  const response = await searchAuthors(locale, { limit: 24 });
+  return pickRandomItems(response.items, 6);
+}
 
 const mediaItemsByLocale: Record<Locale, MediaItem[]> = {
   en: [
@@ -517,7 +432,10 @@ const promoByLocale: Record<Locale, PromoBanner> = {
 };
 
 export async function getHomePageData(locale: Locale): Promise<HomePageData> {
-  const categories = await getHomeCategories(locale);
+  const [categories, authors] = await Promise.all([
+    getHomeCategories(locale),
+    getHomeAuthors(locale),
+  ]);
 
   return {
     navigation,
@@ -583,7 +501,7 @@ export async function getHomePageData(locale: Locale): Promise<HomePageData> {
       cartProductId: cartProductIdByHomeBookId[book.id] ?? `book:${book.id}`,
       slug: slugByHomeBookId[book.id] ?? book.id,
     })),
-    authors: authorsByLocale[locale],
+    authors,
     mediaItems: mediaItemsByLocale[locale],
     reviews: reviewsByLocale[locale],
     promo: promoByLocale[locale],
