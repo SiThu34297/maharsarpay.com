@@ -7,6 +7,123 @@
 
 ## Entries
 
+### 2026-04-16 - Inline Hover Zoom on Main Detail Photo (No Side Pane)
+
+- What changed:
+  - Removed separate side zoom preview pane from detail image interaction.
+  - Removed hover lens overlay.
+  - Updated zoom behavior to magnify directly inside the main photo on hover and follow cursor position.
+- Why it changed:
+  - To match requested behavior: zoom directly on the same photo without showing another preview container.
+- Files touched:
+  - `src/features/books/components/book-detail-image-preview.tsx`
+  - `src/styles/globals.css`
+  - `.plan/pages/books.md`
+- Notes:
+  - Multi-image grid selector remains unchanged and still controls the active photo.
+
+### 2026-04-16 - Multi-Image Grid View on Book Detail Preview
+
+- What changed:
+  - Extended book detail data with `galleryImages` array.
+  - Seeded each book detail with multiple gallery images for preview browsing.
+  - Updated detail preview to consume gallery image list (instead of single cover image).
+  - Switched preview selector from strip-style thumbnails to a multi-image grid view.
+- Why it changed:
+  - To support requested multiple image grid viewing in detail preview experience.
+- Files touched:
+  - `src/features/books/schemas/books.ts`
+  - `src/features/books/server/books-adapter.ts`
+  - `src/features/books/components/book-detail-page.tsx`
+  - `src/styles/globals.css`
+  - `.plan/pages/books.md`
+- Notes:
+  - Active image still supports desktop hover zoom pane behavior.
+
+### 2026-04-16 - Alibaba-Style Book Image Preview with Zoom
+
+- What changed:
+  - Added interactive image preview component for book detail hero with:
+    - main image area
+    - thumbnail selector
+    - hover lens
+    - desktop zoom preview pane
+  - Wired book detail hero to use the new zoomable preview component.
+  - Added detail image preview styles for desktop zoom behavior and mobile-safe fallback.
+- Why it changed:
+  - To match requested Alibaba-like product image inspection experience.
+- Files touched:
+  - `src/features/books/components/book-detail-image-preview.tsx`
+  - `src/features/books/components/book-detail-page.tsx`
+  - `src/styles/globals.css`
+  - `.plan/pages/books.md`
+- Notes:
+  - Zoom pane is enabled for pointer/hover desktop environments and degrades gracefully on touch devices.
+
+### 2026-04-15 - Remove Rating and Stock Text from Book Detail Hero
+
+- What changed:
+  - Removed star rating display (`★★★★★` + numeric value) from book detail hero section.
+  - Removed stock status badge text (`လက်ကျန်ရှိ` / `Out of Stock`) from book detail hero section.
+- Why it changed:
+  - To keep the detail hero cleaner and match latest UI requirement.
+- Files touched:
+  - `src/features/books/components/book-detail-page.tsx`
+  - `.plan/pages/books.md`
+- Notes:
+  - Book data model still retains `rating` and `inStock` fields for future use if needed.
+
+### 2026-04-15 - Source-Aware Breadcrumb on Book Detail
+
+- What changed:
+  - Updated book detail route to read `from` query source (`home` or `books`).
+  - Updated breadcrumb rendering:
+    - from Home -> `ပင်မ / <စာအုပ်အမည်>`
+    - from Books list -> `စာအုပ်များ / <စာအုပ်အမည်>`
+  - Updated books list card links to include `?from=books`.
+  - Updated related books links on detail page to preserve current breadcrumb source.
+- Why it changed:
+  - To make breadcrumb path reflect the actual entry context as requested.
+- Files touched:
+  - `src/app/[lang]/(marketing)/books/[slug]/page.tsx`
+  - `src/features/books/components/book-detail-page.tsx`
+  - `src/features/books/components/books-list-client.tsx`
+  - `.plan/pages/books.md`
+- Notes:
+  - Unknown/missing source falls back to books context.
+
+### 2026-04-15 - Book Detail Page V1 (Modern Layout + Dynamic Slug Route)
+
+- What changed:
+  - Added localized dynamic route for book details at `/:lang/books/[slug]`.
+  - Implemented dynamic metadata generation from book data for detail pages.
+  - Added modern detail layout including breadcrumb, hero cover + primary CTA, key metadata cards, and related books.
+  - Added slug-based linking from books list cards (image/title now navigate to detail).
+  - Extended books schemas/adapter with detail-safe fields (`slug`, `description`, `publishYear`, `pageCount`, `language`, `format`, `isbn`, `inStock`).
+  - Added new books adapter helpers for detail and recommendations:
+    - `getBookBySlug`
+    - `getRelatedBooks`
+  - Added new localized `bookDetail` dictionary contract for English and Myanmar.
+  - Added dedicated detail-page styling utilities in global styles.
+- Why it changed:
+  - To introduce a complete modern book detail experience while preserving existing books list behavior and shared marketing shell consistency.
+- Files touched:
+  - `src/app/[lang]/(marketing)/books/[slug]/page.tsx`
+  - `src/features/books/components/book-detail-page.tsx`
+  - `src/features/books/server/books-adapter.ts`
+  - `src/features/books/server/get-book-detail-page-data.ts`
+  - `src/features/books/schemas/books.ts`
+  - `src/features/books/components/books-list-client.tsx`
+  - `src/features/books/index.ts`
+  - `src/lib/i18n/types.ts`
+  - `src/lib/i18n/dictionaries/en.ts`
+  - `src/lib/i18n/dictionaries/my.ts`
+  - `src/styles/globals.css`
+  - `.plan/books-detail-plan.md`
+  - `.plan/pages/books.md`
+- Notes:
+  - Detail page data is still mock-seeded in the adapter and ready for future backend swap.
+
 ### 2026-04-15 - Revert Add-to-Cart CTA to Full Original Text
 
 - What changed:

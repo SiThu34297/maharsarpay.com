@@ -31,7 +31,18 @@ const cartProductIdByHomeBookId: Record<string, string> = {
   "book-8": "book:after-the-monsoon",
 };
 
-type HomeBookSeedItem = Omit<BookItem, "cartProductId">;
+const slugByHomeBookId: Record<string, string> = {
+  "book-1": "quiet-orchard",
+  "book-2": "golden-rain-in-bagan",
+  "book-3": "letters-from-inle",
+  "book-4": "stories-of-mandalay",
+  "book-5": "midnight-tea-house",
+  "book-6": "shan-hills-journal",
+  "book-7": "river-of-fireflies",
+  "book-8": "after-the-monsoon",
+};
+
+type HomeBookSeedItem = Omit<BookItem, "cartProductId" | "slug">;
 
 const booksByLocale: Record<Locale, HomeBookSeedItem[]> = {
   en: [
@@ -504,6 +515,7 @@ export async function getHomePageData(locale: Locale): Promise<HomePageData> {
     books: booksByLocale[locale].map((book) => ({
       ...book,
       cartProductId: cartProductIdByHomeBookId[book.id] ?? `book:${book.id}`,
+      slug: slugByHomeBookId[book.id] ?? book.id,
     })),
     authors: authorsByLocale[locale],
     mediaItems: mediaItemsByLocale[locale],

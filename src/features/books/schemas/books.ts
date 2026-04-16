@@ -1,5 +1,6 @@
 export type BookListItem = {
   id: string;
+  slug: string;
   cartProductId: string;
   title: string;
   author: string;
@@ -10,6 +11,20 @@ export type BookListItem = {
   rating: number;
   coverImageSrc: string;
   coverImageAlt: string;
+};
+
+export type BookDetail = BookListItem & {
+  description: string;
+  publishYear: number;
+  pageCount: number;
+  language: string;
+  format: string;
+  isbn: string;
+  inStock: boolean;
+  galleryImages: Array<{
+    src: string;
+    alt: string;
+  }>;
 };
 
 export type BookListQuery = {
@@ -44,4 +59,10 @@ export type BooksPageData = {
   initialResponse: BookListResponse;
   filterOptions: BookFilterOptions;
   initialQuery: BookListQuery;
+};
+
+export type BookDetailPageData = {
+  book: BookDetail;
+  relatedBooks: BookListItem[];
+  filterOptions: BookFilterOptions;
 };

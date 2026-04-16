@@ -324,7 +324,10 @@ export function BooksListClient({
               {items.map((book) => {
                 return (
                   <article key={book.id} className="book-list-card">
-                    <div className="relative overflow-hidden rounded-xl">
+                    <Link
+                      href={`/${locale}/books/${book.slug}?from=books`}
+                      className="relative block overflow-hidden rounded-xl"
+                    >
                       <Image
                         src={book.coverImageSrc}
                         alt={book.coverImageAlt}
@@ -333,10 +336,15 @@ export function BooksListClient({
                         className="h-[200px] w-full object-cover sm:h-[220px]"
                         sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                       />
-                    </div>
+                    </Link>
 
                     <h3 className="book-list-title mt-3 text-base text-[var(--color-text-main)] sm:text-lg">
-                      {book.title}
+                      <Link
+                        href={`/${locale}/books/${book.slug}?from=books`}
+                        className="hover:text-[var(--color-brand)]"
+                      >
+                        {book.title}
+                      </Link>
                     </h3>
                     <p className="mt-1 text-sm text-[var(--color-text-muted)]">{book.author}</p>
 

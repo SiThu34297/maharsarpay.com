@@ -74,6 +74,23 @@ export type Dictionary = {
     addedToWishlist: string;
     removeFilterLabel: string;
   };
+  bookDetail: {
+    breadcrumbLabel: string;
+    breadcrumbBooks: string;
+    byAuthorLabel: string;
+    ratingAriaLabel: string;
+    inStock: string;
+    outOfStock: string;
+    bookInfoLabel: string;
+    publishYearLabel: string;
+    pageCountLabel: string;
+    languageLabel: string;
+    formatLabel: string;
+    isbnLabel: string;
+    aboutThisBookLabel: string;
+    relatedBooksTitle: string;
+    viewAllBooks: string;
+  };
   authorsList: {
     title: string;
     description: string;

@@ -7,6 +7,34 @@
 
 ## Entries
 
+### 2026-04-15 - Home to Book Detail Breadcrumb Source
+
+- What changed:
+  - Updated home books cards (mobile + desktop image/title links) to include `?from=home` when opening detail routes.
+- Why it changed:
+  - To allow book detail breadcrumb to render Home-based context when user enters from homepage.
+- Files touched:
+  - `src/features/home/components/home-page.tsx`
+  - `.plan/pages/home.md`
+- Notes:
+  - Add-to-cart interactions remain unchanged.
+
+### 2026-04-15 - Home Books Cards Link to Detail Route
+
+- What changed:
+  - Added slug-based routing support to home page books data contract.
+  - Added home book slug mapping in server seed builder and returned `slug` with each home book item.
+  - Updated home books section cards (mobile carousel + desktop grid) so cover image and title link to `/:lang/books/[slug]`.
+- Why it changed:
+  - To let users open the new book detail page directly from the home page bestseller cards.
+- Files touched:
+  - `src/features/home/schemas/home.ts`
+  - `src/features/home/server/get-home-page-data.ts`
+  - `src/features/home/components/home-page.tsx`
+  - `.plan/pages/home.md`
+- Notes:
+  - Add-to-cart behavior on home cards remains unchanged.
+
 ### 2026-04-15 - Remove Rating Stars from Home Book Cards
 
 - What changed:

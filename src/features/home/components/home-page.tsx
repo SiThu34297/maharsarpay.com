@@ -133,14 +133,23 @@ export async function HomePage({ copy, locale }: HomePageProps) {
             <ul className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4">
               {data.books.map((book) => (
                 <li key={book.id} className="home-card min-w-[230px] snap-start">
-                  <Image
-                    src={book.imageSrc}
-                    alt={book.imageAlt}
-                    width={320}
-                    height={420}
-                    className="h-[220px] w-full rounded-xl object-cover"
-                  />
-                  <h3 className="mt-4 text-lg leading-snug">{book.title}</h3>
+                  <Link href={`/${locale}/books/${book.slug}?from=home`} className="block">
+                    <Image
+                      src={book.imageSrc}
+                      alt={book.imageAlt}
+                      width={320}
+                      height={420}
+                      className="h-[220px] w-full rounded-xl object-cover"
+                    />
+                  </Link>
+                  <h3 className="mt-4 text-lg leading-snug">
+                    <Link
+                      href={`/${locale}/books/${book.slug}?from=home`}
+                      className="hover:text-[var(--color-brand)]"
+                    >
+                      {book.title}
+                    </Link>
+                  </h3>
                   <p className="mt-1 text-sm text-[var(--color-text-muted)]">{book.author}</p>
                   <p className="mt-3 text-base font-semibold text-[var(--color-brand)]">
                     {formatPrice(locale, book.price)}
@@ -158,14 +167,23 @@ export async function HomePage({ copy, locale }: HomePageProps) {
           <div className="hidden gap-6 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {data.books.map((book) => (
               <article key={book.id} className="home-card">
-                <Image
-                  src={book.imageSrc}
-                  alt={book.imageAlt}
-                  width={320}
-                  height={420}
-                  className="h-[250px] w-full rounded-xl object-cover"
-                />
-                <h3 className="mt-4 text-xl leading-snug">{book.title}</h3>
+                <Link href={`/${locale}/books/${book.slug}?from=home`} className="block">
+                  <Image
+                    src={book.imageSrc}
+                    alt={book.imageAlt}
+                    width={320}
+                    height={420}
+                    className="h-[250px] w-full rounded-xl object-cover"
+                  />
+                </Link>
+                <h3 className="mt-4 text-xl leading-snug">
+                  <Link
+                    href={`/${locale}/books/${book.slug}?from=home`}
+                    className="hover:text-[var(--color-brand)]"
+                  >
+                    {book.title}
+                  </Link>
+                </h3>
                 <p className="mt-1 text-sm text-[var(--color-text-muted)]">{book.author}</p>
                 <div className="mt-3 flex items-center justify-between">
                   <p className="text-base font-semibold text-[var(--color-brand)]">

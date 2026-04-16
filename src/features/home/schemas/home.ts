@@ -20,6 +20,7 @@ export type CategoryItem = {
 
 export type BookItem = {
   id: string;
+  slug: string;
   cartProductId: string;
   title: string;
   author: string;
