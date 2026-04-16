@@ -2,6 +2,7 @@ import type { Locale } from "@/lib/i18n";
 
 import type {
   AppliedAuthorFilters,
+  AuthorDetail,
   AuthorListItem,
   AuthorListQuery,
   AuthorListResponse,
@@ -17,109 +18,224 @@ type LocalizedValue = {
   my: string;
 };
 
-type AuthorTemplate = {
-  name: LocalizedValue;
-  genre: LocalizedValue;
-  imageSrc: string;
-  imageAlt: LocalizedValue;
-};
-
 type SeedAuthor = {
   id: string;
+  slug: string;
   name: LocalizedValue;
-  genre: LocalizedValue;
+  genreId: string;
+  shortBio: LocalizedValue;
+  longBio: LocalizedValue;
   createdAt: string;
   imageSrc: string;
   imageAlt: LocalizedValue;
 };
 
-const authorTemplates: AuthorTemplate[] = [
+const seedAuthors: SeedAuthor[] = [
   {
+    id: "author-moe-nadi",
+    slug: "moe-nadi",
     name: { en: "Moe Nadi", my: "မိုးနဒီ" },
-    genre: { en: "Literary Fiction", my: "စာပေရေးရာဝတ္ထု" },
+    genreId: "fiction",
+    shortBio: {
+      en: "Moe Nadi writes reflective novels about family memory and second chances.",
+      my: "မိုးနဒီသည် မိသားစုမှတ်ဉာဏ်နှင့် အသစ်ပြန်စတင်မှုအကြောင်း အတွေးအမြင်ပါတဲ့ ဝတ္ထုများရေးသားသူဖြစ်သည်။",
+    },
+    longBio: {
+      en: "Known for elegant prose and emotionally layered characters, Moe Nadi explores how ordinary people rebuild their lives after difficult seasons. Her work blends intimate family stories with contemporary social themes and has become a favorite among young urban readers.",
+      my: "ချောမွေ့လှပသည့် စာသားပုံစံနှင့် စိတ်ခံစားမှုနက်ရှိုင်းသော ဇာတ်ကောင်ဖန်တီးမှုများကြောင့် လူသိများသော မိုးနဒီ၏လက်ရာများတွင် ခက်ခဲသောကာလများနောက် လူများသည် ဘဝကို မည်သို့ ပြန်လည်တည်ဆောက်သည်ကို ဖော်ပြထားသည်။ မိသားစုအတွင်းကျသော ပုံပြင်များနှင့် ခေတ်ပြိုင်လူမှုရေးအကြောင်းအရာများကို ထိရောက်စွာ ချိတ်ဆက်တင်ပြနိုင်သောကြောင့် မြို့ပြလူငယ်စာဖတ်သူများကြား လူကြိုက်များသည်။",
+    },
+    createdAt: new Date(Date.UTC(2026, 2, 31)).toISOString(),
     imageSrc: "/images/home/real/authors/author-1.jpg",
     imageAlt: { en: "Portrait of Moe Nadi", my: "မိုးနဒီ ရုပ်ပုံ" },
   },
   {
+    id: "author-khin-aye",
+    slug: "khin-aye",
     name: { en: "Khin Aye", my: "ခင်အေး" },
-    genre: { en: "Historical Fiction", my: "သမိုင်းနောက်ခံဝတ္ထု" },
+    genreId: "history",
+    shortBio: {
+      en: "Khin Aye brings archival history to life through vivid storytelling.",
+      my: "ခင်အေးသည် သမိုင်းမှတ်တမ်းများကို အသက်ဝင်သောပုံပြင်များအဖြစ် ဖန်တီးတင်ပြနိုင်သူဖြစ်သည်။",
+    },
+    longBio: {
+      en: "Blending field research, oral narratives, and careful historical context, Khin Aye creates stories that feel both cinematic and grounded. Her writing is often used in reading clubs that focus on Myanmar heritage and place-based memory.",
+      my: "လက်တွေ့သုတေသန၊ ပါးစပ်ပြောမှတ်တမ်းများနှင့် သမိုင်းဆိုင်ရာနောက်ခံတည်ဆောက်မှုကို ပေါင်းစပ်အသုံးပြုပြီး ခင်အေးသည် ရုပ်ရှင်ဆန်သော်လည်း တည်ငြိမ်ယုံကြည်ရသော ပုံပြင်များ ဖန်တီးထားသည်။ မြန်မာ့အမွေအနှစ်နှင့် နေရာဆိုင်ရာမှတ်ဉာဏ်များကို အာရုံစိုက်သော စာဖတ်ကလပ်များတွင်လည်း ထင်ရှားစွာ ဖတ်ရှုခံရသည်။",
+    },
+    createdAt: new Date(Date.UTC(2026, 2, 30)).toISOString(),
     imageSrc: "/images/home/real/authors/author-2.jpg",
     imageAlt: { en: "Portrait of Khin Aye", my: "ခင်အေး ရုပ်ပုံ" },
   },
   {
+    id: "author-sai-nay-lin",
+    slug: "sai-nay-lin",
     name: { en: "Sai Nay Lin", my: "စိုင်းနေလင်း" },
-    genre: { en: "Travel Writing", my: "ခရီးသွားစာပေ" },
+    genreId: "travel",
+    shortBio: {
+      en: "Sai Nay Lin writes immersive travel narratives rooted in local voices.",
+      my: "စိုင်းနေလင်းသည် ဒေသခံအသံများကို အခြေခံထားသော ခရီးသွားပုံပြင်များရေးသားသူဖြစ်သည်။",
+    },
+    longBio: {
+      en: "From lakeside communities to mountain routes, Sai Nay Lin documents travel as a way of listening. His essays and letters highlight food, craft, language, and everyday rhythm, helping readers see places through people rather than postcards.",
+      my: "ရေကန်ကမ်းရွာများမှ တောင်ပေါ်လမ်းကြောင်းများအထိ စိုင်းနေလင်းသည် ခရီးသွားခြင်းကို နားထောင်သိမြင်သည့် လုပ်ငန်းစဉ်တစ်ခုအဖြစ် မှတ်တမ်းတင်သည်။ အစားအစာ၊ လက်မှု၊ ဘာသာစကားနှင့် နေ့စဉ်ဘဝရစ်သမ်တို့ကို ထင်ဟပ်စေသော သူ၏စာများကြောင့် စာဖတ်သူများသည် နေရာကို postcard မဟုတ်ဘဲ လူများမှတဆင့် နားလည်နိုင်လာသည်။",
+    },
+    createdAt: new Date(Date.UTC(2026, 2, 29)).toISOString(),
     imageSrc: "/images/home/real/authors/author-3.jpg",
     imageAlt: { en: "Portrait of Sai Nay Lin", my: "စိုင်းနေလင်း ရုပ်ပုံ" },
   },
   {
+    id: "author-thandar-win",
+    slug: "thandar-win",
     name: { en: "Thandar Win", my: "သန္တာဝင်း" },
-    genre: { en: "Essays", my: "ဆောင်းပါးများ" },
+    genreId: "essays",
+    shortBio: {
+      en: "Thandar Win captures urban culture through clear, thoughtful essays.",
+      my: "သန္တာဝင်းသည် မြို့ပြယဉ်ကျေးမှုကို ရှင်းလင်းစဉ်းစားထားသော ဆောင်းပါးများဖြင့် ဖော်ပြသည်။",
+    },
+    longBio: {
+      en: "Her essays focus on neighborhoods, conversations, and the changing social atmosphere of contemporary Myanmar cities. Readers value her balanced tone and close observation of ordinary details that often go unnoticed.",
+      my: "သန္တာဝင်း၏ ဆောင်းပါးများတွင် မြို့ရပ်ကွက်များ၊ လူမှုဆက်ဆံရေးစကားဝိုင်းများနှင့် ခေတ်ပြိုင်မြို့ပြလူမှုအခြေအနေပြောင်းလဲမှုများကို အဓိကထားရေးသားထားသည်။ သာမန်ဖြစ်စဉ်အသေးစိတ်များကို သတိထားမြင်နိုင်သော သူမ၏အသံကြောင့် စာဖတ်သူများကြား ယုံကြည်မှုမြင့်မားသည်။",
+    },
+    createdAt: new Date(Date.UTC(2026, 2, 28)).toISOString(),
     imageSrc: "/images/home/real/authors/author-4.jpg",
     imageAlt: { en: "Portrait of Thandar Win", my: "သန္တာဝင်း ရုပ်ပုံ" },
   },
   {
+    id: "author-aung-min",
+    slug: "aung-min",
     name: { en: "Aung Min", my: "အောင်မင်း" },
-    genre: { en: "Mystery", my: "လျှို့ဝှက်ဆန်းကြယ်" },
+    genreId: "mystery",
+    shortBio: {
+      en: "Aung Min crafts suspense-driven stories set in familiar local spaces.",
+      my: "အောင်မင်းသည် နေ့စဉ်ပတ်ဝန်းကျင်များအတွင်း စိတ်လှုပ်ရှားဖွယ် လျှို့ဝှက်ဇာတ်လမ်းများရေးသားသူဖြစ်သည်။",
+    },
+    longBio: {
+      en: "Best known for tightly paced plotting and atmospheric settings, Aung Min builds mysteries around tea shops, neighborhoods, and small-town rumor networks. His books are popular with readers who enjoy fast-moving, clue-based narratives.",
+      my: "မြန်ဆန်တိကျသော ဇာတ်လမ်းလှည့်ကွက်များနှင့် လေထုဖန်တီးနိုင်မှုကြောင့် လူသိများသော အောင်မင်းသည် လက်ဖက်ရည်ဆိုင်များ၊ ရပ်ကွက်များနှင့် မြို့ငယ်သတင်းလွှင့်ကွန်ယက်များကို အခြေခံ၍ လျှို့ဝှက်ဇာတ်လမ်းတည်ဆောက်သည်။ သဲလွန်စအခြေပြု စိတ်ဝင်စားဖွယ် ဇာတ်ကြောင်းများနှစ်သက်သူများအတွက် အထူးလူကြိုက်များသည်။",
+    },
+    createdAt: new Date(Date.UTC(2026, 2, 27)).toISOString(),
     imageSrc: "/images/home/real/authors/author-5.jpg",
     imageAlt: { en: "Portrait of Aung Min", my: "အောင်မင်း ရုပ်ပုံ" },
   },
   {
+    id: "author-nan-hnin",
+    slug: "nan-hnin",
     name: { en: "Nan Hnin", my: "နန်းနှင်း" },
-    genre: { en: "Poetry", my: "ကဗျာ" },
+    genreId: "poetry",
+    shortBio: {
+      en: "Nan Hnin's poetry blends mountain landscapes with intimate emotion.",
+      my: "နန်းနှင်း၏ ကဗျာများတွင် တောင်တန်းရှုခင်းနှင့် အတွင်းစိတ်ခံစားချက်များ ပေါင်းစပ်လျက်ရှိသည်။",
+    },
+    longBio: {
+      en: "Writing in both short free verse and long narrative poems, Nan Hnin explores longing, belonging, and resilience. Her readings are frequently featured in youth literary programs and community poetry circles.",
+      my: "လွတ်လပ်ကဗျာတိုများနှင့် ဇာတ်ကြောင်းပါကဗျာရှည်များ နှစ်မျိုးစလုံးဖြင့် နန်းနှင်းသည် အလွမ်း၊ အမှီအခိုခံစားချက်နှင့် သန်မာမှုတို့ကို ရေးသားဖော်ထုတ်သည်။ လူငယ်စာပေအစီအစဉ်များနှင့် ရပ်ရွာကဗျာဝိုင်းများတွင်လည်း မကြာခဏ ဖိတ်ခေါ်ဖတ်ရှုခံရသည်။",
+    },
+    createdAt: new Date(Date.UTC(2026, 2, 26)).toISOString(),
     imageSrc: "/images/home/real/authors/author-6.jpg",
     imageAlt: { en: "Portrait of Nan Hnin", my: "နန်းနှင်း ရုပ်ပုံ" },
   },
   {
+    id: "author-kyaw-zeya",
+    slug: "kyaw-zeya",
     name: { en: "Kyaw Zeya", my: "ကျော်ဇေယျ" },
-    genre: { en: "Romance", my: "အချစ်ဝတ္ထု" },
+    genreId: "romance",
+    shortBio: {
+      en: "Kyaw Zeya writes heartfelt romance centered on river-town life.",
+      my: "ကျော်ဇေယျသည် မြစ်ကမ်းမြို့ဘဝနောက်ခံပါသော အနူးညံ့အချစ်ဝတ္ထုများရေးသားသူဖြစ်သည်။",
+    },
+    longBio: {
+      en: "His stories are known for warm dialogue, grounded relationships, and memorable supporting characters. Kyaw Zeya often writes about choices people make between duty and desire.",
+      my: "သူ၏ ဝတ္ထုများတွင် အပြန်အလှန်စကားပြောသဘာဝ၊ ယုံကြည်စိတ်ချရသော ဆက်ဆံရေးများနှင့် မမေ့နိုင်သော အရန်ဇာတ်ကောင်များကြောင့် ထင်ရှားသည်။ တာဝန်နှင့် ဆန္ဒကြား ရွေးချယ်မှုများကိုလည်း မကြာခဏ ထည့်သွင်းဖော်ပြသည်။",
+    },
+    createdAt: new Date(Date.UTC(2026, 2, 25)).toISOString(),
     imageSrc: "/images/home/real/authors/author-1.jpg",
     imageAlt: { en: "Portrait of Kyaw Zeya", my: "ကျော်ဇေယျ ရုပ်ပုံ" },
   },
   {
+    id: "author-may-thu",
+    slug: "may-thu",
     name: { en: "May Thu", my: "မေသူ" },
-    genre: { en: "Personal Growth", my: "ကိုယ်တိုးတက်ရေး" },
+    genreId: "self-development",
+    shortBio: {
+      en: "May Thu writes practical books on focus, habits, and resilience.",
+      my: "မေသူသည် အာရုံစူးစိုက်မှု၊ အလေ့အကျင့်နှင့် သန်မာမှုဆိုင်ရာ လက်တွေ့ကျစာအုပ်များရေးသားသူဖြစ်သည်။",
+    },
+    longBio: {
+      en: "With a background in mentoring and workplace learning, May Thu turns complex self-development concepts into simple routines readers can apply immediately. Her writing style is direct, calm, and action-oriented.",
+      my: "အလုပ်ခွင်လေ့လာရေးနှင့် မျှဝေသင်ကြားမှုနောက်ခံရှိသော မေသူသည် ကိုယ်တိုးတက်ရေးအကြောင်းအရာများကို နေ့စဉ်အသုံးချနိုင်သည့် နည်းလမ်းလွယ်များအဖြစ် ပြောင်းလဲဖော်ပြသည်။ သူမ၏ရေးနည်းမှာ တိုက်ရိုက်၊ တည်ငြိမ်ပြီး လုပ်ဆောင်နိုင်မှုကို အဓိကထားသည်။",
+    },
+    createdAt: new Date(Date.UTC(2026, 2, 24)).toISOString(),
     imageSrc: "/images/home/real/authors/author-2.jpg",
     imageAlt: { en: "Portrait of May Thu", my: "မေသူ ရုပ်ပုံ" },
   },
   {
+    id: "author-hnin-ei",
+    slug: "hnin-ei",
     name: { en: "Hnin Ei", my: "နှင်းအိ" },
-    genre: { en: "Children's Literature", my: "ကလေးစာပေ" },
+    genreId: "children",
+    shortBio: {
+      en: "Hnin Ei creates warm, imaginative stories for young readers.",
+      my: "နှင်းအိသည် ကလေးစာဖတ်သူများအတွက် စိတ်ကူးယဉ်အပြည့်ရှိသော ပုံပြင်များရေးသားသည်။",
+    },
+    longBio: {
+      en: "From bedtime tales to early-reader adventures, Hnin Ei focuses on kindness, curiosity, and family connection. Her books are often recommended by teachers for bilingual reading sessions.",
+      my: "အိပ်ရာဝင်ပုံပြင်များမှ စာဖတ်လေ့လာစကလေးများအတွက် စွန့်စားခန်းဇာတ်လမ်းများအထိ နှင်းအိသည် ကြင်နာမှု၊ စူးစမ်းလိုစိတ်နှင့် မိသားစုချိတ်ဆက်မှုကို အဓိကထားရေးသားသည်။ နှစ်ဘာသာဖြင့် ဖတ်ရှုလေ့ကျင့်ခန်းများအတွက် ဆရာ၊ဆရာမများက မကြာခဏ အကြံပြုကြသည်။",
+    },
+    createdAt: new Date(Date.UTC(2026, 2, 23)).toISOString(),
     imageSrc: "/images/home/real/authors/author-3.jpg",
     imageAlt: { en: "Portrait of Hnin Ei", my: "နှင်းအိ ရုပ်ပုံ" },
   },
   {
+    id: "author-ye-min-thu",
+    slug: "ye-min-thu",
     name: { en: "Ye Min Thu", my: "ရဲမင်းသူ" },
-    genre: { en: "Biography", my: "အတ္ထုပ္ပတ္တိ" },
+    genreId: "biography",
+    shortBio: {
+      en: "Ye Min Thu profiles influential figures from arts and civic life.",
+      my: "ရဲမင်းသူသည် အနုပညာနှင့် လူမှုဘဝထင်ရှားသူများအကြောင်း ရေးသားသူဖြစ်သည်။",
+    },
+    longBio: {
+      en: "His biographies combine interviews, archival materials, and field notes to present nuanced portraits of modern Myanmar personalities. Readers appreciate the clarity and balance in his narrative approach.",
+      my: "အင်တာဗျူးများ၊ မှတ်တမ်းအထောက်အထားများနှင့် လက်တွေ့မှတ်စုများကို ပေါင်းစပ်အသုံးပြုကာ ရဲမင်းသူသည် ခေတ်သစ်မြန်မာထင်ရှားသူများ၏ ဘက်စုံပုံရိပ်များကို ထင်ရှားစွာ တင်ဆက်သည်။ သူ၏ ရေးသားပုံတွင် ရှင်းလင်းမှုနှင့် ညီမျှမှုရှိသောကြောင့် စာဖတ်သူများက နှစ်သက်ကြသည်။",
+    },
+    createdAt: new Date(Date.UTC(2026, 2, 22)).toISOString(),
     imageSrc: "/images/home/real/authors/author-4.jpg",
     imageAlt: { en: "Portrait of Ye Min Thu", my: "ရဲမင်းသူ ရုပ်ပုံ" },
   },
   {
+    id: "author-zar-chi",
+    slug: "zar-chi",
     name: { en: "Zar Chi", my: "ဇာခြည်" },
-    genre: { en: "Contemporary Fiction", my: "ခေတ်ပြိုင်ဝတ္ထု" },
+    genreId: "contemporary-fiction",
+    shortBio: {
+      en: "Zar Chi explores modern relationships and identity in city life.",
+      my: "ဇာခြည်သည် မြို့ပြဘဝအတွင်း ဆက်ဆံရေးနှင့် ကိုယ်ပိုင်အတ္တအကြောင်းကို ရေးသားသည်။",
+    },
+    longBio: {
+      en: "Her contemporary fiction examines friendship, ambition, and social pressure among young professionals. Zar Chi is recognized for dialogue-rich scenes and emotionally precise character work.",
+      my: "ဇာခြည်၏ ခေတ်ပြိုင်ဝတ္ထုများတွင် လူငယ်အလုပ်ခွင်ပတ်ဝန်းကျင်အတွင်း မိတ်ဆွေမှု၊ ရည်မှန်းချက်နှင့် လူမှုဖိအားများကို စူးစမ်းတင်ပြထားသည်။ စကားပြောပုံစံအသက်ဝင်မှုနှင့် ဇာတ်ကောင်စိတ်ခံစားချက်တိကျမှုအတွက် လူသိများသည်။",
+    },
+    createdAt: new Date(Date.UTC(2026, 2, 21)).toISOString(),
     imageSrc: "/images/home/real/authors/author-5.jpg",
     imageAlt: { en: "Portrait of Zar Chi", my: "ဇာခြည် ရုပ်ပုံ" },
   },
   {
+    id: "author-phyo-sandar",
+    slug: "phyo-sandar",
     name: { en: "Phyo Sandar", my: "ဖြိုးစန္ဒာ" },
-    genre: { en: "Social Commentary", my: "လူမှုရေးသုံးသပ်ချက်" },
+    genreId: "social-commentary",
+    shortBio: {
+      en: "Phyo Sandar writes sharp commentary on social change and culture.",
+      my: "ဖြိုးစန္ဒာသည် လူမှုရေးပြောင်းလဲမှုနှင့် ယဉ်ကျေးမှုအကြောင်း ချွန်ထက်စွာ သုံးသပ်ရေးသားသည်။",
+    },
+    longBio: {
+      en: "Covering education, media, and civic participation, Phyo Sandar's essays connect daily headlines with long-term social patterns. Her pieces are widely shared in discussion groups and reading communities.",
+      my: "ပညာရေး၊ မီဒီယာနှင့် လူမှုဝင်ရောက်ပါဝင်မှုအကြောင်းကို လေ့လာရေးသားသည့် ဖြိုးစန္ဒာ၏ ဆောင်းပါးများသည် နေ့စဉ်သတင်းများကို ရေရှည်လူမှုရုပ်ပုံများနှင့် ချိတ်ဆက်တင်ပြနိုင်သည်။ စာဖတ်အသိုင်းအဝိုင်းနှင့် ဆွေးနွေးဝိုင်းများတွင် အများအပြား မျှဝေဖတ်ရှုကြသည်။",
+    },
+    createdAt: new Date(Date.UTC(2026, 2, 20)).toISOString(),
     imageSrc: "/images/home/real/authors/author-6.jpg",
     imageAlt: { en: "Portrait of Phyo Sandar", my: "ဖြိုးစန္ဒာ ရုပ်ပုံ" },
   },
 ];
-
-const seedAuthors: SeedAuthor[] = Array.from({ length: 36 }, (_, index) => {
-  const template = authorTemplates[index % authorTemplates.length];
-
-  return {
-    id: `author-list-${index + 1}`,
-    name: template.name,
-    genre: template.genre,
-    createdAt: new Date(Date.UTC(2026, 2, 31 - index)).toISOString(),
-    imageSrc: template.imageSrc,
-    imageAlt: template.imageAlt,
-  };
-});
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
@@ -149,6 +265,10 @@ function normalizeQuery(query: Partial<AuthorListQuery>): AuthorListQuery {
   };
 }
 
+function normalizeSlug(value: string) {
+  return value.trim().toLowerCase();
+}
+
 function toUrlSearchParams(raw: RawSearchParams): URLSearchParams {
   const params = new URLSearchParams();
 
@@ -170,12 +290,21 @@ function toUrlSearchParams(raw: RawSearchParams): URLSearchParams {
   return params;
 }
 
-function toLocalizedAuthor(locale: Locale, author: SeedAuthor): AuthorListItem {
+function toLocalizedAuthorListItem(locale: Locale, author: SeedAuthor): AuthorListItem {
   return {
     id: author.id,
+    slug: author.slug,
     name: author.name[locale],
     imageSrc: author.imageSrc,
     imageAlt: author.imageAlt[locale],
+  };
+}
+
+function toLocalizedAuthorDetail(locale: Locale, author: SeedAuthor): AuthorDetail {
+  return {
+    ...toLocalizedAuthorListItem(locale, author),
+    shortBio: author.shortBio[locale],
+    longBio: author.longBio[locale],
   };
 }
 
@@ -203,6 +332,50 @@ export function normalizeAuthorListQuery(query: Partial<AuthorListQuery>): Autho
   return normalizeQuery(query);
 }
 
+export async function getAuthorBySlug(locale: Locale, slug: string): Promise<AuthorDetail | null> {
+  const normalizedSlug = normalizeSlug(slug);
+  const author = seedAuthors.find((seedAuthor) => seedAuthor.slug === normalizedSlug);
+
+  if (!author) {
+    return null;
+  }
+
+  return toLocalizedAuthorDetail(locale, author);
+}
+
+export async function getRelatedAuthors(
+  locale: Locale,
+  currentAuthorId: string,
+  limit = 6,
+): Promise<AuthorListItem[]> {
+  const currentAuthor = seedAuthors.find((seedAuthor) => seedAuthor.id === currentAuthorId);
+
+  if (!currentAuthor) {
+    return [];
+  }
+
+  const safeLimit = clamp(limit, 1, 12);
+  const sameGenre = seedAuthors
+    .filter(
+      (seedAuthor) =>
+        seedAuthor.id !== currentAuthor.id && seedAuthor.genreId === currentAuthor.genreId,
+    )
+    .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime())
+    .map((seedAuthor) => toLocalizedAuthorListItem(locale, seedAuthor));
+
+  if (sameGenre.length >= safeLimit) {
+    return sameGenre.slice(0, safeLimit);
+  }
+
+  const excludedIds = new Set([currentAuthor.id, ...sameGenre.map((author) => author.id)]);
+  const fallbackAuthors = seedAuthors
+    .filter((seedAuthor) => !excludedIds.has(seedAuthor.id))
+    .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime())
+    .map((seedAuthor) => toLocalizedAuthorListItem(locale, seedAuthor));
+
+  return [...sameGenre, ...fallbackAuthors].slice(0, safeLimit);
+}
+
 export async function searchAuthors(
   locale: Locale,
   queryInput: Partial<AuthorListQuery>,
@@ -226,7 +399,7 @@ export async function searchAuthors(
   const offset = Number(query.cursor ?? "0");
   const safeOffset = Number.isFinite(offset) && offset >= 0 ? offset : 0;
   const pageItems = sorted.slice(safeOffset, safeOffset + query.limit);
-  const items = pageItems.map((author) => toLocalizedAuthor(locale, author));
+  const items = pageItems.map((author) => toLocalizedAuthorListItem(locale, author));
   const nextOffset = safeOffset + items.length;
   const nextCursor = nextOffset < sorted.length ? String(nextOffset) : null;
 

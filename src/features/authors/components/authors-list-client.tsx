@@ -285,7 +285,10 @@ export function AuthorsListClient({
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-3 xl:grid-cols-4">
               {items.map((author) => (
                 <article key={author.id} className="book-list-card">
-                  <div className="relative overflow-hidden rounded-xl">
+                  <Link
+                    href={`/${locale}/authors/${author.slug}?from=authors`}
+                    className="relative block overflow-hidden rounded-xl"
+                  >
                     <Image
                       src={author.imageSrc}
                       alt={author.imageAlt}
@@ -294,10 +297,12 @@ export function AuthorsListClient({
                       className="h-[220px] w-full object-cover"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
                     />
-                  </div>
+                  </Link>
 
                   <h2 className="mt-3 text-lg font-semibold text-[var(--color-text-main)]">
-                    {author.name}
+                    <Link href={`/${locale}/authors/${author.slug}?from=authors`}>
+                      {author.name}
+                    </Link>
                   </h2>
                 </article>
               ))}

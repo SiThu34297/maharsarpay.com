@@ -424,6 +424,20 @@ export async function getBookBySlug(locale: Locale, slug: string): Promise<BookD
   return toLocalizedBookDetail(locale, book);
 }
 
+export async function getBooksByAuthor(
+  locale: Locale,
+  authorId: string,
+  limit = 8,
+): Promise<BookListItem[]> {
+  const safeLimit = clamp(limit, 1, 24);
+
+  return seedBooks
+    .filter((seedBook) => seedBook.authorId === authorId)
+    .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime())
+    .slice(0, safeLimit)
+    .map((seedBook) => toLocalizedBook(locale, seedBook));
+}
+
 export async function getRelatedBooks(
   locale: Locale,
   currentBook: Pick<BookListItem, "id" | "categoryId">,

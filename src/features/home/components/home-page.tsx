@@ -207,15 +207,23 @@ export async function HomePage({ copy, locale }: HomePageProps) {
             <ul className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4">
               {data.authors.map((author) => (
                 <li key={author.id} className="home-card min-w-[200px] snap-start text-center">
-                  <Image
-                    src={author.imageSrc}
-                    alt={author.imageAlt}
-                    width={152}
-                    height={152}
-                    className="mx-auto h-[120px] w-[120px] rounded-full border border-[var(--color-border)] object-cover"
-                  />
-                  <h3 className="mt-4 text-lg">{author.name}</h3>
-                  <p className="mt-1 text-sm text-[var(--color-text-muted)]">{author.genre}</p>
+                  <Link href={`/${locale}/authors/${author.slug}?from=home`} className="block">
+                    <Image
+                      src={author.imageSrc}
+                      alt={author.imageAlt}
+                      width={152}
+                      height={152}
+                      className="mx-auto h-[120px] w-[120px] rounded-full border border-[var(--color-border)] object-cover"
+                    />
+                  </Link>
+                  <h3 className="mt-4 text-lg">
+                    <Link
+                      href={`/${locale}/authors/${author.slug}?from=home`}
+                      className="hover:text-[var(--color-brand)]"
+                    >
+                      {author.name}
+                    </Link>
+                  </h3>
                 </li>
               ))}
             </ul>
@@ -224,15 +232,23 @@ export async function HomePage({ copy, locale }: HomePageProps) {
           <div className="hidden gap-5 md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
             {data.authors.map((author) => (
               <article key={author.id} className="home-card text-center">
-                <Image
-                  src={author.imageSrc}
-                  alt={author.imageAlt}
-                  width={160}
-                  height={160}
-                  className="mx-auto h-[124px] w-[124px] rounded-full border border-[var(--color-border)] object-cover"
-                />
-                <h3 className="mt-4 text-lg">{author.name}</h3>
-                <p className="mt-1 text-sm text-[var(--color-text-muted)]">{author.genre}</p>
+                <Link href={`/${locale}/authors/${author.slug}?from=home`} className="block">
+                  <Image
+                    src={author.imageSrc}
+                    alt={author.imageAlt}
+                    width={160}
+                    height={160}
+                    className="mx-auto h-[124px] w-[124px] rounded-full border border-[var(--color-border)] object-cover"
+                  />
+                </Link>
+                <h3 className="mt-4 text-lg">
+                  <Link
+                    href={`/${locale}/authors/${author.slug}?from=home`}
+                    className="hover:text-[var(--color-brand)]"
+                  >
+                    {author.name}
+                  </Link>
+                </h3>
               </article>
             ))}
           </div>

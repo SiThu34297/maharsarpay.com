@@ -108,6 +108,22 @@ export const myDictionary: Dictionary = {
     retry: "ထပ်စမ်းမည်",
     removeFilterLabel: "စစ်ထုတ်မှု ဖယ်ရှားမည်",
   },
+  authorDetail: {
+    breadcrumbLabel: "စာရေးသူ လမ်းကြောင်း",
+    breadcrumbAuthors: "စာရေးသူများ",
+    viewBooksCta: "ဤစာရေးသူ၏ စာအုပ်များ ကြည့်မည်",
+    aboutTitle: "စာရေးသူအကြောင်း",
+    authoredBooksTitle: "ဤစာရေးသူ၏ လက်ရာများ",
+    authoredBooksDescription:
+      "မဟာစာပေတွင် လက်ရှိရရှိနိုင်သော စာအုပ်များကို ရွေးချယ်ကြည့်ရှုနိုင်ပါသည်။",
+    viewAllBooks: "စာအုပ်အားလုံး ကြည့်မည်",
+    noBooksTitle: "လက်ရှိ စာအုပ်မရှိသေးပါ",
+    noBooksDescription:
+      "စာရေးသူပရိုဖိုင်ကို ပြင်ဆင်ပြီးဖြစ်ပြီး စာအုပ်စာရင်းများကို မကြာမီ ထည့်သွင်းပါမည်။",
+    browseBooks: "စာအုပ်များ ကြည့်မည်",
+    relatedAuthorsTitle: "ဆက်စပ်စာရေးသူများ",
+    viewAllAuthors: "စာရေးသူအားလုံး ကြည့်မည်",
+  },
   multimediaList: {
     heroBadge: "တည်းဖြတ်မီဒီယာအခန်း",
     title: "မီဒီယာပုံပြင်များ",

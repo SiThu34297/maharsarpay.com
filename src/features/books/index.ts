@@ -3,6 +3,7 @@ export { BookDetailPage } from "./components/book-detail-page";
 export {
   getBookFilterOptions,
   getBookBySlug,
+  getBooksByAuthor,
   getRelatedBooks,
   normalizeBookListQuery,
   parseBookListQueryFromObject,

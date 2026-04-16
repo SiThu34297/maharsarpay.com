@@ -106,6 +106,20 @@ export type Dictionary = {
     retry: string;
     removeFilterLabel: string;
   };
+  authorDetail: {
+    breadcrumbLabel: string;
+    breadcrumbAuthors: string;
+    viewBooksCta: string;
+    aboutTitle: string;
+    authoredBooksTitle: string;
+    authoredBooksDescription: string;
+    viewAllBooks: string;
+    noBooksTitle: string;
+    noBooksDescription: string;
+    browseBooks: string;
+    relatedAuthorsTitle: string;
+    viewAllAuthors: string;
+  };
   multimediaList: {
     heroBadge: string;
     title: string;

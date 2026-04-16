@@ -32,8 +32,8 @@ export type BookItem = {
 
 export type AuthorItem = {
   id: string;
+  slug: string;
   name: string;
-  genre: string;
   imageSrc: string;
   imageAlt: string;
 };
