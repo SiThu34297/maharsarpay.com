@@ -257,11 +257,6 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                       author.bookCount,
                     )}
                   </p>
-                  {author.note ? (
-                    <p className="mt-2 line-clamp-2 text-sm text-[var(--color-text-muted)]">
-                      {author.note}
-                    </p>
-                  ) : null}
                 </li>
               ))}
             </ul>
@@ -290,11 +285,6 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                 <p className="mt-1 text-xs font-semibold text-[var(--color-brand)]">
                   {formatAuthorBookCount(copy.authors.bookCountTemplate, locale, author.bookCount)}
                 </p>
-                {author.note ? (
-                  <p className="mt-2 line-clamp-3 text-sm text-[var(--color-text-muted)]">
-                    {author.note}
-                  </p>
-                ) : null}
               </article>
             ))}
           </div>

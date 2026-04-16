@@ -121,7 +121,7 @@ export function MarketingMobileHeader({
             : "pointer-events-none grid-rows-[0fr] opacity-0"
         }`}
       >
-        <div className="overflow-hidden border-t border-[var(--color-border)] bg-white">
+        <div className="overflow-hidden border-t border-[var(--color-border)] bg-[var(--color-card-bg)]">
           <nav
             id={mobileMenuId}
             aria-label={copy.header.desktopNavigationLabel}

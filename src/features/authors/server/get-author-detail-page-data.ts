@@ -18,7 +18,7 @@ export async function getAuthorDetailPageData(
 
   const [authoredBooks, relatedAuthors, filterOptions] = await Promise.all([
     getBooksByAuthor(locale, author.id, 8, { authorName: author.name }),
-    getRelatedAuthors(locale, author.id, 6),
+    getRelatedAuthors(locale, author.id, 4),
     getBookFilterOptions(locale),
   ]);
 

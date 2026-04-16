@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import sanitizeHtml from "sanitize-html";
 
 import {
   MarketingSiteFooter,
@@ -18,6 +19,44 @@ type AuthorDetailPageProps = Readonly<{
   breadcrumbSource: "home" | "authors";
 }>;
 
+const AUTHOR_BIO_ALLOWED_TAGS = [
+  "p",
+  "br",
+  "strong",
+  "em",
+  "b",
+  "i",
+  "u",
+  "ul",
+  "ol",
+  "li",
+  "blockquote",
+  "h3",
+  "h4",
+  "a",
+] as const;
+
+function toPlainText(value: string): string {
+  return sanitizeHtml(value, {
+    allowedTags: [],
+    allowedAttributes: {},
+  })
+    .replaceAll(/\s+/g, " ")
+    .trim();
+}
+
+function toSafeRichTextHtml(value: string): string {
+  return sanitizeHtml(value, {
+    allowedTags: [...AUTHOR_BIO_ALLOWED_TAGS],
+    allowedAttributes: {
+      a: ["href", "target", "rel"],
+    },
+    allowedSchemes: ["http", "https", "mailto", "tel"],
+    allowedSchemesAppliedToAttributes: ["href"],
+    disallowedTagsMode: "discard",
+  }).trim();
+}
+
 function formatPrice(locale: Locale, value: number) {
   if (locale === "my") {
     return `${new Intl.NumberFormat("my-MM", {
@@ -30,6 +69,12 @@ function formatPrice(locale: Locale, value: number) {
   }).format(value)}`;
 }
 
+function formatCount(locale: Locale, value: number) {
+  return new Intl.NumberFormat(locale === "my" ? "my-MM" : "en-US", {
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
 export function AuthorDetailPage({ copy, locale, data, breadcrumbSource }: AuthorDetailPageProps) {
   const isMyanmar = locale === "my";
   const navigation = getMarketingNavigation(locale);
@@ -38,6 +83,10 @@ export function AuthorDetailPage({ copy, locale, data, breadcrumbSource }: Autho
     href: `/${locale}/books?category=${encodeURIComponent(category.value)}`,
   }));
   const author = data.author;
+  const authorLongBioHtml = toSafeRichTextHtml(author.longBio);
+  const authorLongBioFallback = toPlainText(author.longBio) || author.name;
+  const relatedAuthors = data.relatedAuthors.slice(0, 4);
+  const authorKicker = locale === "my" ? "စာရေးသူ" : "Author";
 
   return (
     <div
@@ -76,29 +125,54 @@ export function AuthorDetailPage({ copy, locale, data, breadcrumbSource }: Autho
               <Image
                 src={author.imageSrc}
                 alt={author.imageAlt}
-                width={520}
-                height={620}
+                width={440}
+                height={520}
                 className="author-detail-portrait"
-                sizes="(max-width: 1024px) 100vw, 40vw"
+                sizes="(max-width: 1023px) 100vw, 30vw"
               />
             </div>
 
             <div className="author-detail-content">
-              <h1 className="author-detail-name">{author.name}</h1>
-              <p className="author-detail-short-bio">{author.shortBio}</p>
+              <div className="author-detail-headline">
+                <p className="author-detail-kicker">{authorKicker}</p>
+                <h1 className="author-detail-name">{author.name}</h1>
+              </div>
 
-              <Link
-                href={`/${locale}/books?q=${encodeURIComponent(author.name)}`}
-                className="author-detail-primary-cta"
-              >
-                {copy.authorDetail.viewBooksCta}
-              </Link>
+              <div className="author-detail-stats" aria-label={copy.authorDetail.breadcrumbLabel}>
+                <div className="author-detail-stat-card">
+                  <span className="author-detail-stat-value">
+                    {formatCount(locale, data.authoredBooks.length)}
+                  </span>
+                  <span className="author-detail-stat-label">
+                    {copy.authorDetail.authoredBooksTitle}
+                  </span>
+                </div>
+              </div>
+
+              <div className="author-detail-actions">
+                <Link
+                  href={`/${locale}/books?q=${encodeURIComponent(author.name)}`}
+                  className="author-detail-primary-cta"
+                >
+                  {copy.authorDetail.viewBooksCta}
+                </Link>
+                <Link href={`/${locale}/authors`} className="author-detail-secondary-cta">
+                  {copy.authorDetail.viewAllAuthors}
+                </Link>
+              </div>
             </div>
           </section>
 
           <section className="author-detail-about">
             <h2>{copy.authorDetail.aboutTitle}</h2>
-            <p>{author.longBio}</p>
+            {authorLongBioHtml ? (
+              <div
+                className="author-detail-rich-text"
+                dangerouslySetInnerHTML={{ __html: authorLongBioHtml }}
+              />
+            ) : (
+              <p>{authorLongBioFallback}</p>
+            )}
           </section>
 
           <section id="author-books" className="author-detail-books">
@@ -158,7 +232,7 @@ export function AuthorDetailPage({ copy, locale, data, breadcrumbSource }: Autho
             )}
           </section>
 
-          {data.relatedAuthors.length > 0 ? (
+          {relatedAuthors.length > 0 ? (
             <section className="author-detail-related">
               <div className="author-detail-section-header">
                 <h2>{copy.authorDetail.relatedAuthorsTitle}</h2>
@@ -168,7 +242,7 @@ export function AuthorDetailPage({ copy, locale, data, breadcrumbSource }: Autho
               </div>
 
               <div className="author-detail-related-grid">
-                {data.relatedAuthors.map((relatedAuthor) => (
+                {relatedAuthors.map((relatedAuthor) => (
                   <article key={relatedAuthor.id} className="author-detail-related-card">
                     <Link href={`/${locale}/authors/${relatedAuthor.slug}?from=authors`}>
                       <Image

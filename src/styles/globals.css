@@ -1,14 +1,19 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: light;
+
   --color-page-bg: #f9fbf6;
   --color-card-bg: #ffffff;
   --color-text-main: #1f2933;
   --color-text-muted: #6b7280;
   --color-brand: #7aac23;
   --color-brand-subtle: #edf5de;
+  --color-brand-soft: #f3f8ea;
+  --color-brand-strong: #5d8316;
   --color-accent: #d97b2d;
   --color-accent-soft: #fdf0e3;
+  --color-surface-soft: #f3f4f6;
   --color-border: #e5e7eb;
 
   --space-1: 8px;
@@ -20,6 +25,24 @@
 
   --radius-card: 16px;
   --shadow-soft: 0 14px 38px rgba(31, 41, 51, 0.08);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-page-bg: #0f151c;
+  --color-card-bg: #131c24;
+  --color-text-main: #e6edf3;
+  --color-text-muted: #9aa7b4;
+  --color-brand: #9bcf43;
+  --color-brand-subtle: #203018;
+  --color-brand-soft: #2a3e1f;
+  --color-brand-strong: #b8e96a;
+  --color-accent: #f0a35b;
+  --color-accent-soft: #3a2818;
+  --color-surface-soft: #1b2630;
+  --color-border: #2d3945;
+  --shadow-soft: 0 18px 46px rgba(0, 0, 0, 0.36);
 }
 
 @theme inline {
@@ -633,7 +656,7 @@ h6 {
 
 .author-detail-hero {
   display: grid;
-  gap: clamp(18px, 3vw, 32px);
+  gap: clamp(6px, 1vw, 10px);
   border: 1px solid color-mix(in srgb, var(--color-border) 72%, var(--color-brand) 28%);
   border-radius: 24px;
   padding: clamp(16px, 2.8vw, 34px);
@@ -656,6 +679,8 @@ h6 {
   position: relative;
   overflow: hidden;
   border-radius: 22px;
+  max-width: 460px;
+  margin-inline: auto;
 }
 
 .author-detail-portrait-glow {
@@ -673,7 +698,7 @@ h6 {
 .author-detail-portrait {
   position: relative;
   width: 100%;
-  height: clamp(320px, 56vw, 560px);
+  height: clamp(260px, 46vw, 460px);
   border-radius: 22px;
   object-fit: cover;
   border: 1px solid color-mix(in srgb, var(--color-border) 78%, white 22%);
@@ -683,8 +708,24 @@ h6 {
 .author-detail-content {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: clamp(16px, 2.2vw, 24px);
   align-self: center;
+  padding-block: clamp(4px, 1vw, 14px);
+}
+
+.author-detail-headline {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.author-detail-kicker {
+  margin: 0;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-brand);
 }
 
 .author-detail-name {
@@ -693,12 +734,37 @@ h6 {
   line-height: 1.1;
 }
 
-.author-detail-short-bio {
-  margin: 0;
-  max-width: 62ch;
-  font-size: 1rem;
-  line-height: 1.8;
+.author-detail-stats {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.author-detail-stat-card {
+  border: 1px solid color-mix(in srgb, var(--color-border) 75%, var(--color-brand) 25%);
+  border-radius: 14px;
+  padding: 10px 12px;
+  background: color-mix(in srgb, var(--color-brand-subtle) 68%, #ffffff 32%);
+  display: grid;
+  gap: 3px;
+}
+
+.author-detail-stat-value {
+  font-size: 1.22rem;
+  font-weight: 800;
   color: var(--color-text-main);
+}
+
+.author-detail-stat-label {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.author-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
 }
 
 .author-detail-primary-cta {
@@ -729,6 +795,30 @@ h6 {
   filter: brightness(0.98);
 }
 
+.author-detail-secondary-cta {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  padding: 0 18px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  background: #ffffff;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.author-detail-secondary-cta:hover {
+  border-color: var(--color-brand);
+  color: var(--color-brand);
+  transform: translateY(-1px);
+}
+
 .author-detail-about {
   margin-top: clamp(22px, 4vw, 36px);
   border: 1px solid var(--color-border);
@@ -742,12 +832,44 @@ h6 {
   font-size: clamp(1.3rem, 2.2vw, 1.8rem);
 }
 
-.author-detail-about p {
+.author-detail-about > p {
   margin: 12px 0 0;
   max-width: 74ch;
   font-size: 1rem;
   line-height: 1.85;
   color: var(--color-text-main);
+}
+
+.author-detail-rich-text {
+  margin-top: 12px;
+  font-size: 1rem;
+  line-height: 1.85;
+  color: var(--color-text-main);
+}
+
+.author-detail-rich-text :is(p, ul, ol, blockquote) {
+  margin: 0;
+}
+
+.author-detail-rich-text :is(p, ul, ol, blockquote) + :is(p, ul, ol, blockquote) {
+  margin-top: 10px;
+}
+
+.author-detail-rich-text ul,
+.author-detail-rich-text ol {
+  padding-left: 1.3rem;
+}
+
+.author-detail-rich-text blockquote {
+  border-left: 3px solid var(--color-border);
+  padding-left: 12px;
+  color: var(--color-text-muted);
+}
+
+.author-detail-rich-text a {
+  color: var(--color-brand);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .author-detail-books {
@@ -905,8 +1027,10 @@ h6 {
 .author-detail-related-grid {
   margin-top: 14px;
   display: grid;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
   gap: 12px;
+  overflow-x: auto;
+  align-items: stretch;
 }
 
 .author-detail-related-card {
@@ -956,15 +1080,19 @@ h6 {
   }
 
   .author-detail-related-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 14px;
   }
 }
 
 @media (min-width: 1024px) {
   .author-detail-hero {
-    grid-template-columns: minmax(300px, 0.9fr) minmax(0, 1.1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
     align-items: center;
+    gap: clamp(8px, 1vw, 14px);
+  }
+
+  .author-detail-portrait-wrap {
+    margin-inline: 0;
   }
 }
 

@@ -312,11 +312,6 @@ export function AuthorsListClient({
                   <p className="mt-1 text-xs font-semibold text-[var(--color-brand)]">
                     {replaceAuthorBookCount(copy.bookCountTemplate, author.bookCount, locale)}
                   </p>
-                  {author.note ? (
-                    <p className="mt-2 line-clamp-2 text-sm text-[var(--color-text-muted)]">
-                      {author.note}
-                    </p>
-                  ) : null}
                 </article>
               ))}
 

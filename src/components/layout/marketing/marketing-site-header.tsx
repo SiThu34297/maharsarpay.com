@@ -44,7 +44,7 @@ export function MarketingSiteHeader({
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-white/95 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-card-bg)]/95 backdrop-blur-md">
         <div className="home-shell hidden h-20 items-center gap-8 xl:grid xl:grid-cols-[1fr_auto_1fr]">
           <div aria-hidden />
 
@@ -64,7 +64,7 @@ export function MarketingSiteHeader({
                         {getNavigationLabel(copy.navigation, item.id)}
                       </Link>
                       <div className="pointer-events-none absolute left-0 top-full z-40 pt-2 opacity-0 transition group-hover:pointer-events-auto group-hover:opacity-100">
-                        <div className="min-w-[220px] rounded-xl border border-[var(--color-border)] bg-white p-2 shadow-[var(--shadow-soft)]">
+                        <div className="min-w-[220px] rounded-xl border border-[var(--color-border)] bg-[var(--color-card-bg)] p-2 shadow-[var(--shadow-soft)]">
                           {effectiveBookCategoryLinks.map((categoryLink) => (
                             <Link
                               key={`desktop-book-category-${categoryLink.href}`}
@@ -126,7 +126,7 @@ export function MarketingSiteHeader({
                         {getNavigationLabel(copy.navigation, item.id)}
                       </Link>
                       <div className="pointer-events-none absolute left-0 top-full z-40 pt-2 opacity-0 transition group-hover:pointer-events-auto group-hover:opacity-100">
-                        <div className="min-w-[220px] rounded-xl border border-[var(--color-border)] bg-white p-2 shadow-[var(--shadow-soft)]">
+                        <div className="min-w-[220px] rounded-xl border border-[var(--color-border)] bg-[var(--color-card-bg)] p-2 shadow-[var(--shadow-soft)]">
                           {effectiveBookCategoryLinks.map((categoryLink) => (
                             <Link
                               key={`tablet-book-category-${categoryLink.href}`}

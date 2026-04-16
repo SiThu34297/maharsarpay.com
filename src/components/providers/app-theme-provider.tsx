@@ -11,7 +11,7 @@ type AppThemeProviderProps = Readonly<{
 
 export function AppThemeProvider({ children }: AppThemeProviderProps) {
   return (
-    <Theme accentColor="grass" grayColor="slate" radius="large" scaling="100%">
+    <Theme accentColor="grass" grayColor="slate" radius="large" scaling="100%" appearance="light">
       <AuthSessionProvider>
         <CartProvider>{children}</CartProvider>
       </AuthSessionProvider>
