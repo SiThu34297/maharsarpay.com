@@ -53,6 +53,33 @@ function renderStars(rating: number) {
   return `${"★".repeat(fullStars)}${"☆".repeat(Math.max(5 - fullStars, 0))}`;
 }
 
+function getDiscountPricing(book: {
+  price: number;
+  salePrice?: number | null;
+  originalPrice?: number | null;
+  discountAmount?: number | null;
+}) {
+  const salePrice = book.salePrice && book.salePrice > 0 ? book.salePrice : book.price;
+  const originalPrice =
+    book.originalPrice && book.originalPrice > salePrice ? book.originalPrice : null;
+
+  if (!originalPrice) {
+    return {
+      salePrice,
+      originalPrice: null,
+      discountAmount: null,
+    };
+  }
+
+  const fallbackDiscountAmount = originalPrice - salePrice;
+
+  return {
+    salePrice,
+    originalPrice,
+    discountAmount: book.discountAmount ?? fallbackDiscountAmount,
+  };
+}
+
 function SectionHeading({ title, description }: SectionHeadingProps) {
   return (
     <div className="mb-6 md:mb-8">
@@ -177,9 +204,27 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                     </Link>
                   </h3>
                   <p className="mt-1 text-sm text-[var(--color-text-muted)]">{book.author}</p>
-                  <p className="mt-3 text-base font-semibold text-[var(--color-brand)]">
-                    {formatPrice(locale, book.price)}
-                  </p>
+                  {(() => {
+                    const pricing = getDiscountPricing(book);
+
+                    return (
+                      <div className="mt-3 flex flex-wrap items-center gap-2">
+                        <p className="text-base font-semibold text-[var(--color-brand)]">
+                          {formatPrice(locale, pricing.salePrice)}
+                        </p>
+                        {pricing.originalPrice ? (
+                          <>
+                            <p className="text-xs text-[var(--color-text-muted)] line-through">
+                              {formatPrice(locale, pricing.originalPrice)}
+                            </p>
+                            <span className="rounded-full bg-[var(--color-accent-soft)] px-2 py-0.5 text-[10px] font-semibold text-[var(--color-accent)]">
+                              -{formatPrice(locale, pricing.discountAmount ?? 0)}
+                            </span>
+                          </>
+                        ) : null}
+                      </div>
+                    );
+                  })()}
                   <HomeAddToCartButton
                     book={book}
                     addLabel={copy.bestsellers.addToCart}
@@ -211,11 +256,27 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                   </Link>
                 </h3>
                 <p className="mt-1 text-sm text-[var(--color-text-muted)]">{book.author}</p>
-                <div className="mt-3 flex items-center justify-between">
-                  <p className="text-base font-semibold text-[var(--color-brand)]">
-                    {formatPrice(locale, book.price)}
-                  </p>
-                </div>
+                {(() => {
+                  const pricing = getDiscountPricing(book);
+
+                  return (
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <p className="text-base font-semibold text-[var(--color-brand)]">
+                        {formatPrice(locale, pricing.salePrice)}
+                      </p>
+                      {pricing.originalPrice ? (
+                        <>
+                          <p className="text-xs text-[var(--color-text-muted)] line-through">
+                            {formatPrice(locale, pricing.originalPrice)}
+                          </p>
+                          <span className="rounded-full bg-[var(--color-accent-soft)] px-2 py-0.5 text-[10px] font-semibold text-[var(--color-accent)]">
+                            -{formatPrice(locale, pricing.discountAmount ?? 0)}
+                          </span>
+                        </>
+                      ) : null}
+                    </div>
+                  );
+                })()}
                 <HomeAddToCartButton
                   book={book}
                   addLabel={copy.bestsellers.addToCart}

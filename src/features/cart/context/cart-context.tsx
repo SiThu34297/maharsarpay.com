@@ -66,6 +66,14 @@ function isSafeNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value) && value >= 0;
 }
 
+function toOptionalPrice(value: unknown): number | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  return isSafeNumber(value) ? value : null;
+}
+
 function toCartLineItem(input: unknown): CartLineItem | null {
   if (!input || typeof input !== "object") {
     return null;
@@ -110,6 +118,9 @@ function toCartLineItem(input: unknown): CartLineItem | null {
     title: candidate.title,
     author: candidate.author,
     price: candidate.price,
+    salePrice: toOptionalPrice(candidate.salePrice),
+    originalPrice: toOptionalPrice(candidate.originalPrice),
+    discountAmount: toOptionalPrice(candidate.discountAmount),
     coverImageSrc: candidate.coverImageSrc,
     coverImageAlt: candidate.coverImageAlt,
     quantity: candidate.quantity,

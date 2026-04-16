@@ -57,7 +57,11 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 - Categories endpoint is fetched via internal route `GET /api/categories`.
 - External base URL env: `BOOK_API_BASE_URL` (fallback: `https://bookapi.sabahna.com`).
 - Categories source path: `/api/web/categories`.
+- Books source path: `/api/web/books`.
+- Home page books are now backend-driven and display 8 random books per request.
+- Book detail route slug uses backend book `id`.
 - Current behavior: category names returned from backend are used as-is for both `en` and `my` locales.
+- Current behavior: books content returned from backend is used as-is for both `en` and `my` locales.
 
 ## Folder Conventions
 

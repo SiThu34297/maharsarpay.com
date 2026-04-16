@@ -1,6 +1,7 @@
 import type { Locale } from "@/lib/i18n";
 
 import { searchAuthors } from "@/features/authors";
+import { searchBooks } from "@/features/books";
 import { getAllCategories } from "@/features/categories";
 import type {
   AuthorItem,
@@ -21,181 +22,6 @@ const navigation: NavItem[] = [
   { id: "media", href: "#media" },
   { id: "contact", href: "#contact" },
 ];
-
-const cartProductIdByHomeBookId: Record<string, string> = {
-  "book-1": "book:quiet-orchard",
-  "book-2": "book:golden-rain-in-bagan",
-  "book-3": "book:letters-from-inle",
-  "book-4": "book:stories-of-mandalay",
-  "book-5": "book:midnight-tea-house",
-  "book-6": "book:shan-hills-journal",
-  "book-7": "book:river-of-fireflies",
-  "book-8": "book:after-the-monsoon",
-};
-
-const slugByHomeBookId: Record<string, string> = {
-  "book-1": "quiet-orchard",
-  "book-2": "golden-rain-in-bagan",
-  "book-3": "letters-from-inle",
-  "book-4": "stories-of-mandalay",
-  "book-5": "midnight-tea-house",
-  "book-6": "shan-hills-journal",
-  "book-7": "river-of-fireflies",
-  "book-8": "after-the-monsoon",
-};
-
-type HomeBookSeedItem = Omit<BookItem, "cartProductId" | "slug">;
-
-const booksByLocale: Record<Locale, HomeBookSeedItem[]> = {
-  en: [
-    {
-      id: "book-1",
-      title: "The Quiet Orchard",
-      author: "Moe Nadi",
-      price: 21000,
-      rating: 4.8,
-      imageSrc: "/images/home/real/books/book-1.jpg",
-      imageAlt: "The Quiet Orchard book cover",
-    },
-    {
-      id: "book-2",
-      title: "Golden Rain in Bagan",
-      author: "Khin Aye",
-      price: 18500,
-      rating: 4.7,
-      imageSrc: "/images/home/real/books/book-2.jpg",
-      imageAlt: "Golden Rain in Bagan book cover",
-    },
-    {
-      id: "book-3",
-      title: "Letters from Inle",
-      author: "Sai Nay Lin",
-      price: 19800,
-      rating: 4.9,
-      imageSrc: "/images/home/real/books/book-3.jpg",
-      imageAlt: "Letters from Inle book cover",
-    },
-    {
-      id: "book-4",
-      title: "Stories of Mandalay",
-      author: "Thandar Win",
-      price: 17200,
-      rating: 4.6,
-      imageSrc: "/images/home/real/books/book-4.jpg",
-      imageAlt: "Stories of Mandalay book cover",
-    },
-    {
-      id: "book-5",
-      title: "Midnight Tea House",
-      author: "Aung Min",
-      price: 23000,
-      rating: 4.8,
-      imageSrc: "/images/home/real/books/book-5.jpg",
-      imageAlt: "Midnight Tea House book cover",
-    },
-    {
-      id: "book-6",
-      title: "The Shan Hills Journal",
-      author: "Nan Hnin",
-      price: 20400,
-      rating: 4.7,
-      imageSrc: "/images/home/real/books/book-6.jpg",
-      imageAlt: "The Shan Hills Journal book cover",
-    },
-    {
-      id: "book-7",
-      title: "River of Fireflies",
-      author: "Kyaw Zeya",
-      price: 19100,
-      rating: 4.5,
-      imageSrc: "/images/home/real/books/book-7.jpg",
-      imageAlt: "River of Fireflies book cover",
-    },
-    {
-      id: "book-8",
-      title: "After the Monsoon",
-      author: "May Thu",
-      price: 21900,
-      rating: 4.9,
-      imageSrc: "/images/home/real/books/book-8.jpg",
-      imageAlt: "After the Monsoon book cover",
-    },
-  ],
-  my: [
-    {
-      id: "book-1",
-      title: "တိတ်ဆိတ်သော သစ်ဥယျာဉ်",
-      author: "မိုးနဒီ",
-      price: 21000,
-      rating: 4.8,
-      imageSrc: "/images/home/real/books/book-1.jpg",
-      imageAlt: "တိတ်ဆိတ်သော သစ်ဥယျာဉ် စာအုပ်အဖုံး",
-    },
-    {
-      id: "book-2",
-      title: "ပုဂံမိုးရွာရွှေ",
-      author: "ခင်အေး",
-      price: 18500,
-      rating: 4.7,
-      imageSrc: "/images/home/real/books/book-2.jpg",
-      imageAlt: "ပုဂံမိုးရွာရွှေ စာအုပ်အဖုံး",
-    },
-    {
-      id: "book-3",
-      title: "အင်းလေးမှ စာတိုများ",
-      author: "စိုင်းနေလင်း",
-      price: 19800,
-      rating: 4.9,
-      imageSrc: "/images/home/real/books/book-3.jpg",
-      imageAlt: "အင်းလေးမှ စာတိုများ စာအုပ်အဖုံး",
-    },
-    {
-      id: "book-4",
-      title: "မန္တလေးပုံပြင်များ",
-      author: "သန္တာဝင်း",
-      price: 17200,
-      rating: 4.6,
-      imageSrc: "/images/home/real/books/book-4.jpg",
-      imageAlt: "မန္တလေးပုံပြင်များ စာအုပ်အဖုံး",
-    },
-    {
-      id: "book-5",
-      title: "သန်းခေါင်လက်ဖက်ရည်ဆိုင်",
-      author: "အောင်မင်း",
-      price: 23000,
-      rating: 4.8,
-      imageSrc: "/images/home/real/books/book-5.jpg",
-      imageAlt: "သန်းခေါင်လက်ဖက်ရည်ဆိုင် စာအုပ်အဖုံး",
-    },
-    {
-      id: "book-6",
-      title: "ရှမ်းတောင်တန်း မှတ်တမ်း",
-      author: "နန်းနှင်း",
-      price: 20400,
-      rating: 4.7,
-      imageSrc: "/images/home/real/books/book-6.jpg",
-      imageAlt: "ရှမ်းတောင်တန်း မှတ်တမ်း စာအုပ်အဖုံး",
-    },
-    {
-      id: "book-7",
-      title: "မီးပိုးတောင်မြစ်",
-      author: "ကျော်ဇေယျ",
-      price: 19100,
-      rating: 4.5,
-      imageSrc: "/images/home/real/books/book-7.jpg",
-      imageAlt: "မီးပိုးတောင်မြစ် စာအုပ်အဖုံး",
-    },
-    {
-      id: "book-8",
-      title: "မိုးကာလပြီးနောက်",
-      author: "မေသူ",
-      price: 21900,
-      rating: 4.9,
-      imageSrc: "/images/home/real/books/book-8.jpg",
-      imageAlt: "မိုးကာလပြီးနောက် စာအုပ်အဖုံး",
-    },
-  ],
-};
 
 const fallbackCategoriesByLocale: Record<Locale, CategoryItem[]> = {
   en: [
@@ -274,6 +100,26 @@ async function getHomeCategories(locale: Locale): Promise<CategoryItem[]> {
 async function getHomeAuthors(locale: Locale): Promise<AuthorItem[]> {
   const response = await searchAuthors(locale, { limit: 24 });
   return pickRandomItems(response.items, 6);
+}
+
+async function getHomeBooks(locale: Locale): Promise<BookItem[]> {
+  const response = await searchBooks(locale, { limit: 24 });
+  const randomBooks = pickRandomItems(response.items, 8);
+
+  return randomBooks.map((book) => ({
+    id: book.id,
+    slug: book.slug,
+    cartProductId: book.cartProductId,
+    title: book.title,
+    author: book.author,
+    price: book.price,
+    salePrice: book.salePrice,
+    originalPrice: book.originalPrice,
+    discountAmount: book.discountAmount,
+    rating: book.rating,
+    imageSrc: book.coverImageSrc,
+    imageAlt: book.coverImageAlt,
+  }));
 }
 
 const mediaItemsByLocale: Record<Locale, MediaItem[]> = {
@@ -432,9 +278,10 @@ const promoByLocale: Record<Locale, PromoBanner> = {
 };
 
 export async function getHomePageData(locale: Locale): Promise<HomePageData> {
-  const [categories, authors] = await Promise.all([
+  const [categories, authors, books] = await Promise.all([
     getHomeCategories(locale),
     getHomeAuthors(locale),
+    getHomeBooks(locale),
   ]);
 
   return {
@@ -496,11 +343,7 @@ export async function getHomePageData(locale: Locale): Promise<HomePageData> {
       },
     ],
     categories,
-    books: booksByLocale[locale].map((book) => ({
-      ...book,
-      cartProductId: cartProductIdByHomeBookId[book.id] ?? `book:${book.id}`,
-      slug: slugByHomeBookId[book.id] ?? book.id,
-    })),
+    books,
     authors,
     mediaItems: mediaItemsByLocale[locale],
     reviews: reviewsByLocale[locale],

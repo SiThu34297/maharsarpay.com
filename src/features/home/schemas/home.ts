@@ -27,6 +27,9 @@ export type BookItem = {
   title: string;
   author: string;
   price: number;
+  salePrice?: number | null;
+  originalPrice?: number | null;
+  discountAmount?: number | null;
   rating: number;
   imageSrc: string;
   imageAlt: string;

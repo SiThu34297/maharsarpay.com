@@ -37,6 +37,31 @@ function replaceCount(template: string, count: number, locale: Locale) {
   return template.replace("{count}", localizedCount);
 }
 
+function getDiscountPricing(item: {
+  price: number;
+  salePrice?: number | null;
+  originalPrice?: number | null;
+  discountAmount?: number | null;
+}) {
+  const salePrice = item.salePrice && item.salePrice > 0 ? item.salePrice : item.price;
+  const originalPrice =
+    item.originalPrice && item.originalPrice > salePrice ? item.originalPrice : null;
+
+  if (!originalPrice) {
+    return {
+      salePrice,
+      originalPrice: null,
+      discountAmount: null,
+    };
+  }
+
+  return {
+    salePrice,
+    originalPrice,
+    discountAmount: item.discountAmount ?? originalPrice - salePrice,
+  };
+}
+
 export function CartPageClient({ copy, locale }: CartPageClientProps) {
   const { state, subtotal, increment, decrement, remove, clear, totalItems } = useCart();
 
@@ -84,69 +109,87 @@ export function CartPageClient({ copy, locale }: CartPageClientProps) {
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
           <div className="space-y-4">
-            {state.items.map((item) => (
-              <article
-                key={item.cartProductId}
-                className="rounded-2xl border border-[var(--color-border)] bg-white p-4"
-              >
-                <div className="flex gap-4">
-                  <div className="relative h-[140px] w-[108px] shrink-0 overflow-hidden rounded-xl">
-                    <Image
-                      src={item.coverImageSrc}
-                      alt={item.coverImageAlt}
-                      fill
-                      sizes="108px"
-                      className="object-cover"
-                    />
-                  </div>
+            {state.items.map((item) => {
+              const pricing = getDiscountPricing(item);
 
-                  <div className="min-w-0 flex-1">
-                    <h2 className="text-base font-semibold text-[var(--color-text-main)] md:text-lg">
-                      {item.title}
-                    </h2>
-                    <p className="mt-1 text-sm text-[var(--color-text-muted)]">{item.author}</p>
-                    <p className="mt-3 text-sm font-semibold text-[var(--color-brand)] md:text-base">
-                      {formatPrice(locale, item.price)}
-                    </p>
+              return (
+                <article
+                  key={item.cartProductId}
+                  className="rounded-2xl border border-[var(--color-border)] bg-white p-4"
+                >
+                  <div className="flex gap-4">
+                    <div className="relative h-[140px] w-[108px] shrink-0 overflow-hidden rounded-xl">
+                      <Image
+                        src={item.coverImageSrc}
+                        alt={item.coverImageAlt}
+                        fill
+                        sizes="108px"
+                        className="object-cover"
+                      />
+                    </div>
 
-                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                      <div className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] px-2 py-1">
-                        <button
-                          type="button"
-                          aria-label={item.quantity === 1 ? copy.removeItem : copy.decreaseQuantity}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-full text-[var(--color-text-main)] transition hover:bg-[var(--color-brand-subtle)]"
-                          onClick={() => decrement(item.cartProductId)}
-                        >
-                          {item.quantity === 1 ? <TrashIcon /> : <MinusIcon />}
-                        </button>
-
-                        <span className="min-w-10 text-center text-sm font-semibold text-[var(--color-text-main)]">
-                          {item.quantity}
-                        </span>
-
-                        <button
-                          type="button"
-                          aria-label={copy.increaseQuantity}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-full text-[var(--color-text-main)] transition hover:bg-[var(--color-brand-subtle)]"
-                          onClick={() => increment(item.cartProductId)}
-                        >
-                          <PlusIcon />
-                        </button>
+                    <div className="min-w-0 flex-1">
+                      <h2 className="text-base font-semibold text-[var(--color-text-main)] md:text-lg">
+                        {item.title}
+                      </h2>
+                      <p className="mt-1 text-sm text-[var(--color-text-muted)]">{item.author}</p>
+                      <div className="mt-3 flex flex-wrap items-center gap-2">
+                        <p className="text-sm font-semibold text-[var(--color-brand)] md:text-base">
+                          {formatPrice(locale, pricing.salePrice)}
+                        </p>
+                        {pricing.originalPrice ? (
+                          <>
+                            <p className="text-xs text-[var(--color-text-muted)] line-through">
+                              {formatPrice(locale, pricing.originalPrice)}
+                            </p>
+                            <span className="rounded-full bg-[var(--color-accent-soft)] px-2 py-0.5 text-[10px] font-semibold text-[var(--color-accent)]">
+                              -{formatPrice(locale, pricing.discountAmount ?? 0)}
+                            </span>
+                          </>
+                        ) : null}
                       </div>
 
-                      <button
-                        type="button"
-                        className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold text-[var(--color-text-muted)] transition hover:text-[var(--color-accent)]"
-                        onClick={() => remove(item.cartProductId)}
-                      >
-                        <TrashIcon />
-                        <span>{copy.removeItem}</span>
-                      </button>
+                      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                        <div className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] px-2 py-1">
+                          <button
+                            type="button"
+                            aria-label={
+                              item.quantity === 1 ? copy.removeItem : copy.decreaseQuantity
+                            }
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-[var(--color-text-main)] transition hover:bg-[var(--color-brand-subtle)]"
+                            onClick={() => decrement(item.cartProductId)}
+                          >
+                            {item.quantity === 1 ? <TrashIcon /> : <MinusIcon />}
+                          </button>
+
+                          <span className="min-w-10 text-center text-sm font-semibold text-[var(--color-text-main)]">
+                            {item.quantity}
+                          </span>
+
+                          <button
+                            type="button"
+                            aria-label={copy.increaseQuantity}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-[var(--color-text-main)] transition hover:bg-[var(--color-brand-subtle)]"
+                            onClick={() => increment(item.cartProductId)}
+                          >
+                            <PlusIcon />
+                          </button>
+                        </div>
+
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold text-[var(--color-text-muted)] transition hover:text-[var(--color-accent)]"
+                          onClick={() => remove(item.cartProductId)}
+                        >
+                          <TrashIcon />
+                          <span>{copy.removeItem}</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </div>
 
           <aside className="rounded-2xl border border-[var(--color-border)] bg-white p-5 lg:sticky lg:top-24">

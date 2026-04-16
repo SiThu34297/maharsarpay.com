@@ -40,6 +40,33 @@ function formatPrice(locale: Locale, value: number) {
   return `MMK ${grouped}`;
 }
 
+function getDiscountPricing(book: {
+  price: number;
+  salePrice?: number | null;
+  originalPrice?: number | null;
+  discountAmount?: number | null;
+}) {
+  const salePrice = book.salePrice && book.salePrice > 0 ? book.salePrice : book.price;
+  const originalPrice =
+    book.originalPrice && book.originalPrice > salePrice ? book.originalPrice : null;
+
+  if (!originalPrice) {
+    return {
+      salePrice,
+      originalPrice: null,
+      discountAmount: null,
+    };
+  }
+
+  const fallbackDiscountAmount = originalPrice - salePrice;
+
+  return {
+    salePrice,
+    originalPrice,
+    discountAmount: book.discountAmount ?? fallbackDiscountAmount,
+  };
+}
+
 function replaceResultCount(template: string, count: number, locale: Locale) {
   const countText = locale === "my" ? toMyanmarDigits(groupDigits(count)) : groupDigits(count);
   return template.replace("{count}", countText);
@@ -322,6 +349,8 @@ export function BooksListClient({
           {items.length > 0 ? (
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-3 xl:grid-cols-4">
               {items.map((book) => {
+                const pricing = getDiscountPricing(book);
+
                 return (
                   <article key={book.id} className="book-list-card">
                     <Link
@@ -348,10 +377,20 @@ export function BooksListClient({
                     </h3>
                     <p className="mt-1 text-sm text-[var(--color-text-muted)]">{book.author}</p>
 
-                    <div className="mt-3">
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
                       <p className="text-sm font-semibold text-[var(--color-brand)] sm:text-base">
-                        {formatPrice(locale, book.price)}
+                        {formatPrice(locale, pricing.salePrice)}
                       </p>
+                      {pricing.originalPrice ? (
+                        <>
+                          <p className="text-xs text-[var(--color-text-muted)] line-through">
+                            {formatPrice(locale, pricing.originalPrice)}
+                          </p>
+                          <span className="rounded-full bg-[var(--color-accent-soft)] px-2 py-0.5 text-[10px] font-semibold text-[var(--color-accent)]">
+                            -{formatPrice(locale, pricing.discountAmount ?? 0)}
+                          </span>
+                        </>
+                      ) : null}
                     </div>
 
                     <AddToCartButton
@@ -360,6 +399,9 @@ export function BooksListClient({
                         title: book.title,
                         author: book.author,
                         price: book.price,
+                        salePrice: book.salePrice,
+                        originalPrice: book.originalPrice,
+                        discountAmount: book.discountAmount,
                         coverImageSrc: book.coverImageSrc,
                         coverImageAlt: book.coverImageAlt,
                       }}

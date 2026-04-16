@@ -305,6 +305,9 @@ export function MultimediaDetailPage({
                         title: book.title,
                         author: book.author,
                         price: book.price,
+                        salePrice: book.salePrice,
+                        originalPrice: book.originalPrice,
+                        discountAmount: book.discountAmount,
                         coverImageSrc: book.coverImageSrc,
                         coverImageAlt: book.coverImageAlt,
                       }}

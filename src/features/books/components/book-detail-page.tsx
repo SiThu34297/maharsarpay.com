@@ -11,6 +11,7 @@ import { AddToCartButton } from "@/features/cart";
 import type { BookDetailPageData } from "@/features/books/schemas/books";
 import type { Dictionary, Locale } from "@/lib/i18n";
 import { BookDetailImagePreview } from "./book-detail-image-preview";
+import { BookPreviewModal } from "./book-preview-modal";
 
 type BookDetailPageProps = Readonly<{
   copy: Dictionary;
@@ -31,6 +32,51 @@ function formatPrice(locale: Locale, value: number) {
   }).format(value)}`;
 }
 
+function getDiscountPricing(book: {
+  price: number;
+  salePrice?: number | null;
+  originalPrice?: number | null;
+  discountAmount?: number | null;
+}) {
+  const salePrice = book.salePrice && book.salePrice > 0 ? book.salePrice : book.price;
+  const originalPrice =
+    book.originalPrice && book.originalPrice > salePrice ? book.originalPrice : null;
+
+  if (!originalPrice) {
+    return {
+      salePrice,
+      originalPrice: null,
+      discountAmount: null,
+    };
+  }
+
+  const fallbackDiscountAmount = originalPrice - salePrice;
+
+  return {
+    salePrice,
+    originalPrice,
+    discountAmount: book.discountAmount ?? fallbackDiscountAmount,
+  };
+}
+
+function getSafePdfUrl(value: string | null) {
+  if (!value) {
+    return null;
+  }
+
+  try {
+    const url = new URL(value);
+
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      return null;
+    }
+
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
+
 export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDetailPageProps) {
   const isMyanmar = locale === "my";
   const navigation = getMarketingNavigation(locale);
@@ -40,6 +86,8 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
   }));
   const book = data.book;
   const detailHrefSuffix = breadcrumbSource === "home" ? "?from=home" : "?from=books";
+  const pricing = getDiscountPricing(book);
+  const previewPdfSrc = getSafePdfUrl(book.previewPdfSrc);
 
   return (
     <div
@@ -83,46 +131,90 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
                 <span>{book.author}</span>
               </p>
 
-              <p className="book-detail-price">{formatPrice(locale, book.price)}</p>
-              <p className="book-detail-description">{book.description}</p>
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                <p className="book-detail-price">{formatPrice(locale, pricing.salePrice)}</p>
+                {pricing.originalPrice ? (
+                  <>
+                    <p className="text-sm text-[var(--color-text-muted)] line-through">
+                      {formatPrice(locale, pricing.originalPrice)}
+                    </p>
+                    <span className="rounded-full bg-[var(--color-accent-soft)] px-2 py-0.5 text-xs font-semibold text-[var(--color-accent)]">
+                      -{formatPrice(locale, pricing.discountAmount ?? 0)}
+                    </span>
+                  </>
+                ) : null}
+              </div>
 
-              <AddToCartButton
-                item={{
-                  cartProductId: book.cartProductId,
-                  title: book.title,
-                  author: book.author,
-                  price: book.price,
-                  coverImageSrc: book.coverImageSrc,
-                  coverImageAlt: book.coverImageAlt,
-                }}
-                addLabel={copy.booksList.addToCart}
-                addedLabel={copy.booksList.addedToCart}
-                className="book-detail-add-to-cart"
-              />
+              <div
+                className="mt-1 grid grid-cols-2 gap-2 sm:grid-cols-4"
+                aria-label={copy.bookDetail.bookInfoLabel}
+              >
+                <div className="rounded-xl border border-[var(--color-border)] bg-white p-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text-muted)]">
+                    {copy.bookDetail.editionLabel}
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-[var(--color-text-main)]">
+                    {book.edition}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-[var(--color-border)] bg-white p-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text-muted)]">
+                    {copy.bookDetail.publishYearLabel}
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-[var(--color-text-main)]">
+                    {book.publishYear}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-[var(--color-border)] bg-white p-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text-muted)]">
+                    {copy.bookDetail.pageCountLabel}
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-[var(--color-text-main)]">
+                    {book.pageCount}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-[var(--color-border)] bg-white p-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text-muted)]">
+                    {copy.bookDetail.formatLabel}
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-[var(--color-text-main)]">
+                    {book.format}
+                  </p>
+                </div>
+              </div>
+
+              <div className="book-detail-primary-actions">
+                <AddToCartButton
+                  item={{
+                    cartProductId: book.cartProductId,
+                    title: book.title,
+                    author: book.author,
+                    price: book.price,
+                    salePrice: book.salePrice,
+                    originalPrice: book.originalPrice,
+                    discountAmount: book.discountAmount,
+                    coverImageSrc: book.coverImageSrc,
+                    coverImageAlt: book.coverImageAlt,
+                  }}
+                  addLabel={copy.booksList.addToCart}
+                  addedLabel={copy.booksList.addedToCart}
+                  className="book-detail-add-to-cart"
+                />
+
+                {previewPdfSrc ? (
+                  <BookPreviewModal
+                    title={book.title}
+                    pdfSrc={previewPdfSrc}
+                    previewTitle={copy.bookDetail.previewTitle}
+                    previewCtaLabel={copy.bookDetail.previewCtaLabel}
+                    openPreviewLabel={copy.bookDetail.openPreviewLabel}
+                    downloadPreviewLabel={copy.bookDetail.downloadPreviewLabel}
+                    closePreviewLabel={copy.bookDetail.closePreviewLabel}
+                    triggerVariant="inline"
+                  />
+                ) : null}
+              </div>
             </div>
-          </section>
-
-          <section className="book-detail-info-grid" aria-label={copy.bookDetail.bookInfoLabel}>
-            <article className="book-detail-info-card">
-              <h2>{copy.bookDetail.publishYearLabel}</h2>
-              <p>{book.publishYear}</p>
-            </article>
-            <article className="book-detail-info-card">
-              <h2>{copy.bookDetail.pageCountLabel}</h2>
-              <p>{book.pageCount}</p>
-            </article>
-            <article className="book-detail-info-card">
-              <h2>{copy.bookDetail.languageLabel}</h2>
-              <p>{book.language}</p>
-            </article>
-            <article className="book-detail-info-card">
-              <h2>{copy.bookDetail.formatLabel}</h2>
-              <p>{book.format}</p>
-            </article>
-            <article className="book-detail-info-card book-detail-info-card-wide">
-              <h2>{copy.bookDetail.isbnLabel}</h2>
-              <p>{book.isbn}</p>
-            </article>
           </section>
 
           <section className="book-detail-long-description">
@@ -161,9 +253,27 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
                       </Link>
                     </h3>
                     <p>{relatedBook.author}</p>
-                    <p className="book-detail-related-price">
-                      {formatPrice(locale, relatedBook.price)}
-                    </p>
+                    {(() => {
+                      const relatedPricing = getDiscountPricing(relatedBook);
+
+                      return (
+                        <div className="mt-1 flex flex-wrap items-center gap-2">
+                          <p className="book-detail-related-price">
+                            {formatPrice(locale, relatedPricing.salePrice)}
+                          </p>
+                          {relatedPricing.originalPrice ? (
+                            <>
+                              <p className="text-xs text-[var(--color-text-muted)] line-through">
+                                {formatPrice(locale, relatedPricing.originalPrice)}
+                              </p>
+                              <span className="rounded-full bg-[var(--color-accent-soft)] px-2 py-0.5 text-[10px] font-semibold text-[var(--color-accent)]">
+                                -{formatPrice(locale, relatedPricing.discountAmount ?? 0)}
+                              </span>
+                            </>
+                          ) : null}
+                        </div>
+                      );
+                    })()}
                   </article>
                 ))}
               </div>

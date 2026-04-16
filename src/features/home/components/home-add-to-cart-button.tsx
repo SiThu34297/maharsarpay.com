@@ -17,6 +17,9 @@ export function HomeAddToCartButton({ book, addLabel, addedLabel }: HomeAddToCar
         title: book.title,
         author: book.author,
         price: book.price,
+        salePrice: book.salePrice,
+        originalPrice: book.originalPrice,
+        discountAmount: book.discountAmount,
         coverImageSrc: book.imageSrc,
         coverImageAlt: book.imageAlt,
       }}

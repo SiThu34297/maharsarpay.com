@@ -84,12 +84,18 @@ export type Dictionary = {
     inStock: string;
     outOfStock: string;
     bookInfoLabel: string;
+    editionLabel: string;
     publishYearLabel: string;
     pageCountLabel: string;
     languageLabel: string;
     formatLabel: string;
     isbnLabel: string;
     aboutThisBookLabel: string;
+    previewTitle: string;
+    previewCtaLabel: string;
+    openPreviewLabel: string;
+    downloadPreviewLabel: string;
+    closePreviewLabel: string;
     relatedBooksTitle: string;
     viewAllBooks: string;
   };

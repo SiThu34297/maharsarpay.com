@@ -1,3 +1,45 @@
+export type BackendBookAuthor = {
+  id: string;
+  name: string;
+  authorImage: string | null;
+};
+
+export type BackendBookCategory = {
+  id: string;
+  name: string;
+};
+
+export type BackendBookRecord = {
+  id: string;
+  bookTitle: string;
+  edition: string | null;
+  release: number | null;
+  serial: string | null;
+  units: number | null;
+  salePrice: number | null;
+  reviewLink: string | null;
+  bookReleaseDate: string | null;
+  status: number | null;
+  authors: BackendBookAuthor[];
+  categories: BackendBookCategory[];
+  bookImageFront: string | null;
+  bookImageBack: string | null;
+  coverImage: string | null;
+  sideImage: string | null;
+  pages: number | null;
+  originalPrice: number | null;
+  size: string | null;
+  about: string | null;
+  preview: string | null;
+};
+
+export type BackendBooksResponse = {
+  error: boolean;
+  authorized: boolean;
+  message: string;
+  data: BackendBookRecord[];
+};
+
 export type BookListItem = {
   id: string;
   slug: string;
@@ -8,6 +50,9 @@ export type BookListItem = {
   category: string;
   categoryId: string;
   price: number;
+  salePrice?: number | null;
+  originalPrice?: number | null;
+  discountAmount?: number | null;
   rating: number;
   coverImageSrc: string;
   coverImageAlt: string;
@@ -15,6 +60,8 @@ export type BookListItem = {
 
 export type BookDetail = BookListItem & {
   description: string;
+  edition: string;
+  previewPdfSrc: string | null;
   publishYear: number;
   pageCount: number;
   language: string;

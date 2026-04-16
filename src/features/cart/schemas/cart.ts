@@ -5,6 +5,9 @@ export type AddToCartPayload = {
   title: string;
   author: string;
   price: number;
+  salePrice?: number | null;
+  originalPrice?: number | null;
+  discountAmount?: number | null;
   coverImageSrc: string;
   coverImageAlt: string;
 };
@@ -26,5 +29,9 @@ export function getCartTotalItems(state: CartState): number {
 }
 
 export function getCartSubtotal(state: CartState): number {
-  return state.items.reduce((subtotal, item) => subtotal + item.price * item.quantity, 0);
+  return state.items.reduce((subtotal, item) => {
+    const salePrice =
+      typeof item.salePrice === "number" && item.salePrice > 0 ? item.salePrice : item.price;
+    return subtotal + salePrice * item.quantity;
+  }, 0);
 }

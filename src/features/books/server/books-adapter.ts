@@ -3,6 +3,8 @@ import type { Locale } from "@/lib/i18n";
 import { getAllCategories } from "@/features/categories";
 import type {
   AppliedBookFilters,
+  BackendBookRecord,
+  BackendBooksResponse,
   BookDetail,
   BookFilterOptions,
   BookListItem,
@@ -12,6 +14,10 @@ import type {
 
 const DEFAULT_LIMIT = 12;
 const MAX_LIMIT = 24;
+const BOOKS_ENDPOINT = "/api/web/books";
+const BOOK_API_BASE_URL = process.env.BOOK_API_BASE_URL ?? "https://bookapi.sabahna.com";
+const BACKEND_DEFAULT_RATING = 4.7;
+const BACKEND_FALLBACK_COVER_SRC = "/images/home/real/books/book-1.jpg";
 
 type RawSearchParams = Record<string, string | string[] | undefined>;
 
@@ -287,6 +293,303 @@ const seedBooks: SeedBook[] = Array.from({ length: 48 }, (_, index) => {
   };
 });
 
+function normalizeWhitespace(value: string) {
+  return value.trim().replace(/\s+/g, " ");
+}
+
+function normalizeSearchValue(value: string) {
+  return normalizeWhitespace(value).toLowerCase();
+}
+
+function toSafeNumber(value: number | null | undefined, fallback = 0) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return fallback;
+  }
+
+  return value;
+}
+
+function toInteger(value: number | null | undefined, fallback = 0) {
+  return Math.max(0, Math.round(toSafeNumber(value, fallback)));
+}
+
+function stripHtmlToText(value: string | null | undefined) {
+  if (!value) {
+    return "";
+  }
+
+  return value
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getPrimaryAuthor(book: BackendBookRecord) {
+  const author = book.authors.find((item) => normalizeWhitespace(item.name || "") !== "");
+
+  if (!author) {
+    return {
+      id: "unknown-author",
+      name: "Unknown Author",
+    };
+  }
+
+  return {
+    id: author.id,
+    name: normalizeWhitespace(author.name),
+  };
+}
+
+function getPrimaryCategory(book: BackendBookRecord) {
+  const category = book.categories.find((item) => normalizeWhitespace(item.name || "") !== "");
+
+  if (!category) {
+    return {
+      id: "uncategorized",
+      name: "Uncategorized",
+    };
+  }
+
+  return {
+    id: category.id,
+    name: normalizeWhitespace(category.name),
+  };
+}
+
+function resolveBackendBookPricing(book: BackendBookRecord) {
+  const rawSalePrice = toInteger(book.salePrice);
+  const rawOriginalPrice = toInteger(book.originalPrice);
+
+  if (rawSalePrice > 0 && rawOriginalPrice > rawSalePrice) {
+    return {
+      price: rawSalePrice,
+      salePrice: rawSalePrice,
+      originalPrice: rawOriginalPrice,
+      discountAmount: rawOriginalPrice - rawSalePrice,
+    };
+  }
+
+  if (rawSalePrice > 0) {
+    return {
+      price: rawSalePrice,
+      salePrice: rawSalePrice,
+      originalPrice: null,
+      discountAmount: null,
+    };
+  }
+
+  return {
+    price: rawOriginalPrice,
+    salePrice: rawOriginalPrice > 0 ? rawOriginalPrice : null,
+    originalPrice: null,
+    discountAmount: null,
+  };
+}
+
+function resolveBackendBookCoverImage(book: BackendBookRecord) {
+  return (
+    book.coverImage?.trim() ||
+    book.bookImageFront?.trim() ||
+    book.bookImageBack?.trim() ||
+    BACKEND_FALLBACK_COVER_SRC
+  );
+}
+
+function resolveBackendBookPreviewPdfSrc(preview: string | null | undefined) {
+  const rawValue = preview?.trim();
+
+  if (!rawValue) {
+    return null;
+  }
+
+  try {
+    const previewUrl =
+      rawValue.startsWith("http://") || rawValue.startsWith("https://")
+        ? new URL(rawValue)
+        : new URL(rawValue, BOOK_API_BASE_URL);
+
+    if (previewUrl.protocol !== "http:" && previewUrl.protocol !== "https:") {
+      return null;
+    }
+
+    return previewUrl.toString();
+  } catch {
+    return null;
+  }
+}
+
+function resolveBackendBookReleaseTimestamp(book: BackendBookRecord) {
+  const time = Date.parse(book.bookReleaseDate ?? "");
+
+  if (Number.isFinite(time)) {
+    return time;
+  }
+
+  return 0;
+}
+
+function sortBackendBooksDescending(left: BackendBookRecord, right: BackendBookRecord) {
+  const timestampDiff =
+    resolveBackendBookReleaseTimestamp(right) - resolveBackendBookReleaseTimestamp(left);
+
+  if (timestampDiff !== 0) {
+    return timestampDiff;
+  }
+
+  return left.id.localeCompare(right.id);
+}
+
+function toBackendBookListItem(book: BackendBookRecord): BookListItem {
+  const author = getPrimaryAuthor(book);
+  const category = getPrimaryCategory(book);
+  const title = normalizeWhitespace(book.bookTitle || "Untitled Book");
+  const pricing = resolveBackendBookPricing(book);
+
+  return {
+    id: book.id,
+    slug: book.id,
+    cartProductId: `book:${book.id}`,
+    title,
+    author: author.name,
+    authorId: author.id,
+    category: category.name,
+    categoryId: category.id,
+    price: pricing.price,
+    salePrice: pricing.salePrice,
+    originalPrice: pricing.originalPrice,
+    discountAmount: pricing.discountAmount,
+    rating: BACKEND_DEFAULT_RATING,
+    coverImageSrc: resolveBackendBookCoverImage(book),
+    coverImageAlt: `${title} cover`,
+  };
+}
+
+function toBackendBookDetail(locale: Locale, book: BackendBookRecord): BookDetail {
+  const base = toBackendBookListItem(book);
+  const description = stripHtmlToText(book.about) || base.title;
+  const galleryImageSources = [
+    book.bookImageFront,
+    book.bookImageBack,
+    book.coverImage,
+    book.sideImage,
+  ]
+    .map((value) => value?.trim())
+    .filter((value): value is string => Boolean(value));
+  const uniqueGallerySources = [...new Set(galleryImageSources)];
+  const releaseDate = Date.parse(book.bookReleaseDate ?? "");
+
+  return {
+    ...base,
+    description,
+    edition: normalizeWhitespace(book.edition || "") || (locale === "my" ? "၁" : "1"),
+    previewPdfSrc: resolveBackendBookPreviewPdfSrc(book.preview),
+    publishYear: Number.isFinite(releaseDate) ? new Date(releaseDate).getUTCFullYear() : 0,
+    pageCount: toInteger(book.pages),
+    language: locale === "my" ? "မြန်မာဘာသာ" : "Myanmar",
+    format: normalizeWhitespace(book.size || "") || (locale === "my" ? "မသတ်မှတ်" : "Unspecified"),
+    isbn: normalizeWhitespace(book.serial || "") || book.id,
+    inStock: toInteger(book.units) > 0 && toInteger(book.status) === 1,
+    galleryImages: uniqueGallerySources.length
+      ? uniqueGallerySources.map((src) => ({
+          src,
+          alt: `${base.title} preview`,
+        }))
+      : [
+          {
+            src: base.coverImageSrc,
+            alt: base.coverImageAlt,
+          },
+        ],
+  };
+}
+
+function matchesBackendBookCategory(book: BackendBookRecord, categoryQuery: string) {
+  const normalizedQuery = normalizeCategoryFilterValue(categoryQuery);
+
+  if (!normalizedQuery) {
+    return true;
+  }
+
+  const candidates = book.categories
+    .flatMap((category) => [category.id, category.name])
+    .map(normalizeCategoryFilterValue)
+    .filter(Boolean);
+
+  if (candidates.includes(normalizedQuery)) {
+    return true;
+  }
+
+  return candidates.some(
+    (candidate) => candidate.includes(normalizedQuery) || normalizedQuery.includes(candidate),
+  );
+}
+
+function matchesBackendBookKeyword(book: BackendBookRecord, keyword: string) {
+  const haystack = [
+    book.bookTitle,
+    ...book.authors.map((author) => author.name),
+    ...book.categories.map((category) => category.name),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return haystack.includes(keyword);
+}
+
+function matchesBackendAuthor(
+  book: BackendBookRecord,
+  authorId: string,
+  normalizedAuthorName: string,
+) {
+  if (book.authors.some((author) => author.id === authorId)) {
+    return true;
+  }
+
+  if (!normalizedAuthorName) {
+    return false;
+  }
+
+  return book.authors.some((author) => normalizeSearchValue(author.name) === normalizedAuthorName);
+}
+
+async function fetchBooksFromBackend(locale: Locale): Promise<BackendBookRecord[]> {
+  const response = await fetch(`${BOOK_API_BASE_URL}${BOOKS_ENDPOINT}`, {
+    method: "GET",
+    cache: "no-store",
+    headers: {
+      Accept: "application/json",
+      "Accept-Language": locale,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Books API request failed with status ${response.status}`);
+  }
+
+  const payload = (await response.json()) as Partial<BackendBooksResponse>;
+
+  if (payload.error) {
+    throw new Error(payload.message || "Books API returned an error");
+  }
+
+  if (!Array.isArray(payload.data)) {
+    throw new TypeError("Books API returned an invalid response payload");
+  }
+
+  return payload.data.filter((item): item is BackendBookRecord => {
+    return Boolean(item && typeof item === "object" && typeof item.id === "string");
+  });
+}
+
+function getActiveBackendBooks(books: BackendBookRecord[]) {
+  return books.filter((book) => toInteger(book.status, 1) === 1);
+}
+
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
@@ -348,6 +651,9 @@ function toLocalizedBook(locale: Locale, book: SeedBook): BookListItem {
     category: book.category[locale],
     categoryId: book.categoryId,
     price: book.price,
+    salePrice: book.price,
+    originalPrice: null,
+    discountAmount: null,
     rating: Number(book.rating.toFixed(1)),
     coverImageSrc: book.coverImageSrc,
     coverImageAlt: book.coverImageAlt[locale],
@@ -358,6 +664,8 @@ function toLocalizedBookDetail(locale: Locale, book: SeedBook): BookDetail {
   return {
     ...toLocalizedBook(locale, book),
     description: book.description[locale],
+    edition: locale === "my" ? "၁" : "1",
+    previewPdfSrc: null,
     publishYear: book.publishYear,
     pageCount: book.pageCount,
     language: book.language[locale],
@@ -467,13 +775,26 @@ export async function getBookFilterOptions(locale: Locale): Promise<BookFilterOp
 
 export async function getBookBySlug(locale: Locale, slug: string): Promise<BookDetail | null> {
   const normalizedSlug = normalizeSlug(slug);
-  const book = seedBooks.find((seedBook) => seedBook.slug === normalizedSlug);
+  try {
+    const backendBooks = await fetchBooksFromBackend(locale);
+    const backendBook = getActiveBackendBooks(backendBooks).find(
+      (book) => normalizeSlug(book.id) === normalizedSlug,
+    );
 
-  if (!book) {
+    if (backendBook) {
+      return toBackendBookDetail(locale, backendBook);
+    }
+  } catch {
+    // Fall through to seed fallback.
+  }
+
+  const fallbackBook = seedBooks.find((seedBook) => seedBook.slug === normalizedSlug);
+
+  if (!fallbackBook) {
     return null;
   }
 
-  return toLocalizedBookDetail(locale, book);
+  return toLocalizedBookDetail(locale, fallbackBook);
 }
 
 export async function getBooksByAuthor(
@@ -485,9 +806,18 @@ export async function getBooksByAuthor(
   },
 ): Promise<BookListItem[]> {
   const safeLimit = clamp(limit, 1, 24);
-  const normalizedAuthorName = options?.authorName
-    ? options.authorName.trim().toLowerCase().replace(/\s+/g, " ")
-    : "";
+  const normalizedAuthorName = options?.authorName ? normalizeSearchValue(options.authorName) : "";
+
+  try {
+    const backendBooks = await fetchBooksFromBackend(locale);
+    return getActiveBackendBooks(backendBooks)
+      .filter((book) => matchesBackendAuthor(book, authorId, normalizedAuthorName))
+      .sort(sortBackendBooksDescending)
+      .slice(0, safeLimit)
+      .map((book) => toBackendBookListItem(book));
+  } catch {
+    // Fall through to seed fallback.
+  }
 
   return seedBooks
     .filter((seedBook) => {
@@ -499,9 +829,7 @@ export async function getBooksByAuthor(
         return false;
       }
 
-      const candidateNames = [seedBook.author.en, seedBook.author.my].map((name) =>
-        name.trim().toLowerCase().replace(/\s+/g, " "),
-      );
+      const candidateNames = [seedBook.author.en, seedBook.author.my].map(normalizeSearchValue);
 
       return candidateNames.includes(normalizedAuthorName);
     })
@@ -516,7 +844,41 @@ export async function getRelatedBooks(
   limit = 4,
 ): Promise<BookListItem[]> {
   const safeLimit = clamp(limit, 1, 12);
-  const sameCategory = seedBooks
+  try {
+    const backendBooks = getActiveBackendBooks(await fetchBooksFromBackend(locale));
+    const sameCategory = backendBooks
+      .filter((book) => {
+        if (book.id === currentBook.id) {
+          return false;
+        }
+
+        const normalizedCategoryId = normalizeCategoryFilterValue(currentBook.categoryId);
+        return book.categories.some((category) => {
+          const categoryCandidates = [category.id, category.name]
+            .map(normalizeCategoryFilterValue)
+            .filter(Boolean);
+          return categoryCandidates.includes(normalizedCategoryId);
+        });
+      })
+      .sort(sortBackendBooksDescending)
+      .map((book) => toBackendBookListItem(book));
+
+    if (sameCategory.length >= safeLimit) {
+      return sameCategory.slice(0, safeLimit);
+    }
+
+    const excludedIds = new Set([currentBook.id, ...sameCategory.map((book) => book.id)]);
+    const fallbackBooks = backendBooks
+      .filter((book) => !excludedIds.has(book.id))
+      .sort(sortBackendBooksDescending)
+      .map((book) => toBackendBookListItem(book));
+
+    return [...sameCategory, ...fallbackBooks].slice(0, safeLimit);
+  } catch {
+    // Fall through to seed fallback.
+  }
+
+  const sameCategoryFallback = seedBooks
     .filter(
       (seedBook) =>
         seedBook.id !== currentBook.id && seedBook.categoryId === currentBook.categoryId,
@@ -524,17 +886,18 @@ export async function getRelatedBooks(
     .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime())
     .map((seedBook) => toLocalizedBook(locale, seedBook));
 
-  if (sameCategory.length >= safeLimit) {
-    return sameCategory.slice(0, safeLimit);
+  if (sameCategoryFallback.length >= safeLimit) {
+    return sameCategoryFallback.slice(0, safeLimit);
   }
 
-  const excludedIds = new Set([currentBook.id, ...sameCategory.map((book) => book.id)]);
+  const excludedIds = new Set([currentBook.id, ...sameCategoryFallback.map((book) => book.id)]);
+
   const fallbackBooks = seedBooks
     .filter((seedBook) => !excludedIds.has(seedBook.id))
     .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime())
     .map((seedBook) => toLocalizedBook(locale, seedBook));
 
-  return [...sameCategory, ...fallbackBooks].slice(0, safeLimit);
+  return [...sameCategoryFallback, ...fallbackBooks].slice(0, safeLimit);
 }
 
 export async function searchBooks(
@@ -543,6 +906,38 @@ export async function searchBooks(
 ): Promise<BookListResponse> {
   const query = normalizeQuery(queryInput);
   const keyword = query.q?.toLowerCase();
+
+  try {
+    const backendBooks = getActiveBackendBooks(await fetchBooksFromBackend(locale));
+    const filteredBooks = backendBooks.filter((book) => {
+      if (query.category && !matchesBackendBookCategory(book, query.category)) {
+        return false;
+      }
+
+      if (!keyword) {
+        return true;
+      }
+
+      return matchesBackendBookKeyword(book, keyword);
+    });
+
+    const sortedBooks = [...filteredBooks].sort(sortBackendBooksDescending);
+    const offset = Number(query.cursor ?? "0");
+    const safeOffset = Number.isFinite(offset) && offset >= 0 ? offset : 0;
+    const pageItems = sortedBooks.slice(safeOffset, safeOffset + query.limit);
+    const items = pageItems.map((book) => toBackendBookListItem(book));
+    const nextOffset = safeOffset + items.length;
+    const nextCursor = nextOffset < sortedBooks.length ? String(nextOffset) : null;
+
+    return {
+      items,
+      total: sortedBooks.length,
+      nextCursor,
+      appliedFilters: buildAppliedFilters(query),
+    };
+  } catch {
+    // Fall through to seed fallback.
+  }
 
   const filtered = seedBooks.filter((book) => {
     if (query.category && !matchesBookCategory(book, query.category)) {
