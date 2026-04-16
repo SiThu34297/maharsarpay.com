@@ -387,14 +387,16 @@ export function MultimediaListClient({
               {items.map((item) => (
                 <article key={item.id} className="multimedia-list-card">
                   <div className="relative overflow-hidden rounded-xl">
-                    <Image
-                      src={item.imageSrc}
-                      alt={item.imageAlt}
-                      width={420}
-                      height={265}
-                      className="h-[210px] w-full object-cover sm:h-[230px]"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-                    />
+                    <Link href={`/${locale}/multimedia/${item.slug}?from=multimedia`}>
+                      <Image
+                        src={item.imageSrc}
+                        alt={item.imageAlt}
+                        width={420}
+                        height={265}
+                        className="h-[210px] w-full object-cover sm:h-[230px]"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                      />
+                    </Link>
                     <span
                       className={`media-type-pill ${
                         item.mediaType === "video"
@@ -409,7 +411,9 @@ export function MultimediaListClient({
                   </div>
 
                   <h2 className="mt-3 text-lg font-semibold text-[var(--color-text-main)] sm:text-xl">
-                    {item.title}
+                    <Link href={`/${locale}/multimedia/${item.slug}?from=multimedia`}>
+                      {item.title}
+                    </Link>
                   </h2>
                   <p className="mt-2 text-sm leading-relaxed text-[var(--color-text-muted)]">
                     {item.description}

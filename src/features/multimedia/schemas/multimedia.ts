@@ -1,7 +1,10 @@
+import type { BookFilterOptions, BookListItem } from "@/features/books/schemas/books";
+
 export type MediaType = "video" | "photo";
 
 export type MediaListItem = {
   id: string;
+  slug: string;
   title: string;
   description: string;
   creator: string;
@@ -9,6 +12,19 @@ export type MediaListItem = {
   publishedAt: string;
   imageSrc: string;
   imageAlt: string;
+};
+
+export type MediaDetail = MediaListItem & {
+  lead: string;
+  storyParagraphs: string[];
+  tags: string[];
+  durationLabel?: string;
+  photoCount?: number;
+  galleryImages: Array<{
+    src: string;
+    alt: string;
+  }>;
+  relatedBookAuthorId?: string;
 };
 
 export type MediaListQuery = {
@@ -33,4 +49,11 @@ export type MediaListResponse = {
 export type MultimediaPageData = {
   initialResponse: MediaListResponse;
   initialQuery: MediaListQuery;
+};
+
+export type MultimediaDetailPageData = {
+  media: MediaDetail;
+  relatedMedia: MediaListItem[];
+  relatedBooks: BookListItem[];
+  filterOptions: BookFilterOptions;
 };

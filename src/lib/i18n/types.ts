@@ -142,6 +142,31 @@ export type Dictionary = {
     byLabel: string;
     publishedOnLabel: string;
   };
+  multimediaDetail: {
+    breadcrumbLabel: string;
+    breadcrumbMedia: string;
+    heroBadgeVideo: string;
+    heroBadgePhoto: string;
+    watchNowLabel: string;
+    viewGalleryLabel: string;
+    byCreatorLabel: string;
+    publishedOnLabel: string;
+    storyTitle: string;
+    mediaInfoLabel: string;
+    durationLabel: string;
+    photoCountLabel: string;
+    tagsLabel: string;
+    relatedMediaTitle: string;
+    viewAllMedia: string;
+    relatedBooksTitle: string;
+    viewAllBooks: string;
+    noRelatedMediaTitle: string;
+    noRelatedMediaDescription: string;
+    noRelatedBooksTitle: string;
+    noRelatedBooksDescription: string;
+    browseMedia: string;
+    browseBooks: string;
+  };
   contactPage: {
     metaTitle: string;
     metaDescription: string;

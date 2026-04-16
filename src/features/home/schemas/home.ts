@@ -40,6 +40,7 @@ export type AuthorItem = {
 
 export type MediaItem = {
   id: string;
+  slug: string;
   mediaType: "video" | "photo";
   title: string;
   description: string;

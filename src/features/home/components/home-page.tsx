@@ -262,13 +262,15 @@ export async function HomePage({ copy, locale }: HomePageProps) {
               {data.mediaItems.map((item) => (
                 <li key={item.id} className="home-card min-w-[250px] snap-start">
                   <div className="relative">
-                    <Image
-                      src={item.imageSrc}
-                      alt={item.imageAlt}
-                      width={380}
-                      height={250}
-                      className="h-[160px] w-full rounded-xl object-cover"
-                    />
+                    <Link href={`/${locale}/multimedia/${item.slug}?from=home`}>
+                      <Image
+                        src={item.imageSrc}
+                        alt={item.imageAlt}
+                        width={380}
+                        height={250}
+                        className="h-[160px] w-full rounded-xl object-cover"
+                      />
+                    </Link>
                     <span
                       className={`media-type-pill ${
                         item.mediaType === "video"
@@ -281,7 +283,14 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                       <span>{getMediaLabel(copy.media, item.mediaType)}</span>
                     </span>
                   </div>
-                  <h3 className="mt-4 text-lg">{item.title}</h3>
+                  <h3 className="mt-4 text-lg">
+                    <Link
+                      href={`/${locale}/multimedia/${item.slug}?from=home`}
+                      className="hover:text-[var(--color-brand)]"
+                    >
+                      {item.title}
+                    </Link>
+                  </h3>
                   <p className="mt-2 text-sm text-[var(--color-text-muted)]">{item.description}</p>
                 </li>
               ))}
@@ -292,13 +301,15 @@ export async function HomePage({ copy, locale }: HomePageProps) {
             {data.mediaItems.map((item) => (
               <article key={item.id} className="home-card">
                 <div className="relative">
-                  <Image
-                    src={item.imageSrc}
-                    alt={item.imageAlt}
-                    width={420}
-                    height={265}
-                    className="h-[180px] w-full rounded-xl object-cover"
-                  />
+                  <Link href={`/${locale}/multimedia/${item.slug}?from=home`}>
+                    <Image
+                      src={item.imageSrc}
+                      alt={item.imageAlt}
+                      width={420}
+                      height={265}
+                      className="h-[180px] w-full rounded-xl object-cover"
+                    />
+                  </Link>
                   <span
                     className={`media-type-pill ${
                       item.mediaType === "video" ? "media-type-pill-video" : "media-type-pill-photo"
@@ -309,7 +320,14 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                     <span>{getMediaLabel(copy.media, item.mediaType)}</span>
                   </span>
                 </div>
-                <h3 className="mt-4 text-xl">{item.title}</h3>
+                <h3 className="mt-4 text-xl">
+                  <Link
+                    href={`/${locale}/multimedia/${item.slug}?from=home`}
+                    className="hover:text-[var(--color-brand)]"
+                  >
+                    {item.title}
+                  </Link>
+                </h3>
                 <p className="mt-2 text-sm text-[var(--color-text-muted)]">{item.description}</p>
               </article>
             ))}

@@ -309,6 +309,7 @@ const mediaItemsByLocale: Record<Locale, MediaItem[]> = {
   en: [
     {
       id: "media-1",
+      slug: "behind-the-shelves",
       mediaType: "video",
       title: "Behind the Shelves",
       description: "A short tour through our top picks this month.",
@@ -317,6 +318,7 @@ const mediaItemsByLocale: Record<Locale, MediaItem[]> = {
     },
     {
       id: "media-2",
+      slug: "meet-the-author",
       mediaType: "video",
       title: "Meet the Author",
       description: "Conversations with writers shaping modern Myanmar literature.",
@@ -325,6 +327,7 @@ const mediaItemsByLocale: Record<Locale, MediaItem[]> = {
     },
     {
       id: "media-3",
+      slug: "weekend-reading-guide",
       mediaType: "photo",
       title: "Weekend Reading Guide",
       description: "Curated picks for your quiet weekend moments.",
@@ -333,6 +336,7 @@ const mediaItemsByLocale: Record<Locale, MediaItem[]> = {
     },
     {
       id: "media-4",
+      slug: "bookstore-stories",
       mediaType: "photo",
       title: "Bookstore Stories",
       description: "Reader stories from Yangon, Mandalay, and beyond.",
@@ -343,6 +347,7 @@ const mediaItemsByLocale: Record<Locale, MediaItem[]> = {
   my: [
     {
       id: "media-1",
+      slug: "behind-the-shelves",
       mediaType: "video",
       title: "စာအုပ်စင်နောက်ကွယ်",
       description: "ဒီလအတွက် အကြိုက်ဆုံးစာအုပ်များကို အကျဉ်းချုပ် မိတ်ဆက်ထားသည်။",
@@ -351,6 +356,7 @@ const mediaItemsByLocale: Record<Locale, MediaItem[]> = {
     },
     {
       id: "media-2",
+      slug: "meet-the-author",
       mediaType: "video",
       title: "စာရေးသူနှင့် တွေ့ဆုံမှု",
       description: "ခေတ်သစ်မြန်မာစာပေကို ပုံဖော်နေသော စာရေးသူများနှင့် ဆွေးနွေးမှုများ။",
@@ -359,6 +365,7 @@ const mediaItemsByLocale: Record<Locale, MediaItem[]> = {
     },
     {
       id: "media-3",
+      slug: "weekend-reading-guide",
       mediaType: "photo",
       title: "စနေတနင်္ဂနွေ ဖတ်ရှုလမ်းညွှန်",
       description: "ငြိမ်သက်တဲ့ ပိတ်ရက်ချိန်အတွက် ရွေးချယ်ထားသော စာအုပ်အကြံပြုချက်များ။",
@@ -367,6 +374,7 @@ const mediaItemsByLocale: Record<Locale, MediaItem[]> = {
     },
     {
       id: "media-4",
+      slug: "bookstore-stories",
       mediaType: "photo",
       title: "စာအုပ်ဆိုင်ပုံပြင်များ",
       description: "ရန်ကုန်၊ မန္တလေးနှင့် အခြားမြို့များမှ စာဖတ်သူတို့ရဲ့ ပုံပြင်များ။",
