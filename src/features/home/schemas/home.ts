@@ -16,6 +16,8 @@ export type HeroSlide = {
 export type CategoryItem = {
   id: string;
   name: string;
+  imageSrc: string | null;
+  imageAlt: string;
 };
 
 export type BookItem = {

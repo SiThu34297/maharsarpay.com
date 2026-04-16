@@ -115,9 +115,26 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                   categoryHrefByLabel.get(category.name) ??
                   `/${locale}/books?q=${encodeURIComponent(category.name)}`
                 }
-                className="category-chip"
+                className="group rounded-2xl border border-[var(--color-border)] bg-white p-3 transition hover:-translate-y-0.5 hover:border-[var(--color-brand)] hover:shadow-[var(--shadow-soft)]"
               >
-                {category.name}
+                <div className="flex flex-col items-center gap-2 text-center">
+                  {category.imageSrc ? (
+                    <Image
+                      src={category.imageSrc}
+                      alt={category.imageAlt}
+                      width={68}
+                      height={68}
+                      className="h-[68px] w-[68px] border border-[var(--color-border)] object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-[68px] w-[68px] items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-brand-subtle)] text-xl font-semibold text-[var(--color-brand)]">
+                      {category.name.slice(0, 1)}
+                    </div>
+                  )}
+                  <span className="line-clamp-2 text-sm font-semibold text-[var(--color-text-main)] transition group-hover:text-[var(--color-brand)]">
+                    {category.name}
+                  </span>
+                </div>
               </Link>
             ))}
           </div>

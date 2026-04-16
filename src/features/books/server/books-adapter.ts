@@ -1,5 +1,6 @@
 import type { Locale } from "@/lib/i18n";
 
+import { getAllCategories } from "@/features/categories";
 import type {
   AppliedBookFilters,
   BookDetail,
@@ -319,7 +320,7 @@ function toUrlSearchParams(raw: RawSearchParams): URLSearchParams {
   const params = new URLSearchParams();
 
   for (const [key, value] of Object.entries(raw)) {
-    if (typeof value === "undefined") {
+    if (value === undefined) {
       continue;
     }
 
@@ -381,6 +382,30 @@ function normalizeSlug(value: string) {
   return value.trim().toLowerCase();
 }
 
+function normalizeCategoryFilterValue(value: string) {
+  return value.trim().toLowerCase();
+}
+
+function matchesBookCategory(book: SeedBook, categoryQuery: string) {
+  const normalizedQuery = normalizeCategoryFilterValue(categoryQuery);
+
+  if (!normalizedQuery) {
+    return true;
+  }
+
+  const candidates = [book.categoryId, book.category.en, book.category.my]
+    .map(normalizeCategoryFilterValue)
+    .filter(Boolean);
+
+  if (candidates.includes(normalizedQuery)) {
+    return true;
+  }
+
+  return candidates.some(
+    (candidate) => candidate.includes(normalizedQuery) || normalizedQuery.includes(candidate),
+  );
+}
+
 export function parseBookListQueryFromSearchParams(searchParams: URLSearchParams): BookListQuery {
   return normalizeQuery({
     q: searchParams.get("q") ?? undefined,
@@ -399,6 +424,33 @@ export function normalizeBookListQuery(query: Partial<BookListQuery>): BookListQ
 }
 
 export async function getBookFilterOptions(locale: Locale): Promise<BookFilterOptions> {
+  try {
+    const categories = await getAllCategories(locale);
+    const backendCategoryMap = new Map<string, string>();
+
+    for (const category of categories) {
+      const label = category.name.trim();
+
+      if (!label) {
+        continue;
+      }
+
+      backendCategoryMap.set(label, label);
+    }
+
+    const backendCategoryOptions = [...backendCategoryMap.entries()]
+      .map(([value, label]) => ({ value, label }))
+      .sort((left, right) => left.label.localeCompare(right.label));
+
+    if (backendCategoryOptions.length > 0) {
+      return {
+        categories: backendCategoryOptions,
+      };
+    }
+  } catch {
+    // Fallback to seed-based category options if backend is unavailable.
+  }
+
   const localizedBooks = seedBooks.map((book) => toLocalizedBook(locale, book));
   const categoriesMap = new Map<string, string>();
 
@@ -473,7 +525,7 @@ export async function searchBooks(
   const keyword = query.q?.toLowerCase();
 
   const filtered = seedBooks.filter((book) => {
-    if (query.category && book.categoryId !== query.category) {
+    if (query.category && !matchesBookCategory(book, query.category)) {
       return false;
     }
 

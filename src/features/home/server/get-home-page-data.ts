@@ -1,5 +1,6 @@
 import type { Locale } from "@/lib/i18n";
 
+import { getAllCategories } from "@/features/categories";
 import type {
   AuthorItem,
   BookItem,
@@ -195,24 +196,79 @@ const booksByLocale: Record<Locale, HomeBookSeedItem[]> = {
   ],
 };
 
-const categoriesByLocale: Record<Locale, CategoryItem[]> = {
+const fallbackCategoriesByLocale: Record<Locale, CategoryItem[]> = {
   en: [
-    { id: "cat-1", name: "Fiction" },
-    { id: "cat-2", name: "History" },
-    { id: "cat-3", name: "Business" },
-    { id: "cat-4", name: "Self Development" },
-    { id: "cat-5", name: "Children" },
-    { id: "cat-6", name: "Poetry" },
+    { id: "cat-1", name: "Fiction", imageSrc: null, imageAlt: "Fiction category" },
+    { id: "cat-2", name: "History", imageSrc: null, imageAlt: "History category" },
+    { id: "cat-3", name: "Business", imageSrc: null, imageAlt: "Business category" },
+    {
+      id: "cat-4",
+      name: "Self Development",
+      imageSrc: null,
+      imageAlt: "Self Development category",
+    },
+    { id: "cat-5", name: "Children", imageSrc: null, imageAlt: "Children category" },
+    { id: "cat-6", name: "Poetry", imageSrc: null, imageAlt: "Poetry category" },
   ],
   my: [
-    { id: "cat-1", name: "ဝတ္ထု" },
-    { id: "cat-2", name: "သမိုင်း" },
-    { id: "cat-3", name: "စီးပွားရေး" },
-    { id: "cat-4", name: "ကိုယ်တိုးတက်ရေး" },
-    { id: "cat-5", name: "ကလေးစာပေ" },
-    { id: "cat-6", name: "ကဗျာ" },
+    { id: "cat-1", name: "ဝတ္ထု", imageSrc: null, imageAlt: "ဝတ္ထု အမျိုးအစား" },
+    { id: "cat-2", name: "သမိုင်း", imageSrc: null, imageAlt: "သမိုင်း အမျိုးအစား" },
+    {
+      id: "cat-3",
+      name: "စီးပွားရေး",
+      imageSrc: null,
+      imageAlt: "စီးပွားရေး အမျိုးအစား",
+    },
+    {
+      id: "cat-4",
+      name: "ကိုယ်တိုးတက်ရေး",
+      imageSrc: null,
+      imageAlt: "ကိုယ်တိုးတက်ရေး အမျိုးအစား",
+    },
+    {
+      id: "cat-5",
+      name: "ကလေးစာပေ",
+      imageSrc: null,
+      imageAlt: "ကလေးစာပေ အမျိုးအစား",
+    },
+    { id: "cat-6", name: "ကဗျာ", imageSrc: null, imageAlt: "ကဗျာ အမျိုးအစား" },
   ],
 };
+
+function pickRandomItems<T>(items: T[], count: number): T[] {
+  if (items.length <= count) {
+    return items;
+  }
+
+  const shuffled = [...items];
+
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]];
+  }
+
+  return shuffled.slice(0, count);
+}
+
+async function getHomeCategories(locale: Locale): Promise<CategoryItem[]> {
+  try {
+    const backendCategories = await getAllCategories(locale);
+    const mappedCategories = backendCategories.map((category) => ({
+      id: category.id,
+      name: category.name,
+      imageSrc: category.icon,
+      imageAlt: `${category.name} category icon`,
+    }));
+
+    if (mappedCategories.length > 0) {
+      return pickRandomItems(mappedCategories, 6);
+    }
+  } catch {
+    // Fallback to static categories if backend is unavailable.
+  }
+
+  return pickRandomItems(fallbackCategoriesByLocale[locale], 6);
+}
 
 const authorsByLocale: Record<Locale, AuthorItem[]> = {
   en: [
@@ -461,6 +517,8 @@ const promoByLocale: Record<Locale, PromoBanner> = {
 };
 
 export async function getHomePageData(locale: Locale): Promise<HomePageData> {
+  const categories = await getHomeCategories(locale);
+
   return {
     navigation,
     heroSlides: [
@@ -519,7 +577,7 @@ export async function getHomePageData(locale: Locale): Promise<HomePageData> {
             : "A mixed genre book collection for the hero slider",
       },
     ],
-    categories: categoriesByLocale[locale],
+    categories,
     books: booksByLocale[locale].map((book) => ({
       ...book,
       cartProductId: cartProductIdByHomeBookId[book.id] ?? `book:${book.id}`,
