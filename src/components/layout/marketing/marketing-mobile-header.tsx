@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import { ChevronDownIcon, Cross2Icon, HamburgerMenuIcon, PersonIcon } from "@radix-ui/react-icons";
 
-import type { Dictionary } from "@/lib/i18n";
+import type { Dictionary, Locale } from "@/lib/i18n";
 
 import { getNavigationLabel, type MarketingNavId, type MarketingNavItem } from "./navigation";
 
@@ -16,6 +16,7 @@ type BookCategoryLink = {
 
 type MarketingMobileHeaderProps = Readonly<{
   copy: Dictionary;
+  locale: Locale;
   navigation: MarketingNavItem[];
   activeNavId: MarketingNavId;
   bookCategoryLinks: BookCategoryLink[];
@@ -23,6 +24,7 @@ type MarketingMobileHeaderProps = Readonly<{
 
 export function MarketingMobileHeader({
   copy,
+  locale,
   navigation,
   activeNavId,
   bookCategoryLinks,
@@ -103,9 +105,13 @@ export function MarketingMobileHeader({
 
         <div aria-hidden className="h-10 w-10" />
 
-        <button type="button" className="icon-button" aria-label={copy.header.accountLabel}>
+        <Link
+          href={`/${locale}/profile`}
+          className="icon-button"
+          aria-label={copy.header.accountLabel}
+        >
           <PersonIcon />
-        </button>
+        </Link>
       </div>
 
       <div

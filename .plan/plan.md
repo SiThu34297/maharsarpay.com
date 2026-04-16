@@ -7,6 +7,7 @@
 - Categories: `.plan/categories-plan.md`
 - Multimedia: `.plan/multimedia-plan.md`
 - Multimedia Detail: `.plan/multimedia-detail-plan.md`
+- Profile: `.plan/profile-plan.md`
 
 ## Notes
 

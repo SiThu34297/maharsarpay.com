@@ -1,13 +1,20 @@
 import type { Dictionary, Locale } from "@/lib/i18n";
 
-export type MarketingNavId = "home" | "books" | "authors" | "categories" | "media" | "contact";
+export type MarketingNavId =
+  | "home"
+  | "books"
+  | "authors"
+  | "categories"
+  | "media"
+  | "contact"
+  | "profile";
 
 export type MarketingNavItem = {
   id: MarketingNavId;
   href: string;
 };
 
-export type MarketingPageId = "home" | "books" | "authors" | "media" | "contact";
+export type MarketingPageId = "home" | "books" | "authors" | "media" | "contact" | "profile";
 
 export function getNavigationLabel(copy: Dictionary["navigation"], id: MarketingNavId) {
   switch (id) {
@@ -23,6 +30,8 @@ export function getNavigationLabel(copy: Dictionary["navigation"], id: Marketing
       return copy.media;
     case "contact":
       return copy.contact;
+    case "profile":
+      return copy.profile;
     default:
       return copy.home;
   }

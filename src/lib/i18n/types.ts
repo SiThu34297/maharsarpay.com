@@ -20,6 +20,7 @@ export type Dictionary = {
     categories: string;
     media: string;
     contact: string;
+    profile: string;
   };
   hero: {
     badge: string;
@@ -193,6 +194,40 @@ export type Dictionary = {
     increaseQuantity: string;
     removeItem: string;
     subtotalLabel: string;
+  };
+  loginPage: {
+    metaTitle: string;
+    metaDescription: string;
+    title: string;
+    description: string;
+    googleButton: string;
+    orSeparator: string;
+    emailLabel: string;
+    passwordLabel: string;
+    credentialsButton: string;
+    demoHint: string;
+    errorCredentials: string;
+    errorMissingFields: string;
+    errorGoogleUnavailable: string;
+    errorUnknown: string;
+  };
+  profilePage: {
+    metaTitle: string;
+    metaDescription: string;
+    title: string;
+    description: string;
+    avatarAlt: string;
+    logoutButton: string;
+    ordersTitle: string;
+    emptyOrders: string;
+    orderNumberLabel: string;
+    placedOnLabel: string;
+    itemCountLabel: string;
+    totalLabel: string;
+    currencyLabel: string;
+    statusPaid: string;
+    statusProcessing: string;
+    statusShipped: string;
   };
   footer: {
     description: string;

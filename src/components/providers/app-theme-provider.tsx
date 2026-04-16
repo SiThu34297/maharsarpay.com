@@ -2,6 +2,7 @@
 
 import { Theme } from "@radix-ui/themes";
 
+import { AuthSessionProvider } from "@/components/providers/auth-session-provider";
 import { CartProvider } from "@/features/cart";
 
 type AppThemeProviderProps = Readonly<{
@@ -11,7 +12,9 @@ type AppThemeProviderProps = Readonly<{
 export function AppThemeProvider({ children }: AppThemeProviderProps) {
   return (
     <Theme accentColor="grass" grayColor="slate" radius="large" scaling="100%">
-      <CartProvider>{children}</CartProvider>
+      <AuthSessionProvider>
+        <CartProvider>{children}</CartProvider>
+      </AuthSessionProvider>
     </Theme>
   );
 }

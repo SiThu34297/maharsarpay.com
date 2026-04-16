@@ -96,9 +96,13 @@ export function MarketingSiteHeader({
           </nav>
 
           <div className="flex items-center justify-end gap-2 lg:gap-3">
-            <button type="button" className="icon-button" aria-label={copy.header.accountLabel}>
+            <Link
+              href={`/${locale}/profile`}
+              className="icon-button"
+              aria-label={copy.header.accountLabel}
+            >
               <PersonIcon />
-            </button>
+            </Link>
           </div>
         </div>
 
@@ -153,17 +157,18 @@ export function MarketingSiteHeader({
             </ul>
           </nav>
 
-          <button
-            type="button"
+          <Link
+            href={`/${locale}/profile`}
             className="icon-button shrink-0"
             aria-label={copy.header.accountLabel}
           >
             <PersonIcon />
-          </button>
+          </Link>
         </div>
 
         <MarketingMobileHeader
           copy={copy}
+          locale={locale}
           navigation={navigation}
           activeNavId={activeNavId}
           bookCategoryLinks={effectiveBookCategoryLinks}
