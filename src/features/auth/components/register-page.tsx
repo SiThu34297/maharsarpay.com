@@ -106,7 +106,7 @@ export async function RegisterPage({
                 required
                 autoComplete="name"
                 className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm text-[var(--color-text-main)] outline-none placeholder:text-[var(--color-text-muted)] focus-visible:border-[var(--color-brand)]"
-                placeholder="Sithu"
+                placeholder="Maharsarpay"
               />
             </label>
 
@@ -134,7 +134,7 @@ export async function RegisterPage({
                 required
                 autoComplete="tel"
                 className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm text-[var(--color-text-main)] outline-none placeholder:text-[var(--color-text-muted)] focus-visible:border-[var(--color-brand)]"
-                placeholder="+959761807838"
+                placeholder="09xxxxxxxxx"
               />
             </label>
 
@@ -148,7 +148,7 @@ export async function RegisterPage({
                 autoComplete="street-address"
                 rows={3}
                 className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm text-[var(--color-text-main)] outline-none placeholder:text-[var(--color-text-muted)] focus-visible:border-[var(--color-brand)]"
-                placeholder="No.12, Ahlone Township, Yangon"
+                placeholder="Yangon, Myanmar"
               />
             </label>
 
@@ -162,7 +162,7 @@ export async function RegisterPage({
                 required
                 autoComplete="new-password"
                 className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm text-[var(--color-text-main)] outline-none placeholder:text-[var(--color-text-muted)] focus-visible:border-[var(--color-brand)]"
-                placeholder="StrongPass123!"
+                placeholder="••••••••"
               />
             </label>
 

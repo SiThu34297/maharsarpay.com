@@ -1839,7 +1839,7 @@ h6 {
 
 .multimedia-detail-title {
   margin: 0;
-  font-size: clamp(1.95rem, 4.1vw, 3rem);
+  font-size: clamp(1.6rem, 3.4vw, 2.4rem);
   line-height: 1.1;
 }
 
@@ -2059,6 +2059,25 @@ h6 {
 
 .multimedia-detail-related-book-card h3 a {
   color: var(--color-text-main);
+}
+
+.orders-editor-status {
+  background: #ffffff;
+}
+
+.orders-editor-status-pending {
+  border-color: rgba(245, 158, 11, 0.35);
+  color: #b45309;
+}
+
+.orders-editor-status-delivered {
+  border-color: rgba(34, 197, 94, 0.35);
+  color: #15803d;
+}
+
+.orders-editor-status-cancelled {
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #b91c1c;
 }
 
 .multimedia-detail-related-book-card p {

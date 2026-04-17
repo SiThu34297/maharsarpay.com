@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 
 import { ChevronDownIcon, Cross2Icon, HamburgerMenuIcon, PersonIcon } from "@radix-ui/react-icons";
@@ -20,6 +21,11 @@ type MarketingMobileHeaderProps = Readonly<{
   navigation: MarketingNavItem[];
   activeNavId: MarketingNavId;
   bookCategoryLinks: BookCategoryLink[];
+  accountState: {
+    isLoggedIn: boolean;
+    imageSrc: string | null;
+    initials: string;
+  };
 }>;
 
 export function MarketingMobileHeader({
@@ -28,7 +34,12 @@ export function MarketingMobileHeader({
   navigation,
   activeNavId,
   bookCategoryLinks,
+  accountState,
 }: MarketingMobileHeaderProps) {
+  const profilePath = `/${locale}/profile`;
+  const accountHref = accountState.isLoggedIn
+    ? profilePath
+    : `/${locale}/login?next=${encodeURIComponent(profilePath)}`;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isBooksDropdownOpen, setIsBooksDropdownOpen] = useState(activeNavId === "books");
   const mobileMenuId = "marketing-mobile-navigation";
@@ -105,12 +116,24 @@ export function MarketingMobileHeader({
 
         <div aria-hidden className="h-10 w-10" />
 
-        <Link
-          href={`/${locale}/profile`}
-          className="icon-button"
-          aria-label={copy.header.accountLabel}
-        >
-          <PersonIcon />
+        <Link href={accountHref} className="icon-button" aria-label={copy.header.accountLabel}>
+          {accountState.isLoggedIn ? (
+            accountState.imageSrc ? (
+              <Image
+                src={accountState.imageSrc}
+                alt={copy.header.accountLabel}
+                width={36}
+                height={36}
+                className="h-9 w-9 rounded-full object-cover"
+              />
+            ) : (
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-brand-subtle)] text-xs font-semibold text-[var(--color-brand)]">
+                {accountState.initials}
+              </span>
+            )
+          ) : (
+            <PersonIcon />
+          )}
         </Link>
       </div>
 
@@ -137,6 +160,7 @@ export function MarketingMobileHeader({
                       <div className="flex items-center gap-2">
                         <Link
                           href={item.href}
+                          prefetch={false}
                           aria-current={isActive ? "page" : undefined}
                           className={`flex-1 rounded-lg px-3 py-2.5 text-base transition ${
                             isActive
@@ -179,6 +203,7 @@ export function MarketingMobileHeader({
                               <li key={`mobile-book-category-${categoryLink.href}`}>
                                 <Link
                                   href={categoryLink.href}
+                                  prefetch={false}
                                   className="block rounded-md px-3 py-1.5 text-sm text-[var(--color-text-muted)] transition hover:bg-[var(--color-brand-subtle)] hover:text-[var(--color-brand)]"
                                   onClick={closeAllMenus}
                                 >
@@ -197,6 +222,7 @@ export function MarketingMobileHeader({
                   <li key={`mobile-${item.id}`}>
                     <Link
                       href={item.href}
+                      prefetch={false}
                       aria-current={isActive ? "page" : undefined}
                       className={`block rounded-lg px-3 py-2.5 text-base transition ${
                         isActive

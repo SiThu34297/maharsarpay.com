@@ -79,9 +79,7 @@ function SectionHeading({ title, description }: SectionHeadingProps) {
   return (
     <div className="mb-6 md:mb-8">
       <h2 className="text-3xl text-[var(--color-text-main)] md:text-4xl">{title}</h2>
-      <p className="mt-3 max-w-2xl text-base text-[var(--color-text-muted)] md:text-lg">
-        {description}
-      </p>
+      <p className="mt-3 text-base text-[var(--color-text-muted)] md:text-lg">{description}</p>
     </div>
   );
 }

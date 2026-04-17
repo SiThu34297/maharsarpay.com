@@ -215,6 +215,18 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
                   />
                 ) : null}
               </div>
+
+              <div className="mt-4 rounded-xl border border-[var(--color-brand)] bg-[var(--color-brand-subtle)] p-3">
+                <p className="text-sm font-semibold text-[var(--color-brand)]">
+                  {copy.bookDetail.doorToDoorAdTitle}
+                </p>
+                <p className="mt-1 text-sm text-[var(--color-text-main)]">
+                  {copy.bookDetail.doorToDoorAdContact}
+                </p>
+                <p className="mt-2 text-xs text-[var(--color-text-muted)]">
+                  {copy.bookDetail.doorToDoorAdShippingNote}
+                </p>
+              </div>
             </div>
           </section>
 
@@ -275,6 +287,23 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
                           </p>
                         ) : null}
                       </div>
+
+                      <AddToCartButton
+                        item={{
+                          cartProductId: relatedBook.cartProductId,
+                          title: relatedBook.title,
+                          author: relatedBook.author,
+                          price: relatedBook.price,
+                          salePrice: relatedBook.salePrice,
+                          originalPrice: relatedBook.originalPrice,
+                          discountAmount: relatedBook.discountAmount,
+                          coverImageSrc: relatedBook.coverImageSrc,
+                          coverImageAlt: relatedBook.coverImageAlt,
+                        }}
+                        addLabel={copy.booksList.addToCart}
+                        addedLabel={copy.booksList.addedToCart}
+                        className="book-detail-add-to-cart"
+                      />
                     </article>
                   );
                 })}

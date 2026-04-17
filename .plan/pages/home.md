@@ -7,6 +7,32 @@
 
 ## Entries
 
+### 2026-04-17 - Remove Home Section Description Max Width
+
+- What changed:
+  - Removed `max-w-2xl` constraint from shared home section description text (`SectionHeading`).
+- Why it changed:
+  - Requested to let Myanmar section descriptions span full available width for better readability.
+- Files touched:
+  - `src/features/home/components/home-page.tsx`
+  - `.plan/pages/home.md`
+- Notes:
+  - Affects descriptions for categories, books, authors, and media sections.
+
+### 2026-04-17 - Myanmar Home Section Copy Refinement
+
+- What changed:
+  - Updated home section titles and descriptions in Myanmar locale copy.
+  - Changed titles to: `အမျိုးအစားများ`, `စာအုပ်များ`, `စာရေးသူများ`, and `မီဒီယာများ`.
+  - Refined bestsellers, authors, and media descriptions for clearer and more natural wording.
+- Why it changed:
+  - To match requested wording and improve readability/consistency for Myanmar users.
+- Files touched:
+  - `src/lib/i18n/dictionaries/my.ts`
+  - `.plan/pages/home.md`
+- Notes:
+  - This update affects Myanmar locale homepage copy only.
+
 ### 2026-04-17 - Hide Reviews and Seasonal Campaign Sections
 
 - What changed:

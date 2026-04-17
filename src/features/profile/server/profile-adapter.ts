@@ -2,40 +2,69 @@ import "server-only";
 
 import type { Session } from "next-auth";
 
+import { fetchUserOrders } from "@/features/cart-server";
 import type { Locale } from "@/lib/i18n";
 
 import type { ProfileOrder, ProfileSummary } from "@/features/profile/schemas/profile";
 
 type SessionUser = Session["user"];
 
-const defaultAvatar = "/images/home/real/authors/author-1.jpg";
-
-const ordersByEmail: Record<string, ProfileOrder[]> = {
-  "reader@maharsarpay.com": [
-    {
-      id: "ord-1001",
-      orderNumber: "MS-1001",
-      placedAt: "2026-04-11T09:30:00.000Z",
-      status: "shipped",
-      totalAmount: 36800,
-      items: [
-        { id: "book-atomic-habits", title: "Atomic Habits", quantity: 1 },
-        { id: "book-midnight-library", title: "The Midnight Library", quantity: 1 },
-      ],
-    },
-    {
-      id: "ord-1002",
-      orderNumber: "MS-1002",
-      placedAt: "2026-04-14T12:15:00.000Z",
-      status: "processing",
-      totalAmount: 19800,
-      items: [{ id: "book-deep-work", title: "Deep Work", quantity: 1 }],
-    },
-  ],
-};
-
 function getFallbackName(locale: Locale): string {
   return locale === "my" ? "စာဖတ်သူ" : "Reader";
+}
+
+function toOptionalString(value: string | null | undefined): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const normalized = value.trim();
+  return normalized.length > 0 ? normalized : null;
+}
+
+function toPlacedAt(items: Array<{ createdAt: string | null }>): string | null {
+  for (const item of items) {
+    if (item.createdAt) {
+      return item.createdAt;
+    }
+  }
+
+  return null;
+}
+
+function toProfileOrders(
+  orders: Array<{
+    id: string;
+    invoiceNo: string;
+    orderStatus: string;
+    customerName: string | null;
+    customerPhone: string | null;
+    shippingAddress: string | null;
+    subtotalAmount: number;
+    deliveryFee: number;
+    discountAmount: number;
+    totalAmount: number;
+    items: Array<{ id: string; title: string; quantity: number; createdAt: string | null }>;
+  }>,
+): ProfileOrder[] {
+  return orders.map((order) => ({
+    id: order.id,
+    orderNumber: order.invoiceNo,
+    placedAt: toPlacedAt(order.items),
+    status: order.orderStatus,
+    customerName: order.customerName,
+    customerPhone: order.customerPhone,
+    shippingAddress: order.shippingAddress,
+    subtotalAmount: order.subtotalAmount,
+    deliveryFee: order.deliveryFee,
+    discountAmount: order.discountAmount,
+    totalAmount: order.totalAmount,
+    items: order.items.map((item) => ({
+      id: item.id,
+      title: item.title,
+      quantity: item.quantity,
+    })),
+  }));
 }
 
 export async function getProfileSummary(
@@ -43,18 +72,28 @@ export async function getProfileSummary(
   user: SessionUser,
 ): Promise<ProfileSummary> {
   return {
+    id: toOptionalString(user?.id),
     name: user?.name?.trim() || getFallbackName(locale),
     email: user?.email?.trim() || "unknown@maharsarpay.com",
-    imageSrc: user?.image || defaultAvatar,
+    imageSrc: toOptionalString(user?.image),
+    phoneNumber: toOptionalString(user?.phoneNumber),
+    address: toOptionalString(user?.address),
+    loginType: toOptionalString(user?.loginType),
+    authProvider: toOptionalString(user?.authProvider),
+    isEmailVerified: typeof user?.isEmailVerified === "boolean" ? user.isEmailVerified : null,
   };
 }
 
 export async function getOrderHistory(user: SessionUser): Promise<ProfileOrder[]> {
-  const email = user?.email?.toLowerCase();
-
-  if (!email) {
+  if (!user?.id || !user.authToken) {
     return [];
   }
 
-  return ordersByEmail[email] ?? [];
+  const userOrdersResult = await fetchUserOrders(user.authToken, user.id);
+
+  if (!userOrdersResult.ok) {
+    return [];
+  }
+
+  return toProfileOrders(userOrdersResult.data);
 }

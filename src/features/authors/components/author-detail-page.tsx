@@ -69,12 +69,6 @@ function formatPrice(locale: Locale, value: number) {
   }).format(value)}`;
 }
 
-function formatCount(locale: Locale, value: number) {
-  return new Intl.NumberFormat(locale === "my" ? "my-MM" : "en-US", {
-    maximumFractionDigits: 0,
-  }).format(value);
-}
-
 function getDiscountPricing(book: {
   price: number;
   salePrice?: number | null;
@@ -164,17 +158,6 @@ export function AuthorDetailPage({ copy, locale, data, breadcrumbSource }: Autho
               <div className="author-detail-headline">
                 <p className="author-detail-kicker">{authorKicker}</p>
                 <h1 className="author-detail-name">{author.name}</h1>
-              </div>
-
-              <div className="author-detail-stats" aria-label={copy.authorDetail.breadcrumbLabel}>
-                <div className="author-detail-stat-card">
-                  <span className="author-detail-stat-value">
-                    {formatCount(locale, data.authoredBooks.length)}
-                  </span>
-                  <span className="author-detail-stat-label">
-                    {copy.authorDetail.authoredBooksTitle}
-                  </span>
-                </div>
               </div>
 
               <div className="author-detail-actions">

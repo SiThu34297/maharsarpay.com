@@ -1,7 +1,9 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { PersonIcon } from "@radix-ui/react-icons";
 
+import { auth } from "@/auth";
 import { CartFloatingButton } from "@/features/cart";
 import type { Dictionary, Locale } from "@/lib/i18n";
 
@@ -21,13 +23,62 @@ type MarketingSiteHeaderProps = Readonly<{
   bookCategoryLinks?: BookCategoryLink[];
 }>;
 
-export function MarketingSiteHeader({
+type AccountButtonState = {
+  isLoggedIn: boolean;
+  imageSrc: string | null;
+  initials: string;
+};
+
+function toOptionalString(value: string | null | undefined): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const normalized = value.trim();
+  return normalized.length > 0 ? normalized : null;
+}
+
+function getInitials(name: string | null, email: string | null): string {
+  if (name) {
+    const parts = name.split(/\s+/).filter(Boolean);
+    const initials = parts
+      .map((part) => Array.from(part)[0]?.toLocaleUpperCase() ?? "")
+      .join("")
+      .slice(0, 2);
+
+    if (initials) {
+      return initials;
+    }
+  }
+
+  if (email) {
+    const firstChar = Array.from(email)[0]?.toLocaleUpperCase();
+    if (firstChar) {
+      return firstChar;
+    }
+  }
+
+  return "U";
+}
+
+export async function MarketingSiteHeader({
   copy,
   locale,
   navigation,
   activeNavId,
   bookCategoryLinks = [],
 }: MarketingSiteHeaderProps) {
+  const profilePath = `/${locale}/profile`;
+  const loginWithNextPath = `/${locale}/login?next=${encodeURIComponent(profilePath)}`;
+  const session = await auth();
+  const accountState: AccountButtonState = {
+    isLoggedIn: Boolean(session?.user?.id),
+    imageSrc: toOptionalString(session?.user?.image),
+    initials: getInitials(
+      toOptionalString(session?.user?.name),
+      toOptionalString(session?.user?.email),
+    ),
+  };
   const categoriesItem = navigation.find((item) => item.id === "categories");
   const effectiveBookCategoryLinks =
     bookCategoryLinks.length > 0
@@ -41,6 +92,7 @@ export function MarketingSiteHeader({
           ]
         : [];
   const primaryNavigation = navigation.filter((item) => item.id !== "categories");
+  const accountHref = accountState.isLoggedIn ? profilePath : loginWithNextPath;
 
   return (
     <>
@@ -58,6 +110,7 @@ export function MarketingSiteHeader({
                     <li key={item.id} className="group relative">
                       <Link
                         href={item.href}
+                        prefetch={false}
                         aria-current={isActive ? "page" : undefined}
                         className={`nav-link ${isActive ? "nav-link-active" : ""}`}
                       >
@@ -69,6 +122,7 @@ export function MarketingSiteHeader({
                             <Link
                               key={`desktop-book-category-${categoryLink.href}`}
                               href={categoryLink.href}
+                              prefetch={false}
                               className="block rounded-lg px-3 py-2 text-sm font-semibold text-[var(--color-text-main)] transition hover:bg-[var(--color-brand-subtle)] hover:text-[var(--color-brand)]"
                             >
                               {categoryLink.label}
@@ -84,6 +138,7 @@ export function MarketingSiteHeader({
                   <li key={item.id}>
                     <Link
                       href={item.href}
+                      prefetch={false}
                       aria-current={isActive ? "page" : undefined}
                       className={`nav-link ${isActive ? "nav-link-active" : ""}`}
                     >
@@ -96,12 +151,24 @@ export function MarketingSiteHeader({
           </nav>
 
           <div className="flex items-center justify-end gap-2 lg:gap-3">
-            <Link
-              href={`/${locale}/profile`}
-              className="icon-button"
-              aria-label={copy.header.accountLabel}
-            >
-              <PersonIcon />
+            <Link href={accountHref} className="icon-button" aria-label={copy.header.accountLabel}>
+              {accountState.isLoggedIn ? (
+                accountState.imageSrc ? (
+                  <Image
+                    src={accountState.imageSrc}
+                    alt={copy.header.accountLabel}
+                    width={36}
+                    height={36}
+                    className="h-9 w-9 rounded-full object-cover"
+                  />
+                ) : (
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-brand-subtle)] text-xs font-semibold text-[var(--color-brand)]">
+                    {accountState.initials}
+                  </span>
+                )
+              ) : (
+                <PersonIcon />
+              )}
             </Link>
           </div>
         </div>
@@ -120,6 +187,7 @@ export function MarketingSiteHeader({
                     <li key={`tablet-${item.id}`} className="group relative">
                       <Link
                         href={item.href}
+                        prefetch={false}
                         aria-current={isActive ? "page" : undefined}
                         className={`nav-link ${isActive ? "nav-link-active" : ""}`}
                       >
@@ -131,6 +199,7 @@ export function MarketingSiteHeader({
                             <Link
                               key={`tablet-book-category-${categoryLink.href}`}
                               href={categoryLink.href}
+                              prefetch={false}
                               className="block rounded-lg px-3 py-2 text-sm font-semibold text-[var(--color-text-main)] transition hover:bg-[var(--color-brand-subtle)] hover:text-[var(--color-brand)]"
                             >
                               {categoryLink.label}
@@ -146,6 +215,7 @@ export function MarketingSiteHeader({
                   <li key={`tablet-${item.id}`}>
                     <Link
                       href={item.href}
+                      prefetch={false}
                       aria-current={isActive ? "page" : undefined}
                       className={`nav-link ${isActive ? "nav-link-active" : ""}`}
                     >
@@ -158,11 +228,27 @@ export function MarketingSiteHeader({
           </nav>
 
           <Link
-            href={`/${locale}/profile`}
+            href={accountHref}
             className="icon-button shrink-0"
             aria-label={copy.header.accountLabel}
           >
-            <PersonIcon />
+            {accountState.isLoggedIn ? (
+              accountState.imageSrc ? (
+                <Image
+                  src={accountState.imageSrc}
+                  alt={copy.header.accountLabel}
+                  width={36}
+                  height={36}
+                  className="h-9 w-9 rounded-full object-cover"
+                />
+              ) : (
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-brand-subtle)] text-xs font-semibold text-[var(--color-brand)]">
+                  {accountState.initials}
+                </span>
+              )
+            ) : (
+              <PersonIcon />
+            )}
           </Link>
         </div>
 
@@ -172,6 +258,7 @@ export function MarketingSiteHeader({
           navigation={navigation}
           activeNavId={activeNavId}
           bookCategoryLinks={effectiveBookCategoryLinks}
+          accountState={accountState}
         />
       </header>
       <CartFloatingButton locale={locale} ariaLabel={copy.header.cartLabel} />

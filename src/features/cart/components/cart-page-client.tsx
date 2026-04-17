@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
 import type { Session } from "next-auth";
 
 import { MinusIcon, PlusIcon, TrashIcon } from "@radix-ui/react-icons";
@@ -69,7 +68,6 @@ function getDiscountPricing(item: {
 
 export function CartPageClient({ copy, locale, initialSessionUser }: CartPageClientProps) {
   const { state, subtotal, increment, decrement, remove, clear, totalItems } = useCart();
-  const { data: session, status } = useSession();
   const router = useRouter();
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
@@ -79,17 +77,21 @@ export function CartPageClient({ copy, locale, initialSessionUser }: CartPageCli
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const loginNextPath = `/${locale}/cart`;
   const loginPath = `/${locale}/login?next=${encodeURIComponent(loginNextPath)}`;
-  const sessionUser = session?.user ?? initialSessionUser;
-  const isAuthenticated = status === "authenticated" || Boolean(initialSessionUser?.email);
+  const sessionUser = initialSessionUser;
+  const isAuthenticated = Boolean(initialSessionUser?.id);
 
   useEffect(() => {
     if (!isAuthenticated) {
+      setCustomerName("");
+      setCustomerPhone("");
+      setShippingAddress("");
+      setOrderError(null);
       return;
     }
 
-    setCustomerName((current) => current || sessionUser?.name?.trim() || "");
-    setCustomerPhone((current) => current || sessionUser?.phoneNumber?.trim() || "");
-    setShippingAddress((current) => current || sessionUser?.address?.trim() || "");
+    setCustomerName(sessionUser?.name?.trim() || "");
+    setCustomerPhone(sessionUser?.phoneNumber?.trim() || "");
+    setShippingAddress(sessionUser?.address?.trim() || "");
   }, [isAuthenticated, sessionUser?.name, sessionUser?.phoneNumber, sessionUser?.address]);
 
   async function placeOrder() {
@@ -297,6 +299,18 @@ export function CartPageClient({ copy, locale, initialSessionUser }: CartPageCli
               <p className="mt-1 text-sm text-[var(--color-text-muted)]">
                 {copy.checkoutDescription}
               </p>
+
+              <div className="mt-3 rounded-xl border border-[var(--color-brand)] bg-[var(--color-brand-subtle)] p-3">
+                <p className="text-sm font-semibold text-[var(--color-brand)]">
+                  {copy.doorToDoorAdTitle}
+                </p>
+                <p className="mt-1 text-sm text-[var(--color-text-main)]">
+                  {copy.doorToDoorAdContact}
+                </p>
+                <p className="mt-2 text-xs text-[var(--color-text-muted)]">
+                  {copy.doorToDoorAdShippingNote}
+                </p>
+              </div>
 
               {isAuthenticated ? (
                 <form

@@ -3,6 +3,7 @@
 import { Theme } from "@radix-ui/themes";
 
 import { AuthSessionProvider } from "@/components/providers/auth-session-provider";
+import { NavigationLoadingOverlay } from "@/components/providers/navigation-loading-overlay";
 import { CartProvider } from "@/features/cart";
 
 type AppThemeProviderProps = Readonly<{
@@ -13,7 +14,10 @@ export function AppThemeProvider({ children }: AppThemeProviderProps) {
   return (
     <Theme accentColor="grass" grayColor="slate" radius="large" scaling="100%" appearance="light">
       <AuthSessionProvider>
-        <CartProvider>{children}</CartProvider>
+        <CartProvider>
+          <NavigationLoadingOverlay />
+          {children}
+        </CartProvider>
       </AuthSessionProvider>
     </Theme>
   );

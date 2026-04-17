@@ -54,6 +54,9 @@ export async function LoginPage({
   isGoogleEnabled,
 }: LoginPageProps) {
   const isMyanmar = locale === "my";
+  // Temporary switch to hide Google sign-in from the login UI.
+  const isGoogleSignInTemporarilyDisabled = true;
+  const canShowGoogleSignIn = isGoogleEnabled && !isGoogleSignInTemporarilyDisabled;
   const navigation = getMarketingNavigation(locale);
   const bookFilterOptions = await getBookFilterOptions(locale);
   const bookCategoryLinks = bookFilterOptions.categories.map((category) => ({
@@ -98,23 +101,27 @@ export async function LoginPage({
             </p>
           ) : null}
 
-          <form action={signInWithGoogleAction} className="mt-6">
-            <input type="hidden" name="locale" value={locale} />
-            <input type="hidden" name="callbackUrl" value={callbackPath} />
-            <AsyncSubmitButton
-              label={copy.loginPage.googleButton}
-              className="w-full rounded-full border border-[var(--color-border)] px-5 py-3 text-sm font-semibold text-[var(--color-text-main)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand)] disabled:cursor-not-allowed disabled:opacity-60"
-              disabled={!isGoogleEnabled}
-            />
-          </form>
+          {canShowGoogleSignIn ? (
+            <>
+              <form action={signInWithGoogleAction} className="mt-6">
+                <input type="hidden" name="locale" value={locale} />
+                <input type="hidden" name="callbackUrl" value={callbackPath} />
+                <AsyncSubmitButton
+                  label={copy.loginPage.googleButton}
+                  className="w-full rounded-full border border-[var(--color-border)] px-5 py-3 text-sm font-semibold text-[var(--color-text-main)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand)] disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={!isGoogleEnabled}
+                />
+              </form>
 
-          <div className="my-5 flex items-center gap-3">
-            <span className="h-px flex-1 bg-[var(--color-border)]" aria-hidden />
-            <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
-              {copy.loginPage.orSeparator}
-            </span>
-            <span className="h-px flex-1 bg-[var(--color-border)]" aria-hidden />
-          </div>
+              <div className="my-5 flex items-center gap-3">
+                <span className="h-px flex-1 bg-[var(--color-border)]" aria-hidden />
+                <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
+                  {copy.loginPage.orSeparator}
+                </span>
+                <span className="h-px flex-1 bg-[var(--color-border)]" aria-hidden />
+              </div>
+            </>
+          ) : null}
 
           <form action={signInWithCredentialsAction} className="space-y-4">
             <input type="hidden" name="locale" value={locale} />

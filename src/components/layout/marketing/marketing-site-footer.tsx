@@ -84,13 +84,15 @@ export async function MarketingSiteFooter({ copy, navigation }: MarketingSiteFoo
           <div>
             <h4 className="text-base font-semibold">{copy.footer.navigationTitle}</h4>
             <ul className="mt-4 space-y-2 text-sm">
-              {navigation.map((item) => (
-                <li key={`footer-nav-${item.id}`}>
-                  <Link href={item.href} className="footer-link">
-                    {getNavigationLabel(copy.navigation, item.id)}
-                  </Link>
-                </li>
-              ))}
+              {navigation
+                .filter((item) => item.id !== "categories")
+                .map((item) => (
+                  <li key={`footer-nav-${item.id}`}>
+                    <Link href={item.href} className="footer-link">
+                      {getNavigationLabel(copy.navigation, item.id)}
+                    </Link>
+                  </li>
+                ))}
             </ul>
           </div>
 
@@ -100,11 +102,6 @@ export async function MarketingSiteFooter({ copy, navigation }: MarketingSiteFoo
               <li>
                 <Link href={privacyPolicyHref} className="footer-link">
                   {copy.footer.supportPrivacy}
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="footer-link">
-                  {copy.footer.supportHelp}
                 </Link>
               </li>
               <li>
@@ -129,35 +126,8 @@ export async function MarketingSiteFooter({ copy, navigation }: MarketingSiteFoo
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col gap-6 border-t border-(--color-border) pt-6 md:mt-12 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p className="mb-3 text-sm font-medium text-foreground">
-              {copy.footer.newsletterLabel}
-            </p>
-            <form
-              className="flex max-w-md flex-wrap gap-2"
-              action="#"
-              method="post"
-              suppressHydrationWarning
-            >
-              <label htmlFor="newsletter-email" className="sr-only">
-                {copy.footer.newsletterLabel}
-              </label>
-              <input
-                id="newsletter-email"
-                type="email"
-                placeholder={copy.footer.newsletterPlaceholder}
-                className="min-w-55 flex-1 rounded-full border border-(--color-border) bg-white px-4 py-2.5 text-sm text-foreground outline-none placeholder:text-(--color-text-muted) focus-visible:border-(--color-brand)"
-                suppressHydrationWarning
-              />
-              <button
-                type="submit"
-                className="rounded-full bg-(--color-brand) px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--color-brand)"
-              >
-                {copy.footer.newsletterButton}
-              </button>
-            </form>
-          </div>
+        <div className="mt-10 flex items-center justify-between gap-4 border-t border-(--color-border) pt-6 text-xs md:mt-12">
+          <p className="text-(--color-text-muted)">{copy.footer.rights}</p>
 
           <div className="flex items-center gap-3">
             <span className="text-sm text-(--color-text-muted)">{copy.footer.socialLabel}</span>
@@ -175,8 +145,6 @@ export async function MarketingSiteFooter({ copy, navigation }: MarketingSiteFoo
             ))}
           </div>
         </div>
-
-        <p className="mt-6 text-xs text-(--color-text-muted)">{copy.footer.rights}</p>
       </div>
     </footer>
   );

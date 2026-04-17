@@ -1,10 +1,14 @@
 export type ProfileSummary = {
+  id: string | null;
   name: string;
   email: string;
-  imageSrc: string;
+  imageSrc: string | null;
+  phoneNumber: string | null;
+  address: string | null;
+  loginType: string | null;
+  authProvider: string | null;
+  isEmailVerified: boolean | null;
 };
-
-export type ProfileOrderStatus = "processing" | "paid" | "shipped";
 
 export type ProfileOrderItem = {
   id: string;
@@ -15,9 +19,15 @@ export type ProfileOrderItem = {
 export type ProfileOrder = {
   id: string;
   orderNumber: string;
-  placedAt: string;
+  placedAt: string | null;
+  customerName: string | null;
+  customerPhone: string | null;
+  shippingAddress: string | null;
+  subtotalAmount: number;
+  deliveryFee: number;
+  discountAmount: number;
   totalAmount: number;
-  status: ProfileOrderStatus;
+  status: string;
   items: ProfileOrderItem[];
 };
 
