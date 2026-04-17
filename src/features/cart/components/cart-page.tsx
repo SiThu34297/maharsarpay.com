@@ -6,15 +6,17 @@ import {
 } from "@/components/layout/marketing";
 import { getBookFilterOptions } from "@/features/books";
 import type { Dictionary, Locale } from "@/lib/i18n";
+import type { Session } from "next-auth";
 
 import { CartPageClient } from "./cart-page-client";
 
 type CartPageProps = Readonly<{
   copy: Dictionary;
   locale: Locale;
+  sessionUser?: Session["user"];
 }>;
 
-export async function CartPage({ copy, locale }: CartPageProps) {
+export async function CartPage({ copy, locale, sessionUser }: CartPageProps) {
   const isMyanmar = locale === "my";
   const navigation = getMarketingNavigation(locale);
   const bookFilterOptions = await getBookFilterOptions(locale);
@@ -44,7 +46,7 @@ export async function CartPage({ copy, locale }: CartPageProps) {
       />
 
       <main>
-        <CartPageClient copy={copy.cartPage} locale={locale} />
+        <CartPageClient copy={copy.cartPage} locale={locale} initialSessionUser={sessionUser} />
       </main>
 
       <MarketingSiteFooter copy={copy} navigation={navigation} />

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import {
   MarketingSiteFooter,
   MarketingSiteHeader,
@@ -5,39 +7,32 @@ import {
   getMarketingNavigation,
 } from "@/components/layout/marketing";
 import { AsyncSubmitButton } from "@/components/ui/async-submit-button";
-import Link from "next/link";
-import {
-  signInWithCredentialsAction,
-  signInWithGoogleAction,
-} from "@/features/auth/server/auth-actions";
-import type { AuthLoginErrorCode } from "@/features/auth/schemas/auth";
+import { registerWithCredentialsAction } from "@/features/auth/server/auth-actions";
+import type { AuthRegisterErrorCode } from "@/features/auth/schemas/auth";
 import { getBookFilterOptions } from "@/features/books";
 import type { Dictionary, Locale } from "@/lib/i18n";
 
-type LoginPageProps = Readonly<{
+type RegisterPageProps = Readonly<{
   copy: Dictionary;
   locale: Locale;
   callbackPath: string;
-  registerPath: string;
-  errorCode?: AuthLoginErrorCode;
-  isGoogleEnabled: boolean;
+  loginPath: string;
+  errorCode?: AuthRegisterErrorCode;
 }>;
 
 function getErrorMessage(
-  copy: Dictionary["loginPage"],
-  errorCode?: AuthLoginErrorCode,
+  copy: Dictionary["registerPage"],
+  errorCode?: AuthRegisterErrorCode,
 ): string | null {
   if (!errorCode) {
     return null;
   }
 
   switch (errorCode) {
-    case "credentials":
-      return copy.errorCredentials;
+    case "email_in_use":
+      return copy.errorEmailInUse;
     case "missing":
       return copy.errorMissingFields;
-    case "google":
-      return copy.errorGoogleUnavailable;
     case "unknown":
       return copy.errorUnknown;
     default:
@@ -45,14 +40,13 @@ function getErrorMessage(
   }
 }
 
-export async function LoginPage({
+export async function RegisterPage({
   copy,
   locale,
   callbackPath,
-  registerPath,
+  loginPath,
   errorCode,
-  isGoogleEnabled,
-}: LoginPageProps) {
+}: RegisterPageProps) {
   const isMyanmar = locale === "my";
   const navigation = getMarketingNavigation(locale);
   const bookFilterOptions = await getBookFilterOptions(locale);
@@ -60,7 +54,7 @@ export async function LoginPage({
     label: category.label,
     href: `/${locale}/books?category=${encodeURIComponent(category.value)}`,
   }));
-  const errorMessage = getErrorMessage(copy.loginPage, errorCode);
+  const errorMessage = getErrorMessage(copy.registerPage, errorCode);
 
   return (
     <div
@@ -84,9 +78,9 @@ export async function LoginPage({
 
       <main className="home-shell section-gap">
         <section className="mx-auto w-full max-w-xl rounded-2xl border border-[var(--color-border)] bg-white p-6 shadow-[var(--shadow-soft)] md:p-8">
-          <h1 className="text-2xl font-semibold md:text-3xl">{copy.loginPage.title}</h1>
+          <h1 className="text-2xl font-semibold md:text-3xl">{copy.registerPage.title}</h1>
           <p className="mt-2 text-sm text-[var(--color-text-muted)] md:text-base">
-            {copy.loginPage.description}
+            {copy.registerPage.description}
           </p>
 
           {errorMessage ? (
@@ -98,31 +92,27 @@ export async function LoginPage({
             </p>
           ) : null}
 
-          <form action={signInWithGoogleAction} className="mt-6">
-            <input type="hidden" name="locale" value={locale} />
-            <input type="hidden" name="callbackUrl" value={callbackPath} />
-            <AsyncSubmitButton
-              label={copy.loginPage.googleButton}
-              className="w-full rounded-full border border-[var(--color-border)] px-5 py-3 text-sm font-semibold text-[var(--color-text-main)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand)] disabled:cursor-not-allowed disabled:opacity-60"
-              disabled={!isGoogleEnabled}
-            />
-          </form>
-
-          <div className="my-5 flex items-center gap-3">
-            <span className="h-px flex-1 bg-[var(--color-border)]" aria-hidden />
-            <span className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
-              {copy.loginPage.orSeparator}
-            </span>
-            <span className="h-px flex-1 bg-[var(--color-border)]" aria-hidden />
-          </div>
-
-          <form action={signInWithCredentialsAction} className="space-y-4">
+          <form action={registerWithCredentialsAction} className="mt-6 space-y-4">
             <input type="hidden" name="locale" value={locale} />
             <input type="hidden" name="callbackUrl" value={callbackPath} />
 
             <label className="block">
               <span className="mb-1.5 block text-sm font-medium text-[var(--color-text-main)]">
-                {copy.loginPage.emailLabel}
+                {copy.registerPage.nameLabel}
+              </span>
+              <input
+                type="text"
+                name="name"
+                required
+                autoComplete="name"
+                className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm text-[var(--color-text-main)] outline-none placeholder:text-[var(--color-text-muted)] focus-visible:border-[var(--color-brand)]"
+                placeholder="Sithu"
+              />
+            </label>
+
+            <label className="block">
+              <span className="mb-1.5 block text-sm font-medium text-[var(--color-text-main)]">
+                {copy.registerPage.emailLabel}
               </span>
               <input
                 type="email"
@@ -136,31 +126,59 @@ export async function LoginPage({
 
             <label className="block">
               <span className="mb-1.5 block text-sm font-medium text-[var(--color-text-main)]">
-                {copy.loginPage.passwordLabel}
+                {copy.registerPage.phoneLabel}
+              </span>
+              <input
+                type="tel"
+                name="phoneNumber"
+                required
+                autoComplete="tel"
+                className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm text-[var(--color-text-main)] outline-none placeholder:text-[var(--color-text-muted)] focus-visible:border-[var(--color-brand)]"
+                placeholder="+959761807838"
+              />
+            </label>
+
+            <label className="block">
+              <span className="mb-1.5 block text-sm font-medium text-[var(--color-text-main)]">
+                {copy.registerPage.addressLabel}
+              </span>
+              <textarea
+                name="address"
+                required
+                autoComplete="street-address"
+                rows={3}
+                className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm text-[var(--color-text-main)] outline-none placeholder:text-[var(--color-text-muted)] focus-visible:border-[var(--color-brand)]"
+                placeholder="No.12, Ahlone Township, Yangon"
+              />
+            </label>
+
+            <label className="block">
+              <span className="mb-1.5 block text-sm font-medium text-[var(--color-text-main)]">
+                {copy.registerPage.passwordLabel}
               </span>
               <input
                 type="password"
                 name="password"
                 required
-                autoComplete="current-password"
+                autoComplete="new-password"
                 className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm text-[var(--color-text-main)] outline-none placeholder:text-[var(--color-text-muted)] focus-visible:border-[var(--color-brand)]"
-                placeholder="••••••••"
+                placeholder="StrongPass123!"
               />
             </label>
 
             <AsyncSubmitButton
-              label={copy.loginPage.credentialsButton}
+              label={copy.registerPage.submitButton}
               className="w-full rounded-full bg-[var(--color-brand)] px-5 py-3 text-sm font-semibold text-white transition hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)] disabled:cursor-not-allowed disabled:opacity-70"
             />
           </form>
 
           <p className="mt-4 text-sm text-[var(--color-text-muted)]">
-            {copy.loginPage.registerPrompt}{" "}
+            {copy.registerPage.loginPrompt}{" "}
             <Link
-              href={registerPath}
+              href={loginPath}
               className="font-semibold text-[var(--color-brand)] transition hover:brightness-95"
             >
-              {copy.loginPage.registerLink}
+              {copy.registerPage.loginLink}
             </Link>
           </p>
         </section>

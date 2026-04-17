@@ -32,3 +32,21 @@ export function buildLoginRedirectPath(
 
   return queryString ? `/${locale}/login?${queryString}` : `/${locale}/login`;
 }
+
+export function buildRegisterRedirectPath(
+  locale: string,
+  nextPath: string,
+  errorCode?: string,
+): string {
+  const query = new URLSearchParams();
+
+  query.set("next", nextPath);
+
+  if (errorCode) {
+    query.set("error", errorCode);
+  }
+
+  const queryString = query.toString();
+
+  return queryString ? `/${locale}/register?${queryString}` : `/${locale}/register`;
+}

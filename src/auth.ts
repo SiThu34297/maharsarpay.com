@@ -2,7 +2,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 
-import { verifyDemoCredentials } from "@/lib/auth/demo-users";
+import { loginWithEmail } from "@/features/auth-server";
 
 export const isGoogleProviderEnabled = Boolean(
   process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET,
@@ -35,25 +35,72 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
-        const user = verifyDemoCredentials(email, password);
+        const result = await loginWithEmail({ email, password });
 
-        if (!user) {
+        if (!result.ok) {
           return null;
         }
+
+        const user = result.user;
 
         return {
           id: user.id,
           name: user.name,
           email: user.email,
-          image: user.image,
+          image: user.avatarUrl ?? undefined,
+          authToken: user.authToken,
+          phoneNumber: user.phoneNumber,
+          address: user.address,
+          loginType: user.loginType,
+          authProvider: user.authProvider,
+          isEmailVerified: user.emailVerified,
         };
       },
     }),
   ],
   callbacks: {
+    jwt({ token, user }) {
+      if (user) {
+        token.authToken = typeof user.authToken === "string" ? user.authToken : undefined;
+        token.phoneNumber =
+          typeof user.phoneNumber === "string" || user.phoneNumber === null
+            ? user.phoneNumber
+            : null;
+        token.address =
+          typeof user.address === "string" || user.address === null ? user.address : null;
+        token.loginType =
+          typeof user.loginType === "string" || user.loginType === null ? user.loginType : null;
+        token.authProvider =
+          typeof user.authProvider === "string" || user.authProvider === null
+            ? user.authProvider
+            : null;
+        token.isEmailVerified =
+          typeof user.isEmailVerified === "boolean" ? user.isEmailVerified : false;
+      }
+
+      return token;
+    },
     session({ session, token }) {
       if (session.user && typeof token.sub === "string") {
-        (session.user as { id?: string }).id = token.sub;
+        session.user.id = token.sub;
+      }
+
+      if (session.user) {
+        session.user.authToken = typeof token.authToken === "string" ? token.authToken : undefined;
+        session.user.phoneNumber =
+          typeof token.phoneNumber === "string" || token.phoneNumber === null
+            ? token.phoneNumber
+            : null;
+        session.user.address =
+          typeof token.address === "string" || token.address === null ? token.address : null;
+        session.user.loginType =
+          typeof token.loginType === "string" || token.loginType === null ? token.loginType : null;
+        session.user.authProvider =
+          typeof token.authProvider === "string" || token.authProvider === null
+            ? token.authProvider
+            : null;
+        session.user.isEmailVerified =
+          typeof token.isEmailVerified === "boolean" && token.isEmailVerified;
       }
 
       return session;

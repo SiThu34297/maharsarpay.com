@@ -200,6 +200,18 @@ export type Dictionary = {
     increaseQuantity: string;
     removeItem: string;
     subtotalLabel: string;
+    checkoutTitle: string;
+    checkoutDescription: string;
+    customerNameLabel: string;
+    customerPhoneLabel: string;
+    shippingAddressLabel: string;
+    noteLabel: string;
+    notePlaceholder: string;
+    placeOrderButton: string;
+    placingOrderButton: string;
+    loginRequiredMessage: string;
+    loginToOrderButton: string;
+    orderErrorFallback: string;
   };
   loginPage: {
     metaTitle: string;
@@ -211,10 +223,28 @@ export type Dictionary = {
     emailLabel: string;
     passwordLabel: string;
     credentialsButton: string;
-    demoHint: string;
     errorCredentials: string;
     errorMissingFields: string;
     errorGoogleUnavailable: string;
+    errorUnknown: string;
+    registerPrompt: string;
+    registerLink: string;
+  };
+  registerPage: {
+    metaTitle: string;
+    metaDescription: string;
+    title: string;
+    description: string;
+    nameLabel: string;
+    emailLabel: string;
+    phoneLabel: string;
+    addressLabel: string;
+    passwordLabel: string;
+    submitButton: string;
+    loginPrompt: string;
+    loginLink: string;
+    errorMissingFields: string;
+    errorEmailInUse: string;
     errorUnknown: string;
   };
   profilePage: {

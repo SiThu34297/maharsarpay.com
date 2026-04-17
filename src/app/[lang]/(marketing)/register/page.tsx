@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
-import { auth, isGoogleProviderEnabled } from "@/auth";
-import { LoginPage, parseAuthLoginErrorCode } from "@/features/auth";
+import { auth } from "@/auth";
+import { parseAuthRegisterErrorCode, RegisterPage } from "@/features/auth";
 import { getWebsiteMetadataContent } from "@/features/page-info";
+import { buildLoginRedirectPath, getSafeRedirectPath } from "@/lib/auth/redirect";
 import { siteConfig } from "@/lib/constants/site";
-import { buildRegisterRedirectPath, getSafeRedirectPath } from "@/lib/auth/redirect";
 import { getDictionary, hasLocale } from "@/lib/i18n";
 
-type LoginRoutePageProps = Readonly<{
+type RegisterRoutePageProps = Readonly<{
   params: Promise<{ lang: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }>;
@@ -17,7 +17,7 @@ function readStringParam(input: string | string[] | undefined): string | undefin
   return typeof input === "string" ? input : undefined;
 }
 
-export async function generateMetadata({ params }: LoginRoutePageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: RegisterRoutePageProps): Promise<Metadata> {
   const { lang } = await params;
 
   if (!hasLocale(lang)) {
@@ -33,8 +33,8 @@ export async function generateMetadata({ params }: LoginRoutePageProps): Promise
   ]);
 
   return {
-    title: `${dictionary.loginPage.metaTitle} | ${metadataContent.siteTitle}`,
-    description: dictionary.loginPage.metaDescription,
+    title: `${dictionary.registerPage.metaTitle} | ${metadataContent.siteTitle}`,
+    description: dictionary.registerPage.metaDescription,
     openGraph: metadataContent.ogImage
       ? {
           images: [{ url: metadataContent.ogImage }],
@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: LoginRoutePageProps): Promise
   };
 }
 
-export default async function LoginRoutePage({ params, searchParams }: LoginRoutePageProps) {
+export default async function RegisterRoutePage({ params, searchParams }: RegisterRoutePageProps) {
   const { lang } = await params;
 
   if (!hasLocale(lang)) {
@@ -52,8 +52,8 @@ export default async function LoginRoutePage({ params, searchParams }: LoginRout
 
   const paramsObject = await searchParams;
   const callbackPath = getSafeRedirectPath(readStringParam(paramsObject.next), `/${lang}/profile`);
-  const registerPath = buildRegisterRedirectPath(lang, callbackPath);
-  const errorCode = parseAuthLoginErrorCode(readStringParam(paramsObject.error));
+  const loginPath = buildLoginRedirectPath(lang, callbackPath);
+  const errorCode = parseAuthRegisterErrorCode(readStringParam(paramsObject.error));
   const session = await auth();
 
   if (session?.user?.email) {
@@ -65,13 +65,12 @@ export default async function LoginRoutePage({ params, searchParams }: LoginRout
   return (
     <div className="flex flex-1 flex-col">
       <main className="flex flex-1 flex-col" lang={lang}>
-        <LoginPage
+        <RegisterPage
           copy={dictionary}
           locale={lang}
           callbackPath={callbackPath}
-          registerPath={registerPath}
+          loginPath={loginPath}
           errorCode={errorCode}
-          isGoogleEnabled={isGoogleProviderEnabled}
         />
       </main>
     </div>
