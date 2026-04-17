@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { Theme } from "@radix-ui/themes";
 
 import { AuthSessionProvider } from "@/components/providers/auth-session-provider";
@@ -15,7 +16,9 @@ export function AppThemeProvider({ children }: AppThemeProviderProps) {
     <Theme accentColor="grass" grayColor="slate" radius="large" scaling="100%" appearance="light">
       <AuthSessionProvider>
         <CartProvider>
-          <NavigationLoadingOverlay />
+          <Suspense fallback={null}>
+            <NavigationLoadingOverlay />
+          </Suspense>
           {children}
         </CartProvider>
       </AuthSessionProvider>
