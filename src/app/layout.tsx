@@ -4,7 +4,9 @@ import { Inter, Playfair_Display } from "next/font/google";
 import "@radix-ui/themes/styles.css";
 
 import { AppThemeProvider } from "@/components/providers/app-theme-provider";
+import { getWebsiteMetadataContent } from "@/features/page-info";
 import { siteConfig } from "@/lib/constants/site";
+import { defaultLocale } from "@/lib/i18n";
 import "@/styles/globals.css";
 
 const inter = Inter({
@@ -19,10 +21,19 @@ const playfairDisplay = Playfair_Display({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: siteConfig.title,
-  description: siteConfig.description,
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const metadataContent = await getWebsiteMetadataContent(defaultLocale);
+
+  return {
+    title: metadataContent.siteTitle || siteConfig.title,
+    description: metadataContent.siteDescription || siteConfig.description,
+    openGraph: metadataContent.ogImage
+      ? {
+          images: [{ url: metadataContent.ogImage }],
+        }
+      : undefined,
+  };
+}
 
 export default function RootLayout({
   children,

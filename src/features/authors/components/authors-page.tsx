@@ -32,6 +32,7 @@ export async function AuthorsPage({ copy, locale, data }: AuthorsPageProps) {
       }`}
     >
       <MarketingTopBrandStrip
+        locale={locale}
         title="မဟာစာပေ"
         message="သိမ်းထားတဲ့အရာတွေ ပုပ်သိုးမသွားခင် လိုအပ်သူကို ပေးအပ်လိုက်ဖို့ ၀န်မလေးပါနဲ့"
       />

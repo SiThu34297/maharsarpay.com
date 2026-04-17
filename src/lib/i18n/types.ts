@@ -240,6 +240,7 @@ export type Dictionary = {
     navigationTitle: string;
     supportTitle: string;
     supportFaq: string;
+    supportPrivacy: string;
     supportHelp: string;
     supportContact: string;
     contactTitle: string;

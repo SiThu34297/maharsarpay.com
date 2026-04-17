@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AuthorDetailPage, getAuthorBySlug, getAuthorDetailPageData } from "@/features/authors";
+import { getWebsiteMetadataContent } from "@/features/page-info";
 import { siteConfig } from "@/lib/constants/site";
 import { getDictionary, hasLocale } from "@/lib/i18n";
 
@@ -20,18 +21,31 @@ export async function generateMetadata({ params }: AuthorDetailRoutePageProps): 
     };
   }
 
-  const author = await getAuthorBySlug(lang, slug);
+  const [author, metadataContent] = await Promise.all([
+    getAuthorBySlug(lang, slug),
+    getWebsiteMetadataContent(lang),
+  ]);
 
   if (!author) {
     return {
-      title: siteConfig.title,
-      description: siteConfig.description,
+      title: metadataContent.siteTitle,
+      description: metadataContent.siteDescription,
+      openGraph: metadataContent.ogImage
+        ? {
+            images: [{ url: metadataContent.ogImage }],
+          }
+        : undefined,
     };
   }
 
   return {
-    title: `${author.name} | ${siteConfig.title}`,
-    description: author.shortBio,
+    title: `${author.name} | ${metadataContent.siteTitle}`,
+    description: author.shortBio || metadataContent.siteDescription,
+    openGraph: metadataContent.ogImage
+      ? {
+          images: [{ url: metadataContent.ogImage }],
+        }
+      : undefined,
   };
 }
 

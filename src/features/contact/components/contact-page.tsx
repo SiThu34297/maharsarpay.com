@@ -2,10 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 
 import {
+  ChatBubbleIcon,
   EnvelopeClosedIcon,
   GlobeIcon,
   InstagramLogoIcon,
   LinkedInLogoIcon,
+  PaperPlaneIcon,
+  PlayIcon,
+  TwitterLogoIcon,
 } from "@radix-ui/react-icons";
 
 import {
@@ -28,8 +32,28 @@ function getSocialIcon(icon: ContactSocialIcon) {
   switch (icon) {
     case "globe":
       return <GlobeIcon aria-hidden />;
+    case "facebook":
+      return (
+        <span aria-hidden className="text-xs font-semibold">
+          f
+        </span>
+      );
+    case "youtube":
+      return <PlayIcon aria-hidden />;
+    case "messenger":
+      return <ChatBubbleIcon aria-hidden />;
     case "instagram":
       return <InstagramLogoIcon aria-hidden />;
+    case "twitter":
+      return <TwitterLogoIcon aria-hidden />;
+    case "telegram":
+      return <PaperPlaneIcon aria-hidden />;
+    case "tiktok":
+      return (
+        <span aria-hidden className="text-xs font-semibold">
+          t
+        </span>
+      );
     case "linkedin":
       return <LinkedInLogoIcon aria-hidden />;
     case "email":
@@ -56,6 +80,7 @@ export async function ContactPage({ copy, locale, data }: ContactPageProps) {
       }`}
     >
       <MarketingTopBrandStrip
+        locale={locale}
         title="မဟာစာပေ"
         message="သိမ်းထားတဲ့အရာတွေ ပုပ်သိုးမသွားခင် လိုအပ်သူကို ပေးအပ်လိုက်ဖို့ ၀န်မလေးပါနဲ့"
       />

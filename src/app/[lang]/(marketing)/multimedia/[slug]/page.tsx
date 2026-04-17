@@ -6,6 +6,7 @@ import {
   getMediaBySlug,
   getMultimediaDetailPageData,
 } from "@/features/multimedia";
+import { getWebsiteMetadataContent } from "@/features/page-info";
 import { siteConfig } from "@/lib/constants/site";
 import { getDictionary, hasLocale } from "@/lib/i18n";
 
@@ -26,18 +27,31 @@ export async function generateMetadata({
     };
   }
 
-  const media = await getMediaBySlug(lang, slug);
+  const [media, metadataContent] = await Promise.all([
+    getMediaBySlug(lang, slug),
+    getWebsiteMetadataContent(lang),
+  ]);
 
   if (!media) {
     return {
-      title: siteConfig.title,
-      description: siteConfig.description,
+      title: metadataContent.siteTitle,
+      description: metadataContent.siteDescription,
+      openGraph: metadataContent.ogImage
+        ? {
+            images: [{ url: metadataContent.ogImage }],
+          }
+        : undefined,
     };
   }
 
   return {
-    title: `${media.title} | ${siteConfig.title}`,
-    description: media.description,
+    title: `${media.title} | ${metadataContent.siteTitle}`,
+    description: media.description || metadataContent.siteDescription,
+    openGraph: metadataContent.ogImage
+      ? {
+          images: [{ url: metadataContent.ogImage }],
+        }
+      : undefined,
   };
 }
 

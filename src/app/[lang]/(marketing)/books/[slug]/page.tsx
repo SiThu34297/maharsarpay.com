@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { BookDetailPage, getBookBySlug, getBookDetailPageData } from "@/features/books";
+import { getWebsiteMetadataContent } from "@/features/page-info";
 import { siteConfig } from "@/lib/constants/site";
 import { getDictionary, hasLocale } from "@/lib/i18n";
 
@@ -20,18 +21,31 @@ export async function generateMetadata({ params }: BookDetailRoutePageProps): Pr
     };
   }
 
-  const book = await getBookBySlug(lang, slug);
+  const [book, metadataContent] = await Promise.all([
+    getBookBySlug(lang, slug),
+    getWebsiteMetadataContent(lang),
+  ]);
 
   if (!book) {
     return {
-      title: siteConfig.title,
-      description: siteConfig.description,
+      title: metadataContent.siteTitle,
+      description: metadataContent.siteDescription,
+      openGraph: metadataContent.ogImage
+        ? {
+            images: [{ url: metadataContent.ogImage }],
+          }
+        : undefined,
     };
   }
 
   return {
-    title: `${book.title} | ${siteConfig.title}`,
-    description: book.description,
+    title: `${book.title} | ${metadataContent.siteTitle}`,
+    description: book.description || metadataContent.siteDescription,
+    openGraph: metadataContent.ogImage
+      ? {
+          images: [{ url: metadataContent.ogImage }],
+        }
+      : undefined,
   };
 }
 

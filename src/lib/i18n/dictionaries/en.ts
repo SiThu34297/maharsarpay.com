@@ -247,6 +247,7 @@ export const enDictionary: Dictionary = {
     navigationTitle: "Navigation",
     supportTitle: "Support",
     supportFaq: "FAQ",
+    supportPrivacy: "Privacy Policy",
     supportHelp: "Help Center",
     supportContact: "Contact",
     contactTitle: "Contact Info",

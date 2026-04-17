@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { auth, isGoogleProviderEnabled } from "@/auth";
 import { LoginPage, parseAuthLoginErrorCode } from "@/features/auth";
+import { getWebsiteMetadataContent } from "@/features/page-info";
 import { siteConfig } from "@/lib/constants/site";
 import { getSafeRedirectPath } from "@/lib/auth/redirect";
 import { getDictionary, hasLocale } from "@/lib/i18n";
@@ -26,11 +27,19 @@ export async function generateMetadata({ params }: LoginRoutePageProps): Promise
     };
   }
 
-  const dictionary = await getDictionary(lang);
+  const [dictionary, metadataContent] = await Promise.all([
+    getDictionary(lang),
+    getWebsiteMetadataContent(lang),
+  ]);
 
   return {
-    title: `${dictionary.loginPage.metaTitle} | ${siteConfig.title}`,
+    title: `${dictionary.loginPage.metaTitle} | ${metadataContent.siteTitle}`,
     description: dictionary.loginPage.metaDescription,
+    openGraph: metadataContent.ogImage
+      ? {
+          images: [{ url: metadataContent.ogImage }],
+        }
+      : undefined,
   };
 }
 

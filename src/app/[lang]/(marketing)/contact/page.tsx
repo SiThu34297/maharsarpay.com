@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ContactPage, getContactPageData } from "@/features/contact";
+import { getWebsiteMetadataContent } from "@/features/page-info";
 import { siteConfig } from "@/lib/constants/site";
 import { getDictionary, hasLocale } from "@/lib/i18n";
 
@@ -19,11 +20,19 @@ export async function generateMetadata({ params }: ContactRoutePageProps): Promi
     };
   }
 
-  const dictionary = await getDictionary(lang);
+  const [dictionary, metadataContent] = await Promise.all([
+    getDictionary(lang),
+    getWebsiteMetadataContent(lang),
+  ]);
 
   return {
-    title: `${dictionary.contactPage.metaTitle} | ${siteConfig.title}`,
+    title: `${dictionary.contactPage.metaTitle} | ${metadataContent.siteTitle}`,
     description: dictionary.contactPage.metaDescription,
+    openGraph: metadataContent.ogImage
+      ? {
+          images: [{ url: metadataContent.ogImage }],
+        }
+      : undefined,
   };
 }
 

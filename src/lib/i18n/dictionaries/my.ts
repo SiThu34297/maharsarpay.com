@@ -250,6 +250,7 @@ export const myDictionary: Dictionary = {
     navigationTitle: "လမ်းညွှန်",
     supportTitle: "ကူညီမှု",
     supportFaq: "မေးလေ့ရှိသော မေးခွန်းများ",
+    supportPrivacy: "ကိုယ်ရေးအချက်အလက် မူဝါဒ",
     supportHelp: "ကူညီမှုစင်တာ",
     supportContact: "ဆက်သွယ်ရန်",
     contactTitle: "ဆက်သွယ်ရန် အချက်အလက်",

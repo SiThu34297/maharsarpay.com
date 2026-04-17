@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
 import { auth } from "@/auth";
+import { getWebsiteMetadataContent } from "@/features/page-info";
 import { ProfilePage, getProfilePageData } from "@/features/profile";
 import { siteConfig } from "@/lib/constants/site";
 import { getDictionary, hasLocale } from "@/lib/i18n";
@@ -20,11 +21,19 @@ export async function generateMetadata({ params }: ProfileRoutePageProps): Promi
     };
   }
 
-  const dictionary = await getDictionary(lang);
+  const [dictionary, metadataContent] = await Promise.all([
+    getDictionary(lang),
+    getWebsiteMetadataContent(lang),
+  ]);
 
   return {
-    title: `${dictionary.profilePage.metaTitle} | ${siteConfig.title}`,
+    title: `${dictionary.profilePage.metaTitle} | ${metadataContent.siteTitle}`,
     description: dictionary.profilePage.metaDescription,
+    openGraph: metadataContent.ogImage
+      ? {
+          images: [{ url: metadataContent.ogImage }],
+        }
+      : undefined,
   };
 }
 

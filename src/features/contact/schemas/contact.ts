@@ -1,4 +1,14 @@
-export type ContactSocialIcon = "globe" | "instagram" | "linkedin" | "email";
+export type ContactSocialIcon =
+  | "globe"
+  | "instagram"
+  | "linkedin"
+  | "email"
+  | "facebook"
+  | "youtube"
+  | "messenger"
+  | "twitter"
+  | "telegram"
+  | "tiktok";
 
 export type ContactSocialLink = {
   id: string;
