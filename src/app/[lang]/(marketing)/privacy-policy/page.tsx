@@ -11,6 +11,7 @@ import { getBookFilterOptions } from "@/features/books";
 import { getWebsiteMetadataContent, getWebsitePageInfo } from "@/features/page-info";
 import { siteConfig } from "@/lib/constants/site";
 import { getDictionary, hasLocale } from "@/lib/i18n";
+import { buildRouteMetadata } from "@/lib/seo/route-metadata";
 
 type PrivacyPolicyRoutePageProps = Readonly<{
   params: Promise<{ lang: string }>;
@@ -41,15 +42,13 @@ export async function generateMetadata({ params }: PrivacyPolicyRoutePageProps):
     getWebsitePageInfo(lang),
   ]);
 
-  return {
+  return buildRouteMetadata({
+    lang,
+    pathname: "/privacy-policy",
     title: `${getPrivacyPageTitle(lang)} | ${seo.siteTitle}`,
     description: pageInfo.privacyPolicyPlainText || getPrivacyPageDescription(lang),
-    openGraph: seo.ogImage
-      ? {
-          images: [{ url: seo.ogImage }],
-        }
-      : undefined,
-  };
+    ogImage: seo.ogImage,
+  });
 }
 
 export default async function PrivacyPolicyRoutePage({ params }: PrivacyPolicyRoutePageProps) {

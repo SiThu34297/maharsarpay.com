@@ -9,6 +9,7 @@ import {
 import { getWebsiteMetadataContent } from "@/features/page-info";
 import { siteConfig } from "@/lib/constants/site";
 import { getDictionary, hasLocale } from "@/lib/i18n";
+import { buildRouteMetadata } from "@/lib/seo/route-metadata";
 
 type MultimediaDetailRoutePageProps = Readonly<{
   params: Promise<{ lang: string; slug: string }>;
@@ -33,26 +34,24 @@ export async function generateMetadata({
   ]);
 
   if (!media) {
-    return {
+    return buildRouteMetadata({
+      lang,
+      pathname: `/multimedia/${slug}`,
       title: metadataContent.siteTitle,
       description: metadataContent.siteDescription,
-      openGraph: metadataContent.ogImage
-        ? {
-            images: [{ url: metadataContent.ogImage }],
-          }
-        : undefined,
-    };
+      ogImage: metadataContent.ogImage,
+      openGraphType: "article",
+    });
   }
 
-  return {
+  return buildRouteMetadata({
+    lang,
+    pathname: `/multimedia/${slug}`,
     title: `${media.title} | ${metadataContent.siteTitle}`,
     description: media.description || metadataContent.siteDescription,
-    openGraph: metadataContent.ogImage
-      ? {
-          images: [{ url: metadataContent.ogImage }],
-        }
-      : undefined,
-  };
+    ogImage: metadataContent.ogImage,
+    openGraphType: "article",
+  });
 }
 
 export default async function MultimediaDetailRoutePage({

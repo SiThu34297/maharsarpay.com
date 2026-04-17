@@ -7,6 +7,7 @@ import { getWebsiteMetadataContent } from "@/features/page-info";
 import { buildLoginRedirectPath, getSafeRedirectPath } from "@/lib/auth/redirect";
 import { siteConfig } from "@/lib/constants/site";
 import { getDictionary, hasLocale } from "@/lib/i18n";
+import { buildRouteMetadata } from "@/lib/seo/route-metadata";
 
 type RegisterRoutePageProps = Readonly<{
   params: Promise<{ lang: string }>;
@@ -32,15 +33,14 @@ export async function generateMetadata({ params }: RegisterRoutePageProps): Prom
     getWebsiteMetadataContent(lang),
   ]);
 
-  return {
+  return buildRouteMetadata({
+    lang,
+    pathname: "/register",
     title: `${dictionary.registerPage.metaTitle} | ${metadataContent.siteTitle}`,
     description: dictionary.registerPage.metaDescription,
-    openGraph: metadataContent.ogImage
-      ? {
-          images: [{ url: metadataContent.ogImage }],
-        }
-      : undefined,
-  };
+    ogImage: metadataContent.ogImage,
+    noIndex: true,
+  });
 }
 
 export default async function RegisterRoutePage({ params, searchParams }: RegisterRoutePageProps) {

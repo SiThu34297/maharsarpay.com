@@ -5,6 +5,7 @@ import { AuthorDetailPage, getAuthorBySlug, getAuthorDetailPageData } from "@/fe
 import { getWebsiteMetadataContent } from "@/features/page-info";
 import { siteConfig } from "@/lib/constants/site";
 import { getDictionary, hasLocale } from "@/lib/i18n";
+import { buildRouteMetadata } from "@/lib/seo/route-metadata";
 
 type AuthorDetailRoutePageProps = Readonly<{
   params: Promise<{ lang: string; slug: string }>;
@@ -27,26 +28,24 @@ export async function generateMetadata({ params }: AuthorDetailRoutePageProps): 
   ]);
 
   if (!author) {
-    return {
+    return buildRouteMetadata({
+      lang,
+      pathname: `/authors/${slug}`,
       title: metadataContent.siteTitle,
       description: metadataContent.siteDescription,
-      openGraph: metadataContent.ogImage
-        ? {
-            images: [{ url: metadataContent.ogImage }],
-          }
-        : undefined,
-    };
+      ogImage: metadataContent.ogImage,
+      openGraphType: "article",
+    });
   }
 
-  return {
+  return buildRouteMetadata({
+    lang,
+    pathname: `/authors/${slug}`,
     title: `${author.name} | ${metadataContent.siteTitle}`,
     description: author.shortBio || metadataContent.siteDescription,
-    openGraph: metadataContent.ogImage
-      ? {
-          images: [{ url: metadataContent.ogImage }],
-        }
-      : undefined,
-  };
+    ogImage: metadataContent.ogImage,
+    openGraphType: "article",
+  });
 }
 
 export default async function AuthorDetailRoutePage({

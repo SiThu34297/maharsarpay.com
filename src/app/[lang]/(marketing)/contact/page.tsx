@@ -5,6 +5,7 @@ import { ContactPage, getContactPageData } from "@/features/contact";
 import { getWebsiteMetadataContent } from "@/features/page-info";
 import { siteConfig } from "@/lib/constants/site";
 import { getDictionary, hasLocale } from "@/lib/i18n";
+import { buildRouteMetadata } from "@/lib/seo/route-metadata";
 
 type ContactRoutePageProps = Readonly<{
   params: Promise<{ lang: string }>;
@@ -25,15 +26,13 @@ export async function generateMetadata({ params }: ContactRoutePageProps): Promi
     getWebsiteMetadataContent(lang),
   ]);
 
-  return {
+  return buildRouteMetadata({
+    lang,
+    pathname: "/contact",
     title: `${dictionary.contactPage.metaTitle} | ${metadataContent.siteTitle}`,
     description: dictionary.contactPage.metaDescription,
-    openGraph: metadataContent.ogImage
-      ? {
-          images: [{ url: metadataContent.ogImage }],
-        }
-      : undefined,
-  };
+    ogImage: metadataContent.ogImage,
+  });
 }
 
 export default async function ContactRoutePage({ params }: ContactRoutePageProps) {

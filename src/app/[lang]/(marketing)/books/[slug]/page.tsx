@@ -5,6 +5,7 @@ import { BookDetailPage, getBookBySlug, getBookDetailPageData } from "@/features
 import { getWebsiteMetadataContent } from "@/features/page-info";
 import { siteConfig } from "@/lib/constants/site";
 import { getDictionary, hasLocale } from "@/lib/i18n";
+import { buildRouteMetadata } from "@/lib/seo/route-metadata";
 
 type BookDetailRoutePageProps = Readonly<{
   params: Promise<{ lang: string; slug: string }>;
@@ -27,26 +28,24 @@ export async function generateMetadata({ params }: BookDetailRoutePageProps): Pr
   ]);
 
   if (!book) {
-    return {
+    return buildRouteMetadata({
+      lang,
+      pathname: `/books/${slug}`,
       title: metadataContent.siteTitle,
       description: metadataContent.siteDescription,
-      openGraph: metadataContent.ogImage
-        ? {
-            images: [{ url: metadataContent.ogImage }],
-          }
-        : undefined,
-    };
+      ogImage: metadataContent.ogImage,
+      openGraphType: "article",
+    });
   }
 
-  return {
+  return buildRouteMetadata({
+    lang,
+    pathname: `/books/${slug}`,
     title: `${book.title} | ${metadataContent.siteTitle}`,
     description: book.description || metadataContent.siteDescription,
-    openGraph: metadataContent.ogImage
-      ? {
-          images: [{ url: metadataContent.ogImage }],
-        }
-      : undefined,
-  };
+    ogImage: metadataContent.ogImage,
+    openGraphType: "article",
+  });
 }
 
 export default async function BookDetailRoutePage({

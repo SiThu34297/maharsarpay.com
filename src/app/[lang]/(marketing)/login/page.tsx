@@ -7,6 +7,7 @@ import { getWebsiteMetadataContent } from "@/features/page-info";
 import { siteConfig } from "@/lib/constants/site";
 import { buildRegisterRedirectPath, getSafeRedirectPath } from "@/lib/auth/redirect";
 import { getDictionary, hasLocale } from "@/lib/i18n";
+import { buildRouteMetadata } from "@/lib/seo/route-metadata";
 
 type LoginRoutePageProps = Readonly<{
   params: Promise<{ lang: string }>;
@@ -33,13 +34,14 @@ export async function generateMetadata({ params }: LoginRoutePageProps): Promise
   ]);
 
   return {
-    title: `${dictionary.loginPage.metaTitle} | ${metadataContent.siteTitle}`,
-    description: dictionary.loginPage.metaDescription,
-    openGraph: metadataContent.ogImage
-      ? {
-          images: [{ url: metadataContent.ogImage }],
-        }
-      : undefined,
+    ...buildRouteMetadata({
+      lang,
+      pathname: "/login",
+      title: `${dictionary.loginPage.metaTitle} | ${metadataContent.siteTitle}`,
+      description: dictionary.loginPage.metaDescription,
+      ogImage: metadataContent.ogImage,
+      noIndex: true,
+    }),
   };
 }
 

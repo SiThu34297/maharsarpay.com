@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import {
@@ -5,12 +6,39 @@ import {
   getMultimediaPageData,
   parseMultimediaListQueryFromObject,
 } from "@/features/multimedia";
+import { getWebsiteMetadataContent } from "@/features/page-info";
+import { siteConfig } from "@/lib/constants/site";
 import { getDictionary, hasLocale } from "@/lib/i18n";
+import { buildRouteMetadata } from "@/lib/seo/route-metadata";
 
 type MultimediaRoutePageProps = Readonly<{
   params: Promise<{ lang: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }>;
+
+export async function generateMetadata({ params }: MultimediaRoutePageProps): Promise<Metadata> {
+  const { lang } = await params;
+
+  if (!hasLocale(lang)) {
+    return {
+      title: siteConfig.title,
+      description: siteConfig.description,
+    };
+  }
+
+  const [dictionary, seo] = await Promise.all([
+    getDictionary(lang),
+    getWebsiteMetadataContent(lang),
+  ]);
+
+  return buildRouteMetadata({
+    lang,
+    pathname: "/multimedia",
+    title: `${dictionary.multimediaList.title} | ${seo.siteTitle}`,
+    description: dictionary.multimediaList.description,
+    ogImage: seo.ogImage,
+  });
+}
 
 export default async function MultimediaRoutePage({
   params,

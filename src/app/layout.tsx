@@ -25,13 +25,20 @@ export async function generateMetadata(): Promise<Metadata> {
   const metadataContent = await getWebsiteMetadataContent(defaultLocale);
 
   return {
+    metadataBase: new URL(siteConfig.url),
     title: metadataContent.siteTitle || siteConfig.title,
     description: metadataContent.siteDescription || siteConfig.description,
-    openGraph: metadataContent.ogImage
-      ? {
-          images: [{ url: metadataContent.ogImage }],
-        }
-      : undefined,
+    openGraph: {
+      siteName: metadataContent.siteTitle || siteConfig.title,
+      type: "website",
+      images: metadataContent.ogImage ? [{ url: metadataContent.ogImage }] : undefined,
+    },
+    twitter: {
+      card: metadataContent.ogImage ? "summary_large_image" : "summary",
+      title: metadataContent.siteTitle || siteConfig.title,
+      description: metadataContent.siteDescription || siteConfig.description,
+      images: metadataContent.ogImage ? [metadataContent.ogImage] : undefined,
+    },
   };
 }
 
@@ -42,7 +49,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang={defaultLocale}
       className={`h-full antialiased ${inter.variable} ${playfairDisplay.variable}`}
       suppressHydrationWarning
     >

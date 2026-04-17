@@ -6,6 +6,7 @@ import { getWebsiteMetadataContent } from "@/features/page-info";
 import { ProfilePage, getProfilePageData } from "@/features/profile";
 import { siteConfig } from "@/lib/constants/site";
 import { getDictionary, hasLocale } from "@/lib/i18n";
+import { buildRouteMetadata } from "@/lib/seo/route-metadata";
 
 type ProfileRoutePageProps = Readonly<{
   params: Promise<{ lang: string }>;
@@ -26,15 +27,14 @@ export async function generateMetadata({ params }: ProfileRoutePageProps): Promi
     getWebsiteMetadataContent(lang),
   ]);
 
-  return {
+  return buildRouteMetadata({
+    lang,
+    pathname: "/profile",
     title: `${dictionary.profilePage.metaTitle} | ${metadataContent.siteTitle}`,
     description: dictionary.profilePage.metaDescription,
-    openGraph: metadataContent.ogImage
-      ? {
-          images: [{ url: metadataContent.ogImage }],
-        }
-      : undefined,
-  };
+    ogImage: metadataContent.ogImage,
+    noIndex: true,
+  });
 }
 
 export default async function ProfileRoutePage({ params }: ProfileRoutePageProps) {
@@ -47,7 +47,8 @@ export default async function ProfileRoutePage({ params }: ProfileRoutePageProps
   const session = await auth();
 
   if (!session?.user?.email) {
-    redirect(`/${lang}/login?next=${encodeURIComponent(`/${lang}/profile`)}`);
+    const profilePath = `/${lang}/profile`;
+    redirect(`/${lang}/login?next=${encodeURIComponent(profilePath)}`);
   }
 
   const [dictionary, data] = await Promise.all([
