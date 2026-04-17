@@ -232,50 +232,51 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
               </div>
 
               <div className="book-detail-related-grid">
-                {data.relatedBooks.map((relatedBook) => (
-                  <article key={relatedBook.id} className="book-detail-related-card">
-                    <Link
-                      href={`/${locale}/books/${relatedBook.slug}${detailHrefSuffix}`}
-                      className="block"
-                    >
-                      <Image
-                        src={relatedBook.coverImageSrc}
-                        alt={relatedBook.coverImageAlt}
-                        width={360}
-                        height={470}
-                        className="book-detail-related-cover"
-                        sizes="(max-width: 768px) 50vw, 25vw"
-                      />
-                    </Link>
-                    <h3>
-                      <Link href={`/${locale}/books/${relatedBook.slug}${detailHrefSuffix}`}>
-                        {relatedBook.title}
-                      </Link>
-                    </h3>
-                    <p>{relatedBook.author}</p>
-                    {(() => {
-                      const relatedPricing = getDiscountPricing(relatedBook);
+                {data.relatedBooks.map((relatedBook) => {
+                  const relatedPricing = getDiscountPricing(relatedBook);
+                  const hasDiscount =
+                    Boolean(relatedPricing.originalPrice) &&
+                    (relatedPricing.discountAmount ?? 0) > 0;
 
-                      return (
-                        <div className="mt-1 flex flex-wrap items-center gap-2">
-                          <p className="book-detail-related-price">
-                            {formatPrice(locale, relatedPricing.salePrice)}
+                  return (
+                    <article key={relatedBook.id} className="book-detail-related-card">
+                      <Link
+                        href={`/${locale}/books/${relatedBook.slug}${detailHrefSuffix}`}
+                        className="relative block"
+                      >
+                        <Image
+                          src={relatedBook.coverImageSrc}
+                          alt={relatedBook.coverImageAlt}
+                          width={360}
+                          height={470}
+                          className="book-detail-related-cover"
+                          sizes="(max-width: 768px) 50vw, 25vw"
+                        />
+                        {hasDiscount ? (
+                          <span className="absolute left-2 top-2 z-10 rounded-full bg-[var(--color-accent)] px-2 py-1 text-[10px] font-semibold text-white shadow-sm sm:left-3 sm:top-3 sm:text-xs">
+                            -{formatPrice(locale, relatedPricing.discountAmount ?? 0)}
+                          </span>
+                        ) : null}
+                      </Link>
+                      <h3>
+                        <Link href={`/${locale}/books/${relatedBook.slug}${detailHrefSuffix}`}>
+                          {relatedBook.title}
+                        </Link>
+                      </h3>
+                      <p>{relatedBook.author}</p>
+                      <div className="mt-1 flex flex-wrap items-center gap-2">
+                        <p className="book-detail-related-price">
+                          {formatPrice(locale, relatedPricing.salePrice)}
+                        </p>
+                        {relatedPricing.originalPrice ? (
+                          <p className="text-xs text-[var(--color-text-muted)] line-through">
+                            {formatPrice(locale, relatedPricing.originalPrice)}
                           </p>
-                          {relatedPricing.originalPrice ? (
-                            <>
-                              <p className="text-xs text-[var(--color-text-muted)] line-through">
-                                {formatPrice(locale, relatedPricing.originalPrice)}
-                              </p>
-                              <span className="rounded-full bg-[var(--color-accent-soft)] px-2 py-0.5 text-[10px] font-semibold text-[var(--color-accent)]">
-                                -{formatPrice(locale, relatedPricing.discountAmount ?? 0)}
-                              </span>
-                            </>
-                          ) : null}
-                        </div>
-                      );
-                    })()}
-                  </article>
-                ))}
+                        ) : null}
+                      </div>
+                    </article>
+                  );
+                })}
               </div>
             </section>
           ) : null}

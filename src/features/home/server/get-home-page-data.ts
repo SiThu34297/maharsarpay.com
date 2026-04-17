@@ -3,11 +3,13 @@ import type { Locale } from "@/lib/i18n";
 import { searchAuthors } from "@/features/authors";
 import { searchBooks } from "@/features/books";
 import { getAllCategories } from "@/features/categories";
+import { getHomeHeroSlidesFromBackend } from "@/features/home/server/banner-images-adapter";
 import { searchMultimedia } from "@/features/multimedia/server/multimedia-adapter";
 import type {
   AuthorItem,
   BookItem,
   CategoryItem,
+  HeroSlide,
   HomePageData,
   MediaItem,
   NavItem,
@@ -300,8 +302,108 @@ const promoByLocale: Record<Locale, PromoBanner> = {
   },
 };
 
+const fallbackHeroSlidesByLocale: Record<Locale, HeroSlide[]> = {
+  en: [
+    {
+      id: "hero-1",
+      title: "Discover Books That Inspire You",
+      description:
+        "Browse bestsellers, standout local authors, and thoughtfully curated reading picks for every mood.",
+      imageDesktopSrc: "/images/home/real/hero/hero-1.jpg",
+      imageMobileSrc: "/images/home/real/hero/hero-1.jpg",
+      imageAlt: "A curated stack of books for the homepage hero",
+      action: {
+        type: "DEEPLINK",
+        href: "#books",
+      },
+    },
+    {
+      id: "hero-2",
+      title: "Find Your Next Bestseller Today",
+      description:
+        "Browse trending picks, staff favorites, and fresh arrivals selected for fast discovery.",
+      imageDesktopSrc: "/images/home/real/hero/hero-2.jpg",
+      imageMobileSrc: "/images/home/real/hero/hero-2.jpg",
+      imageAlt: "A colorful bestselling books composition",
+      action: {
+        type: "DEEPLINK",
+        href: "#books",
+      },
+    },
+    {
+      id: "hero-3",
+      title: "Stories Curated for Every Generation",
+      description:
+        "From kids books to self-growth and literary fiction, explore titles that match your pace.",
+      imageDesktopSrc: "/images/home/real/hero/hero-3.jpg",
+      imageMobileSrc: "/images/home/real/hero/hero-3.jpg",
+      imageAlt: "A mixed genre book collection for the hero slider",
+      action: {
+        type: "DEEPLINK",
+        href: "#categories",
+      },
+    },
+  ],
+  my: [
+    {
+      id: "hero-1",
+      title: "သင့်ကို လှုံ့ဆော်မည့် စာအုပ်များကို ရှာဖွေလိုက်ပါ",
+      description:
+        "မဟာစာပေတွင် လူကြိုက်များသည့် စာအုပ်များ၊ မြန်မာစာရေးသူများနှင့် အကောင်းဆုံးစာဖတ်အကြံပြုချက်များကို တွေ့နိုင်ပါတယ်။",
+      imageDesktopSrc: "/images/home/real/hero/hero-1.jpg",
+      imageMobileSrc: "/images/home/real/hero/hero-1.jpg",
+      imageAlt: "စာအုပ်များ တန်းစီထားသည့် Hero ပုံ",
+      action: {
+        type: "DEEPLINK",
+        href: "#books",
+      },
+    },
+    {
+      id: "hero-2",
+      title: "အရောင်းအကောင်းဆုံး စာအုပ်ကို ယနေ့ရှာပါ",
+      description:
+        "လတ်တလော လူကြိုက်များဆုံး title များကို အကြံပြုစာရင်းနဲ့တကွ လွယ်ကူစွာ ကြည့်ရှုနိုင်ပါတယ်။",
+      imageDesktopSrc: "/images/home/real/hero/hero-2.jpg",
+      imageMobileSrc: "/images/home/real/hero/hero-2.jpg",
+      imageAlt: "အရောင်းရဆုံး စာအုပ်များ hero ပုံ",
+      action: {
+        type: "DEEPLINK",
+        href: "#books",
+      },
+    },
+    {
+      id: "hero-3",
+      title: "အသက်အရွယ်အားလုံးအတွက် သင့်တော်သော ပုံပြင်များ",
+      description:
+        "ကလေးစာပေမှ ပညာရေး၊ ကိုယ်တိုးတက်ရေးနှင့် ရသစာပေအထိ သင့်လိုအပ်ချက်အလိုက် ရွေးချယ်ပါ။",
+      imageDesktopSrc: "/images/home/real/hero/hero-3.jpg",
+      imageMobileSrc: "/images/home/real/hero/hero-3.jpg",
+      imageAlt: "စာအုပ်အမျိုးအစားစုံ စုစည်းထားသည့် hero ပုံ",
+      action: {
+        type: "DEEPLINK",
+        href: "#categories",
+      },
+    },
+  ],
+};
+
+async function getHomeHeroSlides(locale: Locale): Promise<HeroSlide[]> {
+  try {
+    const backendSlides = await getHomeHeroSlidesFromBackend(locale);
+
+    if (backendSlides.length > 0) {
+      return backendSlides;
+    }
+  } catch {
+    // Fall through to static fallback if backend is unavailable.
+  }
+
+  return fallbackHeroSlidesByLocale[locale];
+}
+
 export async function getHomePageData(locale: Locale): Promise<HomePageData> {
-  const [categories, authors, books, mediaItems] = await Promise.all([
+  const [heroSlides, categories, authors, books, mediaItems] = await Promise.all([
+    getHomeHeroSlides(locale),
     getHomeCategories(locale),
     getHomeAuthors(locale),
     getHomeBooks(locale),
@@ -310,62 +412,7 @@ export async function getHomePageData(locale: Locale): Promise<HomePageData> {
 
   return {
     navigation,
-    heroSlides: [
-      {
-        id: "hero-1",
-        title:
-          locale === "my"
-            ? "သင့်ကို လှုံ့ဆော်မည့် စာအုပ်များကို ရှာဖွေလိုက်ပါ"
-            : "Discover Books That Inspire You",
-        description:
-          locale === "my"
-            ? "မဟာစာပေတွင် လူကြိုက်များသည့် စာအုပ်များ၊ မြန်မာစာရေးသူများနှင့် အကောင်းဆုံးစာဖတ်အကြံပြုချက်များကို တွေ့နိုင်ပါတယ်။"
-            : "Browse bestsellers, standout local authors, and thoughtfully curated reading picks for every mood.",
-        primaryHref: "#books",
-        secondaryHref: "#categories",
-        imageSrc: "/images/home/real/hero/hero-1.jpg",
-        imageAlt:
-          locale === "my"
-            ? "စာအုပ်များ တန်းစီထားသည့် Hero ပုံ"
-            : "A curated stack of books for the homepage hero",
-      },
-      {
-        id: "hero-2",
-        title:
-          locale === "my"
-            ? "အရောင်းအကောင်းဆုံး စာအုပ်ကို ယနေ့ရှာပါ"
-            : "Find Your Next Bestseller Today",
-        description:
-          locale === "my"
-            ? "လတ်တလော လူကြိုက်များဆုံး title များကို အကြံပြုစာရင်းနဲ့တကွ လွယ်ကူစွာ ကြည့်ရှုနိုင်ပါတယ်။"
-            : "Browse trending picks, staff favorites, and fresh arrivals selected for fast discovery.",
-        primaryHref: "#books",
-        secondaryHref: "#media",
-        imageSrc: "/images/home/real/hero/hero-2.jpg",
-        imageAlt:
-          locale === "my"
-            ? "အရောင်းရဆုံး စာအုပ်များ hero ပုံ"
-            : "A colorful bestselling books composition",
-      },
-      {
-        id: "hero-3",
-        title:
-          locale === "my"
-            ? "အသက်အရွယ်အားလုံးအတွက် သင့်တော်သော ပုံပြင်များ"
-            : "Stories Curated for Every Generation",
-        description:
-          locale === "my"
-            ? "ကလေးစာပေမှ ပညာရေး၊ ကိုယ်တိုးတက်ရေးနှင့် ရသစာပေအထိ သင့်လိုအပ်ချက်အလိုက် ရွေးချယ်ပါ။"
-            : "From kids books to self-growth and literary fiction, explore titles that match your pace.",
-        primaryHref: "#categories",
-        secondaryHref: "#authors",
-        imageSrc: "/images/home/real/hero/hero-3.jpg",
-        imageAlt:
-          locale === "my"
-            ? "စာအုပ်အမျိုးအစားစုံ စုစည်းထားသည့် hero ပုံ"
-            : "A mixed genre book collection for the hero slider",
-      },
-    ],
+    heroSlides,
     categories,
     books,
     authors,

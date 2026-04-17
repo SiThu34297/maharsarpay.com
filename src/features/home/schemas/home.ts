@@ -3,15 +3,36 @@ export type NavItem = {
   href: string;
 };
 
+export const homeHeroBannerDesignSpec = {
+  desktop: {
+    width: 1920,
+    height: 900,
+  },
+  mobile: {
+    width: 1080,
+    height: 1800,
+  },
+} as const;
+
 export type HeroSlide = {
   id: string;
   title: string;
   description: string;
-  primaryHref: string;
-  secondaryHref: string;
-  imageSrc: string;
+  imageDesktopSrc: string;
+  imageMobileSrc: string;
   imageAlt: string;
+  action: HeroSlideAction | null;
 };
+
+export type HeroSlideAction =
+  | {
+      type: "DEEPLINK";
+      href: string;
+    }
+  | {
+      type: "EXTERNAL";
+      href: string;
+    };
 
 export type CategoryItem = {
   id: string;

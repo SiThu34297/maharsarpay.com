@@ -1,5 +1,10 @@
 ## Multimedia Detail Page Plan (Editorial Modern)
 
+### Plan Update
+
+- Date: 2026-04-17
+- Summary: Applied book-card discount overlay treatment to multimedia detail related books cards (cover badge + sale/original pricing).
+
 ### Summary
 
 Build a new localized multimedia detail route with an editorial-modern design, progressive media hero treatment, and discovery modules that connect stories to more media and books.

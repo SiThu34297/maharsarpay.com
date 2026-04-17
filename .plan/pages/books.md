@@ -7,6 +7,32 @@
 
 ## Entries
 
+### 2026-04-17 - Discount Overlay for Related Books Cards
+
+- What changed:
+  - Added discount amount overlay badge on related books cover images in book detail page cards.
+  - Removed inline discount badge from related-book price row while keeping sale and original strikethrough prices.
+- Why it changed:
+  - To apply the same discount design pattern across book card sections, not only the main books list.
+- Files touched:
+  - `src/features/books/components/book-detail-page.tsx`
+  - `.plan/pages/books.md`
+- Notes:
+  - Overlay appears only when discount is valid and positive.
+
+### 2026-04-17 - Discount Amount Overlay on Book Card Image
+
+- What changed:
+  - Moved discount amount display from the price row into a badge overlay on top of each book cover image in the books list cards.
+  - Kept sale price and original strikethrough price text below the image.
+- Why it changed:
+  - To highlight discount more clearly and match requested visual design.
+- Files touched:
+  - `src/features/books/components/books-list-client.tsx`
+  - `.plan/pages/books.md`
+- Notes:
+  - Overlay is shown only when a valid positive discount exists.
+
 ### 2026-04-16 - Inline Hover Zoom on Main Detail Photo (No Side Pane)
 
 - What changed:

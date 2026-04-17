@@ -48,11 +48,6 @@ function formatAuthorBookCount(template: string, locale: Locale, count: number) 
   return template.replace("{count}", countText);
 }
 
-function renderStars(rating: number) {
-  const fullStars = Math.round(rating);
-  return `${"★".repeat(fullStars)}${"☆".repeat(Math.max(5 - fullStars, 0))}`;
-}
-
 function getDiscountPricing(book: {
   price: number;
   salePrice?: number | null;
@@ -184,18 +179,90 @@ export async function HomePage({ copy, locale }: HomePageProps) {
 
           <div className="md:hidden">
             <ul className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4">
-              {data.books.map((book) => (
-                <li key={book.id} className="home-card min-w-[230px] snap-start">
-                  <Link href={`/${locale}/books/${book.slug}?from=home`} className="block">
+              {data.books.map((book) => {
+                const pricing = getDiscountPricing(book);
+                const hasDiscount =
+                  Boolean(pricing.originalPrice) && (pricing.discountAmount ?? 0) > 0;
+
+                return (
+                  <li key={book.id} className="home-card min-w-[230px] snap-start flex flex-col">
+                    <Link
+                      href={`/${locale}/books/${book.slug}?from=home`}
+                      className="relative block overflow-hidden rounded-xl"
+                    >
+                      <Image
+                        src={book.imageSrc}
+                        alt={book.imageAlt}
+                        width={320}
+                        height={420}
+                        className="h-[220px] w-full rounded-xl object-cover"
+                      />
+                      {hasDiscount ? (
+                        <span className="absolute left-2 top-2 z-10 rounded-full bg-[var(--color-accent)] px-2 py-1 text-[10px] font-semibold text-white shadow-sm">
+                          -{formatPrice(locale, pricing.discountAmount ?? 0)}
+                        </span>
+                      ) : null}
+                    </Link>
+                    <h3 className="mt-4 min-h-[3.5rem] text-lg leading-snug">
+                      <Link
+                        href={`/${locale}/books/${book.slug}?from=home`}
+                        className="line-clamp-2 hover:text-[var(--color-brand)]"
+                      >
+                        {book.title}
+                      </Link>
+                    </h3>
+                    <p className="mt-1 min-h-[1.25rem] line-clamp-1 text-sm text-[var(--color-text-muted)]">
+                      {book.author}
+                    </p>
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <p className="text-base font-semibold text-[var(--color-brand)]">
+                        {formatPrice(locale, pricing.salePrice)}
+                      </p>
+                      {pricing.originalPrice ? (
+                        <p className="text-xs text-[var(--color-text-muted)] line-through">
+                          {formatPrice(locale, pricing.originalPrice)}
+                        </p>
+                      ) : null}
+                    </div>
+                    <div className="mt-auto">
+                      <HomeAddToCartButton
+                        book={book}
+                        addLabel={copy.bestsellers.addToCart}
+                        addedLabel={copy.booksList.addedToCart}
+                      />
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+
+          <div className="hidden gap-6 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {data.books.map((book) => {
+              const pricing = getDiscountPricing(book);
+              const hasDiscount =
+                Boolean(pricing.originalPrice) && (pricing.discountAmount ?? 0) > 0;
+
+              return (
+                <article key={book.id} className="home-card">
+                  <Link
+                    href={`/${locale}/books/${book.slug}?from=home`}
+                    className="relative block overflow-hidden rounded-xl"
+                  >
                     <Image
                       src={book.imageSrc}
                       alt={book.imageAlt}
                       width={320}
                       height={420}
-                      className="h-[220px] w-full rounded-xl object-cover"
+                      className="h-[250px] w-full rounded-xl object-cover"
                     />
+                    {hasDiscount ? (
+                      <span className="absolute left-2 top-2 z-10 rounded-full bg-[var(--color-accent)] px-2 py-1 text-[10px] font-semibold text-white shadow-sm sm:left-3 sm:top-3 sm:text-xs">
+                        -{formatPrice(locale, pricing.discountAmount ?? 0)}
+                      </span>
+                    ) : null}
                   </Link>
-                  <h3 className="mt-4 text-lg leading-snug">
+                  <h3 className="mt-4 text-xl leading-snug">
                     <Link
                       href={`/${locale}/books/${book.slug}?from=home`}
                       className="hover:text-[var(--color-brand)]"
@@ -204,86 +271,24 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                     </Link>
                   </h3>
                   <p className="mt-1 text-sm text-[var(--color-text-muted)]">{book.author}</p>
-                  {(() => {
-                    const pricing = getDiscountPricing(book);
-
-                    return (
-                      <div className="mt-3 flex flex-wrap items-center gap-2">
-                        <p className="text-base font-semibold text-[var(--color-brand)]">
-                          {formatPrice(locale, pricing.salePrice)}
-                        </p>
-                        {pricing.originalPrice ? (
-                          <>
-                            <p className="text-xs text-[var(--color-text-muted)] line-through">
-                              {formatPrice(locale, pricing.originalPrice)}
-                            </p>
-                            <span className="rounded-full bg-[var(--color-accent-soft)] px-2 py-0.5 text-[10px] font-semibold text-[var(--color-accent)]">
-                              -{formatPrice(locale, pricing.discountAmount ?? 0)}
-                            </span>
-                          </>
-                        ) : null}
-                      </div>
-                    );
-                  })()}
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <p className="text-base font-semibold text-[var(--color-brand)]">
+                      {formatPrice(locale, pricing.salePrice)}
+                    </p>
+                    {pricing.originalPrice ? (
+                      <p className="text-xs text-[var(--color-text-muted)] line-through">
+                        {formatPrice(locale, pricing.originalPrice)}
+                      </p>
+                    ) : null}
+                  </div>
                   <HomeAddToCartButton
                     book={book}
                     addLabel={copy.bestsellers.addToCart}
                     addedLabel={copy.booksList.addedToCart}
                   />
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="hidden gap-6 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {data.books.map((book) => (
-              <article key={book.id} className="home-card">
-                <Link href={`/${locale}/books/${book.slug}?from=home`} className="block">
-                  <Image
-                    src={book.imageSrc}
-                    alt={book.imageAlt}
-                    width={320}
-                    height={420}
-                    className="h-[250px] w-full rounded-xl object-cover"
-                  />
-                </Link>
-                <h3 className="mt-4 text-xl leading-snug">
-                  <Link
-                    href={`/${locale}/books/${book.slug}?from=home`}
-                    className="hover:text-[var(--color-brand)]"
-                  >
-                    {book.title}
-                  </Link>
-                </h3>
-                <p className="mt-1 text-sm text-[var(--color-text-muted)]">{book.author}</p>
-                {(() => {
-                  const pricing = getDiscountPricing(book);
-
-                  return (
-                    <div className="mt-3 flex flex-wrap items-center gap-2">
-                      <p className="text-base font-semibold text-[var(--color-brand)]">
-                        {formatPrice(locale, pricing.salePrice)}
-                      </p>
-                      {pricing.originalPrice ? (
-                        <>
-                          <p className="text-xs text-[var(--color-text-muted)] line-through">
-                            {formatPrice(locale, pricing.originalPrice)}
-                          </p>
-                          <span className="rounded-full bg-[var(--color-accent-soft)] px-2 py-0.5 text-[10px] font-semibold text-[var(--color-accent)]">
-                            -{formatPrice(locale, pricing.discountAmount ?? 0)}
-                          </span>
-                        </>
-                      ) : null}
-                    </div>
-                  );
-                })()}
-                <HomeAddToCartButton
-                  book={book}
-                  addLabel={copy.bestsellers.addToCart}
-                  addedLabel={copy.booksList.addedToCart}
-                />
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </div>
         </section>
 
@@ -428,70 +433,6 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                 <p className="mt-2 text-sm text-[var(--color-text-muted)]">{item.description}</p>
               </article>
             ))}
-          </div>
-        </section>
-
-        <section className="home-shell section-gap">
-          <SectionHeading title={copy.reviews.title} description={copy.reviews.description} />
-
-          <div className="md:hidden">
-            <ul className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4">
-              {data.reviews.map((review) => (
-                <li key={review.id} className="home-card min-w-[260px] snap-start">
-                  <p
-                    className="text-sm text-[var(--color-text-muted)]"
-                    aria-label={`${review.rating} stars`}
-                  >
-                    {renderStars(review.rating)}
-                  </p>
-                  <p className="mt-4 text-base leading-relaxed text-[var(--color-text-main)]">
-                    “{review.quote}”
-                  </p>
-                  <p className="mt-4 text-sm font-semibold text-[var(--color-brand)]">
-                    {review.name}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="hidden gap-6 md:grid md:grid-cols-2 xl:grid-cols-4">
-            {data.reviews.map((review) => (
-              <article key={review.id} className="home-card">
-                <p
-                  className="text-sm text-[var(--color-text-muted)]"
-                  aria-label={`${review.rating} stars`}
-                >
-                  {renderStars(review.rating)}
-                </p>
-                <p className="mt-4 text-base leading-relaxed text-[var(--color-text-main)]">
-                  “{review.quote}”
-                </p>
-                <p className="mt-5 text-sm font-semibold text-[var(--color-brand)]">
-                  {review.name}
-                </p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="home-shell pb-14 pt-4 md:pb-20">
-          <div className="rounded-[24px] border border-[var(--color-accent)]/40 bg-[var(--color-accent-soft)] p-6 md:p-10">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-accent)]">
-              {data.promo.badge}
-            </p>
-            <h2 className="text-3xl text-[var(--color-text-main)] md:text-4xl">
-              {data.promo.title}
-            </h2>
-            <p className="mt-3 max-w-2xl text-base text-[var(--color-text-muted)] md:text-lg">
-              {data.promo.description}
-            </p>
-            <Link
-              href={data.promo.ctaHref}
-              className="mt-6 inline-flex rounded-full bg-[var(--color-accent)] px-6 py-3 text-sm font-semibold text-white transition hover:brightness-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
-            >
-              {copy.promo.cta}
-            </Link>
           </div>
         </section>
       </main>

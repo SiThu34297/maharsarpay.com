@@ -350,6 +350,8 @@ export function BooksListClient({
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-3 xl:grid-cols-4">
               {items.map((book) => {
                 const pricing = getDiscountPricing(book);
+                const hasDiscount =
+                  Boolean(pricing.originalPrice) && (pricing.discountAmount ?? 0) > 0;
 
                 return (
                   <article key={book.id} className="book-list-card">
@@ -365,6 +367,11 @@ export function BooksListClient({
                         className="h-[200px] w-full object-cover sm:h-[220px]"
                         sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                       />
+                      {hasDiscount ? (
+                        <span className="absolute left-2 top-2 z-10 rounded-full bg-[var(--color-accent)] px-2 py-1 text-[10px] font-semibold text-white shadow-sm sm:left-3 sm:top-3 sm:text-xs">
+                          -{formatPrice(locale, pricing.discountAmount ?? 0)}
+                        </span>
+                      ) : null}
                     </Link>
 
                     <h3 className="book-list-title mt-3 text-base text-[var(--color-text-main)] sm:text-lg">
@@ -382,14 +389,9 @@ export function BooksListClient({
                         {formatPrice(locale, pricing.salePrice)}
                       </p>
                       {pricing.originalPrice ? (
-                        <>
-                          <p className="text-xs text-[var(--color-text-muted)] line-through">
-                            {formatPrice(locale, pricing.originalPrice)}
-                          </p>
-                          <span className="rounded-full bg-[var(--color-accent-soft)] px-2 py-0.5 text-[10px] font-semibold text-[var(--color-accent)]">
-                            -{formatPrice(locale, pricing.discountAmount ?? 0)}
-                          </span>
-                        </>
+                        <p className="text-xs text-[var(--color-text-muted)] line-through">
+                          {formatPrice(locale, pricing.originalPrice)}
+                        </p>
                       ) : null}
                     </div>
 

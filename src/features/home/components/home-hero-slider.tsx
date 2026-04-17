@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 
 import type { HeroSlide } from "@/features/home/schemas/home";
@@ -16,6 +17,7 @@ const AUTO_ROTATE_MS = 6000;
 
 export function HomeHeroSlider({ slides, previousLabel, nextLabel }: HomeHeroSliderProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isDesktopOrTablet, setIsDesktopOrTablet] = useState(false);
 
   const totalSlides = slides.length;
 
@@ -34,12 +36,27 @@ export function HomeHeroSlider({ slides, previousLabel, nextLabel }: HomeHeroSli
       return;
     }
 
-    const intervalId = window.setInterval(() => {
+    const intervalId = globalThis.setInterval(() => {
       setActiveIndex((current) => (current + 1) % totalSlides);
     }, AUTO_ROTATE_MS);
 
-    return () => window.clearInterval(intervalId);
+    return () => globalThis.clearInterval(intervalId);
   }, [totalSlides]);
+
+  useEffect(() => {
+    const mediaQuery = globalThis.matchMedia("(min-width: 768px)");
+
+    const updateViewport = () => {
+      setIsDesktopOrTablet(mediaQuery.matches);
+    };
+
+    updateViewport();
+    mediaQuery.addEventListener("change", updateViewport);
+
+    return () => {
+      mediaQuery.removeEventListener("change", updateViewport);
+    };
+  }, []);
 
   if (!activeSlide) {
     return null;
@@ -66,9 +83,63 @@ export function HomeHeroSlider({ slides, previousLabel, nextLabel }: HomeHeroSli
   }
 
   return (
-    <section className="relative h-[52svh] min-h-[340px] w-full overflow-hidden sm:h-[58svh] md:h-[64svh] md:min-h-[460px] lg:h-[72svh] xl:h-[78svh]">
+    <section className="relative h-[68svh] min-h-[500px] w-full overflow-hidden bg-black sm:h-[64svh] md:h-[64svh] md:min-h-[460px] lg:h-[72svh] xl:h-[78svh]">
       {slides.map((slide, index) => {
         const isActive = index === safeActiveIndex;
+        const imageSrc = isDesktopOrTablet ? slide.imageDesktopSrc : slide.imageMobileSrc;
+
+        const slideVisual = (
+          <>
+            <Image
+              src={imageSrc}
+              alt={slide.imageAlt}
+              fill
+              className="object-fill"
+              sizes="100vw"
+              priority={index === 0}
+            />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-black/10" />
+          </>
+        );
+
+        let slideContent = slideVisual;
+
+        if (slide.action?.type === "EXTERNAL") {
+          slideContent = (
+            <a
+              href={slide.action.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block h-full w-full"
+              aria-label={slide.title}
+              tabIndex={isActive ? 0 : -1}
+            >
+              {slideVisual}
+            </a>
+          );
+        }
+
+        if (slide.action?.type === "DEEPLINK") {
+          slideContent = slide.action.href.startsWith("#") ? (
+            <a
+              href={slide.action.href}
+              className="block h-full w-full"
+              aria-label={slide.title}
+              tabIndex={isActive ? 0 : -1}
+            >
+              {slideVisual}
+            </a>
+          ) : (
+            <Link
+              href={slide.action.href}
+              className="block h-full w-full"
+              aria-label={slide.title}
+              tabIndex={isActive ? 0 : -1}
+            >
+              {slideVisual}
+            </Link>
+          );
+        }
 
         return (
           <div
@@ -78,15 +149,7 @@ export function HomeHeroSlider({ slides, previousLabel, nextLabel }: HomeHeroSli
             }`}
             aria-hidden={!isActive}
           >
-            <Image
-              src={slide.imageSrc}
-              alt={slide.imageAlt}
-              fill
-              className="object-cover object-center"
-              sizes="100vw"
-              priority={index === 0}
-            />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-black/10" />
+            {slideContent}
           </div>
         );
       })}

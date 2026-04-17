@@ -7,6 +7,19 @@
 
 ## Entries
 
+### 2026-04-17 - Authored Books Discount Overlay Badge
+
+- What changed:
+  - Added discount amount overlay badge on authored book cover cards in author detail page.
+  - Updated authored book price display to use sale price with optional original strikethrough when discounted.
+- Why it changed:
+  - To keep discount rendering consistent across book card lists on different pages.
+- Files touched:
+  - `src/features/authors/components/author-detail-page.tsx`
+  - `.plan/pages/authors.md`
+- Notes:
+  - Overlay appears only when a valid positive discount exists.
+
 ### 2026-04-15 - Restore Books Categories Dropdown + Shared Floating Cart
 
 - What changed:

@@ -7,6 +7,129 @@
 
 ## Entries
 
+### 2026-04-17 - Hide Reviews and Seasonal Campaign Sections
+
+- What changed:
+  - Removed the reviews/testimonials section (`စာဖတ်သူများ၏ အမြင်များ`) from home page rendering.
+  - Removed the seasonal campaign promo section (`ရာသီအလိုက် ကမ်ပိန်း`) from home page rendering.
+  - Removed now-unused review star rendering helper from home page component.
+- Why it changed:
+  - These two sections were requested to be hidden from the homepage.
+- Files touched:
+  - `src/features/home/components/home-page.tsx`
+  - `.plan/pages/home.md`
+- Notes:
+  - Other home sections and navigation remain unchanged.
+
+### 2026-04-17 - Mobile Home Books Card Balance for Long Titles
+
+- What changed:
+  - Updated mobile home books cards to keep add-to-cart buttons vertically aligned even when titles are long.
+  - Added two-line title clamp and fixed title area height.
+  - Added single-line author clamp and fixed author row height.
+  - Switched mobile card container to a column flex layout and anchored the button area at the bottom.
+- Why it changed:
+  - Long titles were wrapping unevenly and causing inconsistent card height and button alignment.
+- Files touched:
+  - `src/features/home/components/home-page.tsx`
+  - `.plan/pages/home.md`
+- Notes:
+  - This adjustment is mobile-only within the home books carousel section.
+
+### 2026-04-17 - Home Books Discount Overlay on Cover
+
+- What changed:
+  - Moved discount amount display to an overlay badge on top of bestseller book cover images (mobile and desktop home sections).
+  - Removed inline discount badge from the price row while keeping sale and original strikethrough prices.
+- Why it changed:
+  - To keep discount visual treatment consistent with books list card behavior.
+- Files touched:
+  - `src/features/home/components/home-page.tsx`
+  - `.plan/pages/home.md`
+- Notes:
+  - Overlay appears only when a valid positive discount exists.
+
+### 2026-04-17 - Home Hero Mobile Height Increase (Round 2)
+
+- What changed:
+  - Increased mobile banner design height target from `1080 x 1620` to `1080 x 1800`.
+  - Increased mobile hero section height again to better support taller mobile banner compositions.
+- Why it changed:
+  - Additional vertical space was requested for mobile banner layout.
+- Files touched:
+  - `src/features/home/schemas/home.ts`
+  - `src/features/home/components/home-hero-slider.tsx`
+  - `.plan/pages/home.md`
+- Notes:
+  - Desktop/tablet banner spec remains `1920 x 900`.
+
+### 2026-04-17 - Home Hero Mobile Height Increase
+
+- What changed:
+  - Increased mobile banner design height target from `1080 x 1350` to `1080 x 1620`.
+  - Increased mobile hero section display height to better accommodate taller banner composition.
+- Why it changed:
+  - Mobile banner composition needed more vertical space for important content.
+- Files touched:
+  - `src/features/home/schemas/home.ts`
+  - `src/features/home/components/home-hero-slider.tsx`
+  - `.plan/pages/home.md`
+- Notes:
+  - Desktop/tablet banner spec remains `1920 x 900`.
+
+### 2026-04-17 - Home Hero Banner Design Dimensions
+
+- What changed:
+  - Added explicit home hero banner design dimensions for both desktop and mobile.
+  - Exposed canonical values in home schema for design/development alignment.
+- Why it changed:
+  - To give designers a clear width/height target when preparing banner artwork.
+- Files touched:
+  - `src/features/home/schemas/home.ts`
+  - `.plan/pages/home.md`
+- Notes:
+  - Desktop/tablet spec: `1920 x 900`
+  - Mobile spec: `1080 x 1350`
+
+### 2026-04-17 - Home Hero Banner Full Image Fit
+
+- What changed:
+  - Updated hero banner image rendering to show full photos without cropping.
+  - Switched slider image fit behavior from cover mode to contain mode.
+  - Added a black hero section backdrop so letterboxing areas are intentional and visually clean.
+- Why it changed:
+  - Banner photos were being cropped on the slider and important parts of the image were not visible.
+- Files touched:
+  - `src/features/home/components/home-hero-slider.tsx`
+  - `.plan/pages/home.md`
+- Notes:
+  - This keeps full image visibility across mobile, tablet, and desktop.
+
+### 2026-04-17 - Home Hero Banner Backend Integration
+
+- What changed:
+  - Added backend banner fetch adapter for homepage hero slides using `BOOK_API_BASE_URL + /api/web/banner-images`.
+  - Replaced static inline `heroSlides` assembly with backend-first loading in home server data.
+  - Added resilient static fallback hero slides when backend fails or returns no usable banners.
+  - Updated hero slide schema to support responsive sources (`imageDesktopSrc`, `imageMobileSrc`) and normalized action metadata.
+  - Updated hero slider UI to:
+    - render `webImage` equivalent on tablet/desktop and `mobileImage` equivalent on mobile.
+    - make the entire active slide clickable when action is valid.
+    - support `EXTERNAL` (new tab) and `DEEPLINK` (internal navigation) actions.
+  - Added deeplink normalization rule that converts legacy `/book/:id` to `/{locale}/books/:id`.
+- Why it changed:
+  - To fetch banner slider content from backend while matching responsive image requirements and preserving safe navigation behavior.
+- Files touched:
+  - `src/features/home/server/banner-images-adapter.ts`
+  - `src/features/home/server/get-home-page-data.ts`
+  - `src/features/home/schemas/home.ts`
+  - `src/features/home/components/home-hero-slider.tsx`
+  - `.plan/banner-slider-backend-fetch-plan.md`
+  - `.plan/pages/home.md`
+- Notes:
+  - Backend Myanmar content is reused for both `en` and `my`.
+  - Missing/invalid action URLs intentionally produce non-clickable slides.
+
 ### 2026-04-15 - Home to Book Detail Breadcrumb Source
 
 - What changed:

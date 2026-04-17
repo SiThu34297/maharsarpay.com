@@ -2,6 +2,18 @@
 
 ## Plan Update
 
+- Date: 2026-04-17
+- Summary: Increased mobile hero banner target again to `1080 x 1800` and raised mobile hero viewport height for taller creative layouts.
+
+- Date: 2026-04-17
+- Summary: Increased mobile hero banner design target height to `1080 x 1620` and raised mobile hero section height for better vertical composition.
+
+- Date: 2026-04-17
+- Summary: Updated hero banner image fit to show full photos (no cropping) by switching slider image rendering to contain mode with a neutral backdrop.
+
+- Date: 2026-04-17
+- Summary: Integrated home hero slider with backend banner API (`/api/web/banner-images`), including responsive image source handling and DEEPLINK/EXTERNAL click behavior with fallback slides.
+
 - Date: 2026-04-15
 - Summary: Moved floating cart button into shared marketing header so it appears on every marketing page, and removed the duplicate home-only button.
 
