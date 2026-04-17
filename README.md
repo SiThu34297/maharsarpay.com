@@ -58,10 +58,13 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 - External base URL env: `BOOK_API_BASE_URL` (fallback: `https://bookapi.sabahna.com`).
 - Categories source path: `/api/web/categories`.
 - Books source path: `/api/web/books`.
+- Multimedia source path: `/api/web/multimedia`.
 - Home page books are now backend-driven and display 8 random books per request.
+- Home page multimedia is backend-driven and displays 4 random items per request.
 - Book detail route slug uses backend book `id`.
 - Current behavior: category names returned from backend are used as-is for both `en` and `my` locales.
 - Current behavior: books content returned from backend is used as-is for both `en` and `my` locales.
+- Current behavior: multimedia content returned from backend is used as-is for both `en` and `my` locales.
 
 ## Folder Conventions
 

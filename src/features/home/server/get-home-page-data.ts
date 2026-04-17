@@ -3,6 +3,7 @@ import type { Locale } from "@/lib/i18n";
 import { searchAuthors } from "@/features/authors";
 import { searchBooks } from "@/features/books";
 import { getAllCategories } from "@/features/categories";
+import { searchMultimedia } from "@/features/multimedia/server/multimedia-adapter";
 import type {
   AuthorItem,
   BookItem,
@@ -120,6 +121,28 @@ async function getHomeBooks(locale: Locale): Promise<BookItem[]> {
     imageSrc: book.coverImageSrc,
     imageAlt: book.coverImageAlt,
   }));
+}
+
+async function getHomeMediaItems(locale: Locale): Promise<MediaItem[]> {
+  try {
+    const response = await searchMultimedia(locale, { limit: 500 });
+
+    if (response.items.length > 0) {
+      return pickRandomItems(response.items, 4).map((item) => ({
+        id: item.id,
+        slug: item.slug,
+        mediaType: item.mediaType,
+        title: item.title,
+        description: item.description,
+        imageSrc: item.imageSrc,
+        imageAlt: item.imageAlt,
+      }));
+    }
+  } catch {
+    // Fall through to static fallback if backend is unavailable.
+  }
+
+  return pickRandomItems(mediaItemsByLocale[locale], 4);
 }
 
 const mediaItemsByLocale: Record<Locale, MediaItem[]> = {
@@ -278,10 +301,11 @@ const promoByLocale: Record<Locale, PromoBanner> = {
 };
 
 export async function getHomePageData(locale: Locale): Promise<HomePageData> {
-  const [categories, authors, books] = await Promise.all([
+  const [categories, authors, books, mediaItems] = await Promise.all([
     getHomeCategories(locale),
     getHomeAuthors(locale),
     getHomeBooks(locale),
+    getHomeMediaItems(locale),
   ]);
 
   return {
@@ -345,7 +369,7 @@ export async function getHomePageData(locale: Locale): Promise<HomePageData> {
     categories,
     books,
     authors,
-    mediaItems: mediaItemsByLocale[locale],
+    mediaItems,
     reviews: reviewsByLocale[locale],
     promo: promoByLocale[locale],
   };

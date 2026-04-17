@@ -14,12 +14,38 @@ export type MediaListItem = {
   imageAlt: string;
 };
 
+export type BackendMultimediaRecord = {
+  id: string;
+  title: string;
+  uploadedTime: string;
+  content: string;
+  mediaType: MediaType;
+  viewCount: number;
+  active: number;
+  deletedStatus: number;
+  youtubeUrl: string[];
+  videoUrl: string[];
+  imageUrl: string[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type BackendMultimediaResponse = {
+  error: boolean;
+  authorized: boolean;
+  message: string;
+  data: BackendMultimediaRecord[];
+};
+
 export type MediaDetail = MediaListItem & {
   lead: string;
   storyParagraphs: string[];
   tags: string[];
   durationLabel?: string;
   photoCount?: number;
+  youtubeUrls: string[];
+  uploadedVideoUrls: string[];
+  primaryVideoUrl?: string;
   galleryImages: Array<{
     src: string;
     alt: string;

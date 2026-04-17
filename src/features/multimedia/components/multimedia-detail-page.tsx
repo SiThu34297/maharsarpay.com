@@ -20,6 +20,20 @@ type MultimediaDetailPageProps = Readonly<{
   breadcrumbSource: "home" | "multimedia";
 }>;
 
+type MediaMasonryItem =
+  | {
+      id: string;
+      kind: "photo";
+      src: string;
+      alt: string;
+    }
+  | {
+      id: string;
+      kind: "youtube" | "video";
+      src: string;
+      label: string;
+    };
+
 const EN_MONTHS = [
   "Jan",
   "Feb",
@@ -48,7 +62,7 @@ function formatPrice(locale: Locale, value: number) {
 }
 
 function toMyanmarDigits(value: string) {
-  return value.replace(/\d/g, (digit) => String.fromCharCode(0x1040 + Number(digit)));
+  return value.replaceAll(/\d/g, (digit) => String.fromCodePoint(0x1040 + Number(digit)));
 }
 
 function formatDate(locale: Locale, value: string) {
@@ -73,6 +87,134 @@ function getMediaTypeLabel(copy: Dictionary["multimediaList"], mediaType: MediaT
   return mediaType === "video" ? copy.videoFilterLabel : copy.photoFilterLabel;
 }
 
+function toYouTubeEmbedUrl(value: string) {
+  try {
+    const url = new URL(value);
+
+    if (url.hostname.includes("youtu.be")) {
+      const videoId = url.pathname.split("/").filter(Boolean)[0];
+      return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+    }
+
+    if (url.hostname.includes("youtube.com")) {
+      if (url.pathname.startsWith("/embed/")) {
+        return value;
+      }
+
+      const videoId = url.searchParams.get("v");
+      return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+function buildMediaMasonryItems(media: MultimediaDetailPageData["media"]): MediaMasonryItem[] {
+  if (media.mediaType === "photo") {
+    const photoSources =
+      media.galleryImages.length > 0
+        ? media.galleryImages
+        : [
+            {
+              src: media.imageSrc,
+              alt: media.imageAlt,
+            },
+          ];
+
+    return photoSources.map((image, index) => ({
+      id: `${media.id}-photo-${index}`,
+      kind: "photo",
+      src: image.src,
+      alt: image.alt,
+    }));
+  }
+
+  const youtubeItems = media.youtubeUrls
+    .map((url, index) => {
+      const embedUrl = toYouTubeEmbedUrl(url);
+
+      if (!embedUrl) {
+        return null;
+      }
+
+      return {
+        id: `${media.id}-youtube-${index}`,
+        kind: "youtube" as const,
+        src: embedUrl,
+        label: `${media.title} YouTube ${index + 1}`,
+      };
+    })
+    .filter((item): item is Extract<MediaMasonryItem, { kind: "youtube" }> => Boolean(item));
+
+  const uploadedVideoItems = media.uploadedVideoUrls.map((url, index) => ({
+    id: `${media.id}-video-${index}`,
+    kind: "video" as const,
+    src: url,
+    label: `${media.title} Video ${index + 1}`,
+  }));
+
+  const videos = [...youtubeItems, ...uploadedVideoItems];
+
+  if (videos.length > 0) {
+    return videos;
+  }
+
+  return [
+    {
+      id: `${media.id}-fallback-photo`,
+      kind: "photo",
+      src: media.imageSrc,
+      alt: media.imageAlt,
+    },
+  ];
+}
+
+function getPhotoMasonryVariant(index: number, totalItems: number) {
+  if (totalItems === 1) {
+    return "photo-frame-featured";
+  }
+
+  const variants = ["photo-frame-standard", "photo-frame-tall", "photo-frame-wide"];
+  return variants[index % variants.length];
+}
+
+function getMasonryLayoutClass(totalItems: number) {
+  if (totalItems <= 1) {
+    return "multimedia-detail-masonry-single";
+  }
+
+  if (totalItems === 2) {
+    return "multimedia-detail-masonry-pair";
+  }
+
+  if (totalItems === 3) {
+    return "multimedia-detail-masonry-trio";
+  }
+
+  return "multimedia-detail-masonry-grid";
+}
+
+function buildNarrativeParagraphs(media: MultimediaDetailPageData["media"]) {
+  const candidates = [media.lead, media.description, ...media.storyParagraphs]
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  const seen = new Set<string>();
+
+  return candidates.filter((value) => {
+    const key = value.toLowerCase();
+
+    if (seen.has(key)) {
+      return false;
+    }
+
+    seen.add(key);
+    return true;
+  });
+}
+
 export function MultimediaDetailPage({
   copy,
   locale,
@@ -86,6 +228,10 @@ export function MultimediaDetailPage({
     href: `/${locale}/books?category=${encodeURIComponent(category.value)}`,
   }));
   const media = data.media;
+  const masonryItems = buildMediaMasonryItems(media);
+  const masonryCount = masonryItems.length;
+  const masonryLayoutClass = getMasonryLayoutClass(masonryCount);
+  const narrativeParagraphs = buildNarrativeParagraphs(media);
 
   return (
     <div
@@ -121,42 +267,74 @@ export function MultimediaDetailPage({
             <span className="truncate">{media.title}</span>
           </nav>
 
-          <section className="multimedia-detail-hero mt-5">
-            <div className="multimedia-detail-media-wrap">
-              <div className="multimedia-detail-media-glow" aria-hidden />
-              <div className="multimedia-detail-media-frame">
-                <Image
-                  src={media.imageSrc}
-                  alt={media.imageAlt}
-                  width={920}
-                  height={580}
-                  className="multimedia-detail-media-image"
-                  sizes="(max-width: 1024px) 100vw, 52vw"
-                />
-                <span
-                  className={`media-type-pill ${
-                    media.mediaType === "video" ? "media-type-pill-video" : "media-type-pill-photo"
-                  }`}
-                  aria-label={getMediaTypeLabel(copy.multimediaList, media.mediaType)}
-                >
-                  {media.mediaType === "video" ? <PlayIcon /> : <CameraIcon />}
-                  <span>{getMediaTypeLabel(copy.multimediaList, media.mediaType)}</span>
-                </span>
-
-                <button type="button" className="multimedia-detail-hero-cta" aria-disabled="true">
-                  {media.mediaType === "video"
-                    ? copy.multimediaDetail.watchNowLabel
-                    : copy.multimediaDetail.viewGalleryLabel}
-                </button>
-              </div>
+          <section id="media-gallery" className="multimedia-detail-stage mt-5">
+            <div className="multimedia-detail-stage-header">
+              <span
+                className={`media-type-pill ${
+                  media.mediaType === "video" ? "media-type-pill-video" : "media-type-pill-photo"
+                }`}
+                aria-label={getMediaTypeLabel(copy.multimediaList, media.mediaType)}
+              >
+                {media.mediaType === "video" ? <PlayIcon /> : <CameraIcon />}
+                <span>{getMediaTypeLabel(copy.multimediaList, media.mediaType)}</span>
+              </span>
             </div>
 
+            <div
+              className={`multimedia-detail-masonry ${masonryLayoutClass}`}
+              aria-label={copy.multimediaDetail.mediaInfoLabel}
+            >
+              {masonryItems.map((item, index) => (
+                <article
+                  key={item.id}
+                  className={`multimedia-detail-masonry-item ${
+                    masonryCount === 1 ? "multimedia-detail-masonry-item-featured" : ""
+                  }`}
+                >
+                  {item.kind === "photo" ? (
+                    <div
+                      className={`multimedia-detail-masonry-photo-frame ${getPhotoMasonryVariant(index, masonryCount)}`}
+                    >
+                      <Image
+                        src={item.src}
+                        alt={item.alt}
+                        fill
+                        className="multimedia-detail-masonry-photo"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                      />
+                    </div>
+                  ) : item.kind === "youtube" ? (
+                    <>
+                      <div className="multimedia-detail-masonry-video-frame">
+                        <iframe
+                          src={item.src}
+                          title={item.label}
+                          loading="lazy"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowFullScreen
+                          className="multimedia-detail-masonry-iframe"
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="multimedia-detail-masonry-video-frame">
+                      <video
+                        controls
+                        preload="metadata"
+                        className="multimedia-detail-masonry-video"
+                        poster={media.imageSrc}
+                      >
+                        <source src={item.src} />
+                      </video>
+                    </div>
+                  )}
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="multimedia-detail-content-surface">
             <div className="multimedia-detail-content">
-              <p className="multimedia-detail-category-chip">
-                {media.mediaType === "video"
-                  ? copy.multimediaDetail.heroBadgeVideo
-                  : copy.multimediaDetail.heroBadgePhoto}
-              </p>
               <h1 className="multimedia-detail-title">{media.title}</h1>
               <p className="multimedia-detail-meta-line">
                 {copy.multimediaDetail.byCreatorLabel}
@@ -165,68 +343,15 @@ export function MultimediaDetailPage({
               <p className="multimedia-detail-published">
                 {copy.multimediaDetail.publishedOnLabel} {formatDate(locale, media.publishedAt)}
               </p>
-              <p className="multimedia-detail-lead">{media.lead}</p>
-              <p className="multimedia-detail-description">{media.description}</p>
+            </div>
+
+            <div className="multimedia-detail-narrative">
+              <h2>{copy.multimediaDetail.storyTitle}</h2>
+              {narrativeParagraphs.map((paragraph, index) => (
+                <p key={`${media.id}-narrative-${index}`}>{paragraph}</p>
+              ))}
             </div>
           </section>
-
-          <section className="multimedia-detail-story">
-            <h2>{copy.multimediaDetail.storyTitle}</h2>
-            {media.storyParagraphs.map((paragraph, index) => (
-              <p key={`${media.id}-story-${index}`}>{paragraph}</p>
-            ))}
-          </section>
-
-          <section
-            className="multimedia-detail-info-grid"
-            aria-label={copy.multimediaDetail.mediaInfoLabel}
-          >
-            {media.durationLabel ? (
-              <article className="multimedia-detail-info-card">
-                <h3>{copy.multimediaDetail.durationLabel}</h3>
-                <p>{media.durationLabel}</p>
-              </article>
-            ) : null}
-            {typeof media.photoCount === "number" ? (
-              <article className="multimedia-detail-info-card">
-                <h3>{copy.multimediaDetail.photoCountLabel}</h3>
-                <p>{media.photoCount}</p>
-              </article>
-            ) : null}
-            <article className="multimedia-detail-info-card multimedia-detail-info-card-wide">
-              <h3>{copy.multimediaDetail.tagsLabel}</h3>
-              <div className="multimedia-detail-tags">
-                {media.tags.map((tag) => (
-                  <span key={`${media.id}-${tag}`} className="multimedia-detail-tag-pill">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </article>
-          </section>
-
-          {media.galleryImages.length > 0 ? (
-            <section
-              className="multimedia-detail-gallery"
-              aria-label={copy.multimediaDetail.viewGalleryLabel}
-            >
-              {media.galleryImages.map((galleryImage, index) => (
-                <div
-                  key={`${media.id}-gallery-${index}`}
-                  className="multimedia-detail-gallery-item"
-                >
-                  <Image
-                    src={galleryImage.src}
-                    alt={galleryImage.alt}
-                    width={340}
-                    height={240}
-                    className="multimedia-detail-gallery-image"
-                    sizes="(max-width: 768px) 50vw, 22vw"
-                  />
-                </div>
-              ))}
-            </section>
-          ) : null}
 
           <section className="multimedia-detail-related">
             <div className="multimedia-detail-section-header">

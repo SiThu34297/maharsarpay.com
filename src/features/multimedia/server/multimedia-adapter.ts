@@ -4,6 +4,8 @@ import type { Locale } from "@/lib/i18n";
 
 import type {
   AppliedMediaFilters,
+  BackendMultimediaRecord,
+  BackendMultimediaResponse,
   MediaDetail,
   MediaListItem,
   MediaListQuery,
@@ -12,9 +14,14 @@ import type {
 } from "@/features/multimedia/schemas/multimedia";
 
 const DEFAULT_LIMIT = 12;
-const MAX_LIMIT = 24;
+const MAX_LIMIT = 500;
+const MULTIMEDIA_ENDPOINT = "/api/web/multimedia";
+const BOOK_API_BASE_URL = process.env.BOOK_API_BASE_URL ?? "https://bookapi.sabahna.com";
+const DEFAULT_MEDIA_CREATOR = "မဟာစာပေ";
+const FALLBACK_VIDEO_IMAGE = "/images/home/real/media/media-1.jpg";
+const FALLBACK_PHOTO_IMAGE = "/images/home/real/media/media-3.jpg";
 
-const MEDIA_TYPES: MediaType[] = ["video", "photo"];
+const MEDIA_TYPES = new Set<MediaType>(["video", "photo"]);
 
 type RawSearchParams = Record<string, string | string[] | undefined>;
 
@@ -260,6 +267,292 @@ const seedMediaItems: SeedMedia[] = Array.from({ length: 40 }, (_, index) => {
   };
 });
 
+function normalizeWhitespace(value: string) {
+  return value.trim().replaceAll(/\s+/g, " ");
+}
+
+function stripHtmlToText(value: string | null | undefined) {
+  if (!value) {
+    return "";
+  }
+
+  return value
+    .replaceAll(/<[^>]*>/g, " ")
+    .replaceAll(/&nbsp;/gi, " ")
+    .replaceAll(/&amp;/gi, "&")
+    .replaceAll(/&quot;/gi, '"')
+    .replaceAll(/&#39;/gi, "'")
+    .replaceAll(/\s+/g, " ")
+    .trim();
+}
+
+function truncateText(value: string, maxLength: number) {
+  if (value.length <= maxLength) {
+    return value;
+  }
+
+  return `${value.slice(0, Math.max(0, maxLength - 3)).trimEnd()}...`;
+}
+
+function toSafeInteger(value: number | null | undefined, fallback = 0) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return fallback;
+  }
+
+  return Math.round(value);
+}
+
+function toMediaType(value: string | null | undefined): MediaType {
+  return value === "video" ? "video" : "photo";
+}
+
+function toSafeStringArray(values: string[] | null | undefined) {
+  if (!Array.isArray(values)) {
+    return [];
+  }
+
+  return values
+    .filter((value): value is string => typeof value === "string")
+    .map((value) => value.trim())
+    .filter(Boolean);
+}
+
+function resolveBackendPublishedAt(media: BackendMultimediaRecord) {
+  const candidates = [media.uploadedTime, media.createdAt, media.updatedAt];
+
+  for (const candidate of candidates) {
+    const timestamp = Date.parse(candidate ?? "");
+
+    if (Number.isFinite(timestamp)) {
+      return new Date(timestamp).toISOString();
+    }
+  }
+
+  return new Date(0).toISOString();
+}
+
+function resolveBackendPublishedTimestamp(media: BackendMultimediaRecord) {
+  return Date.parse(resolveBackendPublishedAt(media));
+}
+
+function sortBackendMediaDescending(left: BackendMultimediaRecord, right: BackendMultimediaRecord) {
+  const timestampDiff =
+    resolveBackendPublishedTimestamp(right) - resolveBackendPublishedTimestamp(left);
+
+  if (timestampDiff !== 0) {
+    return timestampDiff;
+  }
+
+  return left.id.localeCompare(right.id);
+}
+
+function makeSlugPart(value: string) {
+  const normalized = value
+    .normalize("NFKD")
+    .replaceAll(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replaceAll(/[^a-z0-9]+/g, "-")
+    .replaceAll(/^-+|-+$/g, "");
+
+  return normalized;
+}
+
+function buildBackendMediaSlug(media: BackendMultimediaRecord) {
+  const titlePart = makeSlugPart(media.title || "");
+  const idPart =
+    media.id
+      .toLowerCase()
+      .replaceAll(/[^a-z0-9]/g, "")
+      .slice(0, 12) || "media";
+
+  if (!titlePart) {
+    return `media-${idPart}`;
+  }
+
+  return `${titlePart}-${idPart}`;
+}
+
+function extractContentParagraphs(content: string) {
+  const paragraphMatches = content.match(/<p[^>]*>[\s\S]*?<\/p>/gi) ?? [];
+  const paragraphs = paragraphMatches
+    .map((paragraph) => stripHtmlToText(paragraph))
+    .filter(Boolean);
+
+  if (paragraphs.length > 0) {
+    return paragraphs;
+  }
+
+  const plainText = stripHtmlToText(content);
+
+  if (!plainText) {
+    return [];
+  }
+
+  return [plainText];
+}
+
+function resolveYouTubeVideoId(value: string) {
+  try {
+    const url = new URL(value);
+
+    if (url.hostname.includes("youtu.be")) {
+      return url.pathname.split("/").filter(Boolean)[0] ?? null;
+    }
+
+    if (!url.hostname.includes("youtube.com")) {
+      return null;
+    }
+
+    const watchId = url.searchParams.get("v");
+
+    if (watchId) {
+      return watchId;
+    }
+
+    const pathSegments = url.pathname.split("/").filter(Boolean);
+
+    if (pathSegments.length >= 2 && ["embed", "shorts", "live"].includes(pathSegments[0])) {
+      return pathSegments[1] ?? null;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+function resolveYouTubeThumbnailFromUrls(urls: string[]) {
+  for (const url of urls) {
+    const videoId = resolveYouTubeVideoId(url);
+
+    if (videoId) {
+      return `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+    }
+  }
+
+  return null;
+}
+
+function resolveBackendPrimaryImage(media: BackendMultimediaRecord) {
+  const images = toSafeStringArray(media.imageUrl);
+
+  if (images.length > 0) {
+    return images[0];
+  }
+
+  if (toMediaType(media.mediaType) === "video") {
+    const youtubeThumbnail = resolveYouTubeThumbnailFromUrls(toSafeStringArray(media.youtubeUrl));
+
+    if (youtubeThumbnail) {
+      return youtubeThumbnail;
+    }
+  }
+
+  return toMediaType(media.mediaType) === "video" ? FALLBACK_VIDEO_IMAGE : FALLBACK_PHOTO_IMAGE;
+}
+
+function getActiveBackendMedia(mediaItems: BackendMultimediaRecord[]) {
+  return mediaItems.filter((item) => {
+    if (!item || typeof item !== "object") {
+      return false;
+    }
+
+    return toSafeInteger(item.active, 0) === 1 && toSafeInteger(item.deletedStatus, 0) === 0;
+  });
+}
+
+function resolveBackendNarrative(media: BackendMultimediaRecord, title: string) {
+  const storyParagraphs = extractContentParagraphs(media.content);
+  const plainContent = stripHtmlToText(media.content);
+  const lead = storyParagraphs[0] ?? truncateText(plainContent || title, 260);
+  const description = truncateText((storyParagraphs[0] ?? plainContent) || title, 200);
+
+  return {
+    lead,
+    description,
+    storyParagraphs: storyParagraphs.length > 0 ? storyParagraphs : [lead],
+  };
+}
+
+function toBackendMediaListItem(media: BackendMultimediaRecord): MediaListItem {
+  const title = normalizeWhitespace(media.title || "") || "Untitled Multimedia";
+  const narrative = resolveBackendNarrative(media, title);
+
+  return {
+    id: media.id,
+    slug: buildBackendMediaSlug(media),
+    title,
+    description: narrative.description,
+    creator: DEFAULT_MEDIA_CREATOR,
+    mediaType: toMediaType(media.mediaType),
+    publishedAt: resolveBackendPublishedAt(media),
+    imageSrc: resolveBackendPrimaryImage(media),
+    imageAlt: `${title} media`,
+  };
+}
+
+function toBackendMediaDetail(media: BackendMultimediaRecord): MediaDetail {
+  const base = toBackendMediaListItem(media);
+  const narrative = resolveBackendNarrative(media, base.title);
+  const imageUrls = toSafeStringArray(media.imageUrl);
+  const youtubeUrls = toSafeStringArray(media.youtubeUrl);
+  const uploadedVideoUrls = toSafeStringArray(media.videoUrl);
+  const gallerySources = imageUrls.length > 0 ? imageUrls : [base.imageSrc];
+
+  return {
+    ...base,
+    lead: narrative.lead,
+    storyParagraphs: narrative.storyParagraphs,
+    tags: [],
+    durationLabel: undefined,
+    photoCount: base.mediaType === "photo" ? gallerySources.length : undefined,
+    youtubeUrls,
+    uploadedVideoUrls,
+    primaryVideoUrl: youtubeUrls[0] ?? uploadedVideoUrls[0],
+    galleryImages: gallerySources.map((src, index) => ({
+      src,
+      alt: `${base.title} ${index + 1}`,
+    })),
+    relatedBookAuthorId: undefined,
+  };
+}
+
+async function fetchMultimediaFromBackend(locale: Locale): Promise<BackendMultimediaRecord[]> {
+  const response = await fetch(`${BOOK_API_BASE_URL}${MULTIMEDIA_ENDPOINT}`, {
+    method: "GET",
+    cache: "no-store",
+    headers: {
+      Accept: "application/json",
+      "Accept-Language": locale,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Multimedia API request failed with status ${response.status}`);
+  }
+
+  const payload = (await response.json()) as Partial<BackendMultimediaResponse>;
+
+  if (payload.error) {
+    throw new Error(payload.message || "Multimedia API returned an error");
+  }
+
+  if (!Array.isArray(payload.data)) {
+    throw new TypeError("Multimedia API returned an invalid response payload");
+  }
+
+  return payload.data.filter((item): item is BackendMultimediaRecord => {
+    return Boolean(item && typeof item === "object" && typeof item.id === "string");
+  });
+}
+
+function matchesBackendMediaKeyword(media: BackendMultimediaRecord, keyword: string) {
+  const narrative = resolveBackendNarrative(media, normalizeWhitespace(media.title || ""));
+  const haystack = `${media.title} ${narrative.description} ${DEFAULT_MEDIA_CREATOR}`.toLowerCase();
+
+  return haystack.includes(keyword);
+}
+
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
@@ -283,7 +576,7 @@ function parseMediaType(value: string | null): MediaType | undefined {
     return undefined;
   }
 
-  if (!MEDIA_TYPES.includes(value as MediaType)) {
+  if (!MEDIA_TYPES.has(value as MediaType)) {
     return undefined;
   }
 
@@ -305,7 +598,7 @@ function toUrlSearchParams(raw: RawSearchParams): URLSearchParams {
   const params = new URLSearchParams();
 
   for (const [key, value] of Object.entries(raw)) {
-    if (typeof value === "undefined") {
+    if (value === undefined) {
       continue;
     }
 
@@ -344,6 +637,9 @@ function toLocalizedMediaDetail(locale: Locale, item: SeedMedia): MediaDetail {
     tags: item.tags.map((tag) => tag[locale]),
     durationLabel: item.durationLabel?.[locale],
     photoCount: item.photoCount,
+    youtubeUrls: [],
+    uploadedVideoUrls: [],
+    primaryVideoUrl: undefined,
     galleryImages: item.galleryImages.map((image) => ({
       src: image.src,
       alt: image.alt[locale],
@@ -384,7 +680,26 @@ export function normalizeMultimediaListQuery(query: Partial<MediaListQuery>): Me
 
 export async function getMediaBySlug(locale: Locale, slug: string): Promise<MediaDetail | null> {
   const normalizedSlug = normalizeSlug(slug);
-  const media = seedMediaItems.find((seedMedia) => seedMedia.slug === normalizedSlug);
+
+  try {
+    const backendMedia = getActiveBackendMedia(await fetchMultimediaFromBackend(locale));
+    const matchedMedia = backendMedia.find((media) => {
+      return (
+        normalizeSlug(media.id) === normalizedSlug ||
+        normalizeSlug(buildBackendMediaSlug(media)) === normalizedSlug
+      );
+    });
+
+    if (matchedMedia) {
+      return toBackendMediaDetail(matchedMedia);
+    }
+  } catch {
+    // Fall through to seed fallback.
+  }
+
+  const media = seedMediaItems.find(
+    (seedMedia) => normalizeSlug(seedMedia.slug) === normalizedSlug,
+  );
 
   if (!media) {
     return null;
@@ -399,6 +714,36 @@ export async function getRelatedMedia(
   limit = 4,
 ): Promise<MediaListItem[]> {
   const safeLimit = clamp(limit, 1, 12);
+
+  try {
+    const backendMedia = getActiveBackendMedia(await fetchMultimediaFromBackend(locale));
+    const sameType = backendMedia
+      .filter(
+        (media) =>
+          media.id !== currentMedia.id && toMediaType(media.mediaType) === currentMedia.mediaType,
+      )
+      .sort(sortBackendMediaDescending)
+      .map((media) => toBackendMediaListItem(media));
+
+    if (sameType.length >= safeLimit) {
+      return sameType.slice(0, safeLimit);
+    }
+
+    const excludedIds = new Set([currentMedia.id, ...sameType.map((media) => media.id)]);
+    const fallbackMedia = backendMedia
+      .filter((media) => !excludedIds.has(media.id))
+      .sort(sortBackendMediaDescending)
+      .map((media) => toBackendMediaListItem(media));
+
+    const merged = [...sameType, ...fallbackMedia].slice(0, safeLimit);
+
+    if (merged.length > 0) {
+      return merged;
+    }
+  } catch {
+    // Fall through to seed fallback.
+  }
+
   const sameType = seedMediaItems
     .filter(
       (seedMedia) =>
@@ -471,6 +816,39 @@ export async function searchMultimedia(
 ): Promise<MediaListResponse> {
   const query = normalizeQuery(queryInput);
   const keyword = query.q?.toLowerCase();
+
+  try {
+    const backendMedia = getActiveBackendMedia(await fetchMultimediaFromBackend(locale));
+    const filtered = backendMedia.filter((media) => {
+      if (query.mediaType && toMediaType(media.mediaType) !== query.mediaType) {
+        return false;
+      }
+
+      if (!keyword) {
+        return true;
+      }
+
+      return matchesBackendMediaKeyword(media, keyword);
+    });
+
+    const sorted = [...filtered].sort(sortBackendMediaDescending);
+
+    const offset = Number(query.cursor ?? "0");
+    const safeOffset = Number.isFinite(offset) && offset >= 0 ? offset : 0;
+    const pageItems = sorted.slice(safeOffset, safeOffset + query.limit);
+    const items = pageItems.map((media) => toBackendMediaListItem(media));
+    const nextOffset = safeOffset + items.length;
+    const nextCursor = nextOffset < sorted.length ? String(nextOffset) : null;
+
+    return {
+      items,
+      total: sorted.length,
+      nextCursor,
+      appliedFilters: buildAppliedFilters(query),
+    };
+  } catch {
+    // Fall through to seed fallback.
+  }
 
   const filtered = seedMediaItems.filter((item) => {
     if (query.mediaType && item.mediaType !== query.mediaType) {
