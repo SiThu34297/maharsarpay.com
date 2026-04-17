@@ -19,6 +19,7 @@ export type Dictionary = {
     authors: string;
     categories: string;
     media: string;
+    bookReviews: string;
     contact: string;
     profile: string;
   };
@@ -117,6 +118,37 @@ export type Dictionary = {
     loadMoreError: string;
     retry: string;
     removeFilterLabel: string;
+  };
+  bookReviewsList: {
+    title: string;
+    description: string;
+    searchPlaceholder: string;
+    searchButton: string;
+    showingResults: string;
+    clearAllFilters: string;
+    noReviewsFound: string;
+    tryDifferentFilters: string;
+    browseBooks: string;
+    loadingMore: string;
+    loadMoreError: string;
+    retry: string;
+    removeFilterLabel: string;
+    byLabel: string;
+    onLabel: string;
+    reviewedBookLabel: string;
+    readReviewLabel: string;
+    viewsLabel: string;
+  };
+  bookReviewDetail: {
+    breadcrumbLabel: string;
+    breadcrumbBookReviews: string;
+    reviewByLabel: string;
+    reviewedBookLabel: string;
+    publishedOnLabel: string;
+    updatedOnLabel: string;
+    viewsLabel: string;
+    openBookLabel: string;
+    backToReviews: string;
   };
   authorDetail: {
     breadcrumbLabel: string;

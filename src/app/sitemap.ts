@@ -3,7 +3,15 @@ import type { MetadataRoute } from "next";
 import { siteConfig } from "@/lib/constants/site";
 import { locales } from "@/lib/i18n";
 
-const publicRoutes = ["", "/books", "/authors", "/multimedia", "/contact", "/privacy-policy"];
+const publicRoutes = [
+  "",
+  "/books",
+  "/authors",
+  "/multimedia",
+  "/book-reviews",
+  "/contact",
+  "/privacy-policy",
+];
 
 function withLocale(locale: (typeof locales)[number], route: string): string {
   return route ? `/${locale}${route}` : `/${locale}`;

@@ -6,6 +6,7 @@ export type MarketingNavId =
   | "authors"
   | "categories"
   | "media"
+  | "bookReviews"
   | "contact"
   | "profile";
 
@@ -14,7 +15,14 @@ export type MarketingNavItem = {
   href: string;
 };
 
-export type MarketingPageId = "home" | "books" | "authors" | "media" | "contact" | "profile";
+export type MarketingPageId =
+  | "home"
+  | "books"
+  | "authors"
+  | "media"
+  | "bookReviews"
+  | "contact"
+  | "profile";
 
 export function getNavigationLabel(copy: Dictionary["navigation"], id: MarketingNavId) {
   switch (id) {
@@ -28,6 +36,8 @@ export function getNavigationLabel(copy: Dictionary["navigation"], id: Marketing
       return copy.categories;
     case "media":
       return copy.media;
+    case "bookReviews":
+      return copy.bookReviews;
     case "contact":
       return copy.contact;
     case "profile":
@@ -46,6 +56,7 @@ export function getMarketingNavigation(locale: Locale): MarketingNavItem[] {
     { id: "authors", href: `${base}/authors` },
     { id: "categories", href: `${base}/books` },
     { id: "media", href: `${base}/multimedia` },
+    { id: "bookReviews", href: `${base}/book-reviews` },
     { id: "contact", href: `${base}/contact` },
   ];
 }
