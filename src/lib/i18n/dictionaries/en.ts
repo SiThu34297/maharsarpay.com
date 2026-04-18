@@ -259,6 +259,7 @@ export const enDictionary: Dictionary = {
     placingOrderButton: "Placing order...",
     loginRequiredMessage: "Please sign in before placing your order.",
     loginToOrderButton: "Login to Order",
+    orderErrorCaptcha: "Human verification failed. Please try again.",
     orderErrorFallback: "Unable to place your order. Please try again.",
   },
   loginPage: {
@@ -273,6 +274,7 @@ export const enDictionary: Dictionary = {
     credentialsButton: "Sign in with Email",
     errorCredentials: "Incorrect email or password.",
     errorMissingFields: "Please fill in both email and password.",
+    errorCaptcha: "Human verification failed. Please try again.",
     errorGoogleUnavailable: "Google sign-in is not configured yet.",
     errorUnknown: "Something went wrong. Please try again.",
     registerPrompt: "Do not have an account?",
@@ -293,6 +295,7 @@ export const enDictionary: Dictionary = {
     loginLink: "Sign in",
     errorMissingFields: "Please fill in all required fields.",
     errorEmailInUse: "This email is already in use.",
+    errorCaptcha: "Human verification failed. Please try again.",
     errorUnknown: "Unable to create your account right now. Please try again.",
   },
   profilePage: {

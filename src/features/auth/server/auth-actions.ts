@@ -1,6 +1,6 @@
 "use server";
 
-import { AuthError } from "next-auth";
+import { AuthError, CredentialsSignin } from "next-auth";
 import { redirect } from "next/navigation";
 
 import { isGoogleProviderEnabled, signIn, signOut } from "@/auth";
@@ -12,8 +12,8 @@ import {
 } from "@/lib/auth/redirect";
 import { defaultLocale, hasLocale } from "@/lib/i18n";
 
-type LoginErrorCode = "credentials" | "missing" | "google" | "unknown";
-type RegisterErrorCode = "missing" | "email_in_use" | "unknown";
+type LoginErrorCode = "credentials" | "missing" | "captcha" | "google" | "unknown";
+type RegisterErrorCode = "missing" | "email_in_use" | "captcha" | "unknown";
 
 function resolveLocale(value: FormDataEntryValue | null): string {
   if (typeof value !== "string") {
@@ -54,20 +54,31 @@ export async function signInWithCredentialsAction(formData: FormData) {
   const callbackPath = resolveCallbackPath(formData, locale);
   const emailField = formData.get("email");
   const passwordField = formData.get("password");
+  const recaptchaTokenField = formData.get("recaptchaToken");
   const email = typeof emailField === "string" ? emailField.trim() : "";
   const password = typeof passwordField === "string" ? passwordField : "";
+  const recaptchaToken = typeof recaptchaTokenField === "string" ? recaptchaTokenField.trim() : "";
 
   if (!email || !password) {
     redirectToLogin(locale, callbackPath, "missing");
+  }
+
+  if (!recaptchaToken) {
+    redirectToLogin(locale, callbackPath, "captcha");
   }
 
   try {
     await signIn("credentials", {
       email,
       password,
+      recaptchaToken,
       redirectTo: callbackPath,
     });
   } catch (error) {
+    if (error instanceof CredentialsSignin && error.code === "captcha") {
+      redirectToLogin(locale, callbackPath, "captcha");
+    }
+
     if (error instanceof AuthError) {
       if (error.type === "CredentialsSignin") {
         redirectToLogin(locale, callbackPath, "credentials");
@@ -89,15 +100,21 @@ export async function registerWithCredentialsAction(formData: FormData) {
   const nameField = formData.get("name");
   const phoneNumberField = formData.get("phoneNumber");
   const addressField = formData.get("address");
+  const recaptchaTokenField = formData.get("recaptchaToken");
 
   const email = typeof emailField === "string" ? emailField.trim() : "";
   const password = typeof passwordField === "string" ? passwordField : "";
   const name = typeof nameField === "string" ? nameField.trim() : "";
   const phoneNumber = typeof phoneNumberField === "string" ? phoneNumberField.trim() : "";
   const address = typeof addressField === "string" ? addressField.trim() : "";
+  const recaptchaToken = typeof recaptchaTokenField === "string" ? recaptchaTokenField.trim() : "";
 
   if (!email || !password || !name || !phoneNumber || !address) {
     redirectToRegister(locale, callbackPath, "missing");
+  }
+
+  if (!recaptchaToken) {
+    redirectToRegister(locale, callbackPath, "captcha");
   }
 
   const registerResult = await registerWithEmail({
@@ -106,6 +123,7 @@ export async function registerWithCredentialsAction(formData: FormData) {
     name,
     phoneNumber,
     address,
+    recaptchaToken,
   });
 
   if (!registerResult.ok) {
@@ -117,22 +135,16 @@ export async function registerWithCredentialsAction(formData: FormData) {
       redirectToRegister(locale, callbackPath, "missing");
     }
 
+    if (registerResult.code === "captcha") {
+      redirectToRegister(locale, callbackPath, "captcha");
+    }
+
     redirectToRegister(locale, callbackPath, "unknown");
   }
 
-  try {
-    await signIn("credentials", {
-      email,
-      password,
-      redirectTo: callbackPath,
-    });
-  } catch (error) {
-    if (error instanceof AuthError) {
-      redirectToRegister(locale, callbackPath, "unknown");
-    }
-
-    throw error;
-  }
+  // Backend verifies reCAPTCHA token and may treat it as single-use.
+  // Redirect to login after successful registration so a fresh token is used.
+  redirect(buildLoginRedirectPath(locale, callbackPath));
 }
 
 export async function signOutAction(formData: FormData) {

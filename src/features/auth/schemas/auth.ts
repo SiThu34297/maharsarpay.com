@@ -1,8 +1,14 @@
-export const authLoginErrorCodes = ["credentials", "missing", "google", "unknown"] as const;
+export const authLoginErrorCodes = [
+  "credentials",
+  "missing",
+  "captcha",
+  "google",
+  "unknown",
+] as const;
 
 export type AuthLoginErrorCode = (typeof authLoginErrorCodes)[number];
 
-export const authRegisterErrorCodes = ["missing", "email_in_use", "unknown"] as const;
+export const authRegisterErrorCodes = ["missing", "email_in_use", "captcha", "unknown"] as const;
 
 export type AuthRegisterErrorCode = (typeof authRegisterErrorCodes)[number];
 

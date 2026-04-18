@@ -1,4 +1,5 @@
 import NextAuth from "next-auth";
+import { CredentialsSignin } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 
@@ -26,18 +27,33 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
+        recaptchaToken: { label: "reCAPTCHA Token", type: "text" },
       },
       async authorize(credentials) {
         const email = typeof credentials?.email === "string" ? credentials.email.trim() : "";
         const password = typeof credentials?.password === "string" ? credentials.password : "";
+        const recaptchaToken =
+          typeof credentials?.recaptchaToken === "string" ? credentials.recaptchaToken.trim() : "";
 
         if (!email || !password) {
           return null;
         }
 
-        const result = await loginWithEmail({ email, password });
+        if (!recaptchaToken) {
+          const error = new CredentialsSignin();
+          error.code = "captcha";
+          throw error;
+        }
+
+        const result = await loginWithEmail({ email, password, recaptchaToken });
 
         if (!result.ok) {
+          if (result.code === "captcha") {
+            const error = new CredentialsSignin();
+            error.code = "captcha";
+            throw error;
+          }
+
           return null;
         }
 

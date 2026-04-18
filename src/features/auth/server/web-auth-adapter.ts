@@ -90,6 +90,19 @@ function toMessage(value: unknown, fallback: string): string {
 function resolveErrorCode(statusCode: number, message: string, mode: AuthMode): WebAuthResult {
   const normalizedMessage = message.toLowerCase();
 
+  if (
+    normalizedMessage.includes("captcha") ||
+    normalizedMessage.includes("recaptcha") ||
+    normalizedMessage.includes("human verification")
+  ) {
+    return {
+      ok: false,
+      code: "captcha",
+      message,
+      statusCode,
+    };
+  }
+
   if (normalizedMessage.includes("email already in use")) {
     return {
       ok: false,

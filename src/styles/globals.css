@@ -2392,3 +2392,11 @@ h6 {
 .locale-my label {
   line-height: 1.9;
 }
+
+/* Keep the reCAPTCHA badge visible and clear of the bottom-right floating cart CTA. */
+.grecaptcha-badge {
+  right: auto !important;
+  left: 12px !important;
+  bottom: 12px !important;
+  z-index: 80 !important;
+}

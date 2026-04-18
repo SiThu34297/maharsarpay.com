@@ -9,6 +9,7 @@ type OrderRequestBody = {
   customerName?: unknown;
   shippingAddress?: unknown;
   note?: unknown;
+  recaptchaToken?: unknown;
 };
 
 function toOptionalString(value: unknown): string | null {
@@ -104,6 +105,18 @@ export async function POST(request: NextRequest) {
   const shippingAddress =
     toOptionalString(body.shippingAddress) ?? toOptionalString(session.user.address);
   const note = toOptionalString(body.note) ?? undefined;
+  const recaptchaToken = toOptionalString(body.recaptchaToken);
+
+  if (!recaptchaToken) {
+    return NextResponse.json(
+      {
+        error: true,
+        code: "captcha",
+        message: "Human verification is required.",
+      },
+      { status: 400 },
+    );
+  }
 
   if (!items.length || !customerName || !customerPhone || !shippingAddress) {
     return NextResponse.json(
@@ -122,12 +135,14 @@ export async function POST(request: NextRequest) {
     customerName,
     shippingAddress,
     note,
+    recaptchaToken,
   });
 
   if (!orderResult.ok) {
     return NextResponse.json(
       {
         error: true,
+        code: orderResult.code,
         message: orderResult.message,
       },
       { status: orderResult.statusCode },

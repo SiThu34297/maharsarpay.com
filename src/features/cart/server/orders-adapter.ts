@@ -14,6 +14,7 @@ export type CreateOrderPayload = {
   customerPhone: string;
   customerName: string;
   shippingAddress: string;
+  recaptchaToken: string;
   note?: string;
 };
 
@@ -26,6 +27,7 @@ type CreateOrderResult =
   | {
       ok: false;
       statusCode: number;
+      code: "captcha" | "unknown";
       message: string;
     };
 
@@ -47,6 +49,20 @@ function toMessage(value: unknown, fallback: string): string {
 
 function toStatusCode(value: unknown, fallback: number): number {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+}
+
+function toErrorCode(message: string): "captcha" | "unknown" {
+  const normalized = message.toLowerCase();
+
+  if (
+    normalized.includes("captcha") ||
+    normalized.includes("recaptcha") ||
+    normalized.includes("human verification")
+  ) {
+    return "captcha";
+  }
+
+  return "unknown";
 }
 
 async function parseJson(response: Response): Promise<unknown> {
@@ -81,6 +97,7 @@ export async function createBookOrder(
       return {
         ok: false,
         statusCode,
+        code: toErrorCode(message),
         message,
       };
     }
@@ -94,6 +111,7 @@ export async function createBookOrder(
     return {
       ok: false,
       statusCode: 500,
+      code: "unknown",
       message: "Unable to connect to order service.",
     };
   }

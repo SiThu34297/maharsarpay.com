@@ -7,6 +7,7 @@ import {
   getMarketingNavigation,
 } from "@/components/layout/marketing";
 import { AsyncSubmitButton } from "@/components/ui/async-submit-button";
+import { RecaptchaServerActionForm } from "@/components/ui/recaptcha-server-action-form";
 import { registerWithCredentialsAction } from "@/features/auth/server/auth-actions";
 import type { AuthRegisterErrorCode } from "@/features/auth/schemas/auth";
 import { getBookFilterOptions } from "@/features/books";
@@ -33,6 +34,8 @@ function getErrorMessage(
       return copy.errorEmailInUse;
     case "missing":
       return copy.errorMissingFields;
+    case "captcha":
+      return copy.errorCaptcha;
     case "unknown":
       return copy.errorUnknown;
     default:
@@ -92,7 +95,12 @@ export async function RegisterPage({
             </p>
           ) : null}
 
-          <form action={registerWithCredentialsAction} className="mt-6 space-y-4">
+          <RecaptchaServerActionForm
+            action={registerWithCredentialsAction}
+            recaptchaAction="register"
+            className="mt-6 space-y-4"
+            captchaErrorMessage={copy.registerPage.errorCaptcha}
+          >
             <input type="hidden" name="locale" value={locale} />
             <input type="hidden" name="callbackUrl" value={callbackPath} />
 
@@ -170,7 +178,7 @@ export async function RegisterPage({
               label={copy.registerPage.submitButton}
               className="w-full rounded-full bg-[var(--color-brand)] px-5 py-3 text-sm font-semibold text-white transition hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)] disabled:cursor-not-allowed disabled:opacity-70"
             />
-          </form>
+          </RecaptchaServerActionForm>
 
           <p className="mt-4 text-sm text-[var(--color-text-muted)]">
             {copy.registerPage.loginPrompt}{" "}

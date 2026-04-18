@@ -9,6 +9,11 @@ import type { Session } from "next-auth";
 import { MinusIcon, PlusIcon, TrashIcon } from "@radix-ui/react-icons";
 
 import { useCart } from "@/features/cart/context/cart-context";
+import {
+  activateRecaptchaContext,
+  getRecaptchaToken,
+  preloadRecaptcha,
+} from "@/lib/security/recaptcha-v3-client";
 import type { Dictionary, Locale } from "@/lib/i18n";
 
 type CartPageClientProps = Readonly<{
@@ -94,6 +99,22 @@ export function CartPageClient({ copy, locale, initialSessionUser }: CartPageCli
     setShippingAddress(sessionUser?.address?.trim() || "");
   }, [isAuthenticated, sessionUser?.name, sessionUser?.phoneNumber, sessionUser?.address]);
 
+  useEffect(() => {
+    const canPlaceOrder = isAuthenticated && state.items.length > 0;
+
+    if (!canPlaceOrder) {
+      return;
+    }
+
+    const deactivateRecaptchaContext = activateRecaptchaContext();
+
+    void preloadRecaptcha().catch(() => {
+      // Token acquisition handles and displays the user-facing error on submit.
+    });
+
+    return deactivateRecaptchaContext;
+  }, [isAuthenticated, state.items.length]);
+
   async function placeOrder() {
     if (!isAuthenticated) {
       router.push(loginPath);
@@ -102,6 +123,16 @@ export function CartPageClient({ copy, locale, initialSessionUser }: CartPageCli
 
     setOrderError(null);
     setIsPlacingOrder(true);
+
+    let recaptchaToken = "";
+
+    try {
+      recaptchaToken = await getRecaptchaToken("place_order");
+    } catch {
+      setOrderError(copy.orderErrorCaptcha);
+      setIsPlacingOrder(false);
+      return;
+    }
 
     try {
       const response = await fetch("/api/orders", {
@@ -114,6 +145,7 @@ export function CartPageClient({ copy, locale, initialSessionUser }: CartPageCli
           customerPhone,
           shippingAddress,
           note,
+          recaptchaToken,
           items: state.items.map((item) => ({
             cartProductId: item.cartProductId,
             qty: item.quantity,
@@ -121,15 +153,20 @@ export function CartPageClient({ copy, locale, initialSessionUser }: CartPageCli
         }),
       });
 
-      let payload: { message?: unknown } | null = null;
+      let payload: { message?: unknown; code?: unknown } | null = null;
 
       try {
-        payload = (await response.json()) as { message?: unknown };
+        payload = (await response.json()) as { message?: unknown; code?: unknown };
       } catch {
         payload = null;
       }
 
       if (response.status === 401 || response.status === 403) {
+        if (payload?.code === "captcha") {
+          setOrderError(copy.orderErrorCaptcha);
+          return;
+        }
+
         if (isAuthenticated) {
           setOrderError(copy.orderErrorFallback);
         } else {
@@ -140,6 +177,11 @@ export function CartPageClient({ copy, locale, initialSessionUser }: CartPageCli
       }
 
       if (!response.ok) {
+        if (payload?.code === "captcha") {
+          setOrderError(copy.orderErrorCaptcha);
+          return;
+        }
+
         setOrderError(
           typeof payload?.message === "string" && payload.message.trim().length > 0
             ? payload.message

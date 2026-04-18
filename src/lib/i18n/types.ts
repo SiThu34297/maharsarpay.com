@@ -253,6 +253,7 @@ export type Dictionary = {
     placingOrderButton: string;
     loginRequiredMessage: string;
     loginToOrderButton: string;
+    orderErrorCaptcha: string;
     orderErrorFallback: string;
   };
   loginPage: {
@@ -267,6 +268,7 @@ export type Dictionary = {
     credentialsButton: string;
     errorCredentials: string;
     errorMissingFields: string;
+    errorCaptcha: string;
     errorGoogleUnavailable: string;
     errorUnknown: string;
     registerPrompt: string;
@@ -287,6 +289,7 @@ export type Dictionary = {
     loginLink: string;
     errorMissingFields: string;
     errorEmailInUse: string;
+    errorCaptcha: string;
     errorUnknown: string;
   };
   profilePage: {

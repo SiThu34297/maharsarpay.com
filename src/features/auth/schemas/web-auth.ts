@@ -20,6 +20,7 @@ export type WebAuthBackendUser = {
 export type WebAuthLoginPayload = {
   email: string;
   password: string;
+  recaptchaToken: string;
 };
 
 export type WebAuthRegisterPayload = {
@@ -28,12 +29,14 @@ export type WebAuthRegisterPayload = {
   name: string;
   phoneNumber: string;
   address: string;
+  recaptchaToken: string;
 };
 
 export type WebAuthErrorCode =
   | "email_in_use"
   | "invalid_credentials"
   | "missing_fields"
+  | "captcha"
   | "unauthorized"
   | "unknown";
 

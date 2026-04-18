@@ -265,6 +265,7 @@ export const myDictionary: Dictionary = {
     placingOrderButton: "အော်ဒါတင်နေသည်...",
     loginRequiredMessage: "အော်ဒါတင်ရန် အကောင့်ဝင်ရန်လိုအပ်ပါသည်။",
     loginToOrderButton: "အကောင့်ဝင်ပြီး အော်ဒါတင်မည်",
+    orderErrorCaptcha: "လူသားအတည်ပြုခြင်း မအောင်မြင်ပါ။ ထပ်မံကြိုးစားပါ။",
     orderErrorFallback: "အော်ဒါတင်၍မရပါ။ ထပ်မံကြိုးစားပါ။",
   },
   loginPage: {
@@ -279,6 +280,7 @@ export const myDictionary: Dictionary = {
     credentialsButton: "အီးမေးလ်ဖြင့် ဝင်မည်",
     errorCredentials: "အီးမေးလ် သို့မဟုတ် စကားဝှက် မမှန်ပါ။",
     errorMissingFields: "အီးမေးလ်နှင့် စကားဝှက် ဖြည့်သွင်းပေးပါ။",
+    errorCaptcha: "လူသားအတည်ပြုခြင်း မအောင်မြင်ပါ။ ထပ်မံကြိုးစားပါ။",
     errorGoogleUnavailable: "Google အကောင့်ဝင်မှု မစီစဉ်ရသေးပါ။",
     errorUnknown: "ပြဿနာတစ်ခု ဖြစ်ပွားခဲ့သည်။ ထပ်မံစမ်းကြည့်ပါ။",
     registerPrompt: "အကောင့်မရှိသေးဘူးလား?",
@@ -299,6 +301,7 @@ export const myDictionary: Dictionary = {
     loginLink: "အကောင့်ဝင်မည်",
     errorMissingFields: "လိုအပ်သော အချက်အလက်အားလုံး ဖြည့်သွင်းပေးပါ။",
     errorEmailInUse: "ဤအီးမေးလ်ကို အသုံးပြုပြီးဖြစ်ပါသည်။",
+    errorCaptcha: "လူသားအတည်ပြုခြင်း မအောင်မြင်ပါ။ ထပ်မံကြိုးစားပါ။",
     errorUnknown: "လက်ရှိအချိန်တွင် အကောင့်ဖွင့်၍မရပါ။ ထပ်မံကြိုးစားပါ။",
   },
   profilePage: {

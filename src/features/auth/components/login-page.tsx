@@ -5,6 +5,7 @@ import {
   getMarketingNavigation,
 } from "@/components/layout/marketing";
 import { AsyncSubmitButton } from "@/components/ui/async-submit-button";
+import { RecaptchaServerActionForm } from "@/components/ui/recaptcha-server-action-form";
 import Link from "next/link";
 import {
   signInWithCredentialsAction,
@@ -36,6 +37,8 @@ function getErrorMessage(
       return copy.errorCredentials;
     case "missing":
       return copy.errorMissingFields;
+    case "captcha":
+      return copy.errorCaptcha;
     case "google":
       return copy.errorGoogleUnavailable;
     case "unknown":
@@ -123,7 +126,12 @@ export async function LoginPage({
             </>
           ) : null}
 
-          <form action={signInWithCredentialsAction} className="space-y-4">
+          <RecaptchaServerActionForm
+            action={signInWithCredentialsAction}
+            recaptchaAction="login"
+            className="space-y-4"
+            captchaErrorMessage={copy.loginPage.errorCaptcha}
+          >
             <input type="hidden" name="locale" value={locale} />
             <input type="hidden" name="callbackUrl" value={callbackPath} />
 
@@ -159,7 +167,7 @@ export async function LoginPage({
               label={copy.loginPage.credentialsButton}
               className="w-full rounded-full bg-[var(--color-brand)] px-5 py-3 text-sm font-semibold text-white transition hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)] disabled:cursor-not-allowed disabled:opacity-70"
             />
-          </form>
+          </RecaptchaServerActionForm>
 
           <p className="mt-4 text-sm text-[var(--color-text-muted)]">
             {copy.loginPage.registerPrompt}{" "}
