@@ -105,6 +105,22 @@ async function getHomeAuthors(locale: Locale): Promise<AuthorItem[]> {
   return pickRandomItems(response.items, 6);
 }
 
+function getBookAuthorText(
+  book: {
+    author: string;
+    authors: Array<{ name: string }>;
+  },
+  locale: Locale,
+) {
+  const names = book.authors.map((author) => author.name.trim()).filter((name) => name.length > 0);
+
+  if (names.length > 0) {
+    return names.join(locale === "my" ? "၊ " : ", ");
+  }
+
+  return book.author;
+}
+
 async function getHomeBooks(locale: Locale): Promise<BookItem[]> {
   const response = await searchBooks(locale, { limit: 24 });
   const randomBooks = pickRandomItems(response.items, 8);
@@ -114,7 +130,7 @@ async function getHomeBooks(locale: Locale): Promise<BookItem[]> {
     slug: book.slug,
     cartProductId: book.cartProductId,
     title: book.title,
-    author: book.author,
+    author: getBookAuthorText(book, locale),
     price: book.price,
     salePrice: book.salePrice,
     originalPrice: book.originalPrice,

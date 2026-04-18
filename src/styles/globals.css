@@ -410,6 +410,12 @@ h6 {
   gap: 10px;
 }
 
+.book-detail-author-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
 .book-detail-author-avatar {
   width: 44px;
   height: 44px;

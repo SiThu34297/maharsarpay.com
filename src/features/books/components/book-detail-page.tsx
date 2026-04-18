@@ -142,6 +142,22 @@ function getInitial(name: string) {
   return firstChar ? firstChar.toLocaleUpperCase() : "R";
 }
 
+function getBookAuthorsText(
+  book: {
+    author: string;
+    authors: Array<{ name: string }>;
+  },
+  locale: Locale,
+) {
+  const names = book.authors.map((author) => author.name.trim()).filter((name) => name.length > 0);
+
+  if (names.length > 0) {
+    return names.join(locale === "my" ? "၊ " : ", ");
+  }
+
+  return book.author;
+}
+
 function toSafeBookDescriptionHtml(value: string): string {
   const sanitized = sanitizeHtml(value, {
     allowedTags: [...BOOK_DESCRIPTION_ALLOWED_TAGS],
@@ -184,8 +200,18 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
   const previewPdfSrc = getSafePdfUrl(book.previewPdfSrc);
   const viewAllBookReviewsHref = `/${locale}/book-reviews?bookId=${encodeURIComponent(book.id)}`;
   const bookDescriptionHtml = toSafeBookDescriptionHtml(book.description);
-  const hasAuthorDetail = book.authorId.trim().length > 0 && book.authorId !== "unknown-author";
-  const authorDetailHref = `/${locale}/authors/${encodeURIComponent(book.authorId)}`;
+  const displayAuthor = getBookAuthorsText(book, locale);
+  const bookAuthors =
+    book.authors.length > 0
+      ? book.authors
+      : [
+          {
+            id: book.authorId,
+            name: book.author,
+            imageSrc: book.authorImageSrc ?? null,
+            imageAlt: book.authorImageAlt ?? null,
+          },
+        ];
   const bookCategories =
     book.categories.length > 0
       ? book.categories
@@ -248,46 +274,64 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
               <h1 className="book-detail-title">{book.title}</h1>
               <div className="book-detail-author">
                 <p className="book-detail-author-label">{copy.bookDetail.byAuthorLabel}</p>
-                <div className="book-detail-author-identity">
-                  {authorImageSrc ? (
-                    hasAuthorDetail ? (
-                      <Link href={authorDetailHref} className="book-detail-author-avatar-link">
-                        <Image
-                          src={authorImageSrc}
-                          alt={authorImageAlt}
-                          width={44}
-                          height={44}
-                          className="book-detail-author-avatar"
-                        />
-                      </Link>
-                    ) : (
-                      <Image
-                        src={authorImageSrc}
-                        alt={authorImageAlt}
-                        width={44}
-                        height={44}
-                        className="book-detail-author-avatar"
-                      />
-                    )
-                  ) : hasAuthorDetail ? (
-                    <Link href={authorDetailHref} className="book-detail-author-avatar-link">
-                      <span className="book-detail-author-avatar-fallback">
-                        {getInitial(book.author)}
-                      </span>
-                    </Link>
-                  ) : (
-                    <span className="book-detail-author-avatar-fallback">
-                      {getInitial(book.author)}
-                    </span>
-                  )}
+                <div className="book-detail-author-list">
+                  {bookAuthors.map((author) => {
+                    const hasAuthorDetail =
+                      author.id.trim().length > 0 && author.id !== "unknown-author";
+                    const authorDetailHref = `/${locale}/authors/${encodeURIComponent(author.id)}`;
+                    const authorImageSrc = author.imageSrc?.trim() || null;
+                    const authorImageAlt = author.imageAlt?.trim() || `${author.name} portrait`;
 
-                  {hasAuthorDetail ? (
-                    <Link href={authorDetailHref} className="book-detail-author-name">
-                      {book.author}
-                    </Link>
-                  ) : (
-                    <span className="book-detail-author-name">{book.author}</span>
-                  )}
+                    return (
+                      <div
+                        key={`${author.id}:${author.name}`}
+                        className="book-detail-author-identity"
+                      >
+                        {authorImageSrc ? (
+                          hasAuthorDetail ? (
+                            <Link
+                              href={authorDetailHref}
+                              className="book-detail-author-avatar-link"
+                            >
+                              <Image
+                                src={authorImageSrc}
+                                alt={authorImageAlt}
+                                width={44}
+                                height={44}
+                                className="book-detail-author-avatar"
+                              />
+                            </Link>
+                          ) : (
+                            <Image
+                              src={authorImageSrc}
+                              alt={authorImageAlt}
+                              width={44}
+                              height={44}
+                              className="book-detail-author-avatar"
+                            />
+                          )
+                        ) : hasAuthorDetail ? (
+                          <Link href={authorDetailHref} className="book-detail-author-avatar-link">
+                            <span className="book-detail-author-avatar-fallback">
+                              {getInitial(author.name)}
+                            </span>
+                          </Link>
+                        ) : (
+                          <span className="book-detail-author-avatar-fallback">
+                            {getInitial(author.name)}
+                          </span>
+                        )}
+
+                        {hasAuthorDetail ? (
+                          <Link href={authorDetailHref} className="book-detail-author-name">
+                            {author.name}
+                          </Link>
+                        ) : (
+                          <span className="book-detail-author-name">{author.name}</span>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -348,7 +392,7 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
                   item={{
                     cartProductId: book.cartProductId,
                     title: book.title,
-                    author: book.author,
+                    author: displayAuthor,
                     price: book.price,
                     salePrice: book.salePrice,
                     originalPrice: book.originalPrice,
@@ -466,6 +510,7 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
               <div className="book-detail-related-grid">
                 {data.relatedBooks.map((relatedBook) => {
                   const relatedPricing = getDiscountPricing(relatedBook);
+                  const displayRelatedAuthor = getBookAuthorsText(relatedBook, locale);
                   const hasDiscount =
                     Boolean(relatedPricing.originalPrice) &&
                     (relatedPricing.discountAmount ?? 0) > 0;
@@ -495,7 +540,7 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
                           {relatedBook.title}
                         </Link>
                       </h3>
-                      <p>{relatedBook.author}</p>
+                      <p className="line-clamp-1">{displayRelatedAuthor}</p>
                       <div className="mt-1 flex flex-wrap items-center gap-2">
                         <p className="book-detail-related-price">
                           {formatPrice(locale, relatedPricing.salePrice)}
@@ -511,7 +556,7 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
                         item={{
                           cartProductId: relatedBook.cartProductId,
                           title: relatedBook.title,
-                          author: relatedBook.author,
+                          author: displayRelatedAuthor,
                           price: relatedBook.price,
                           salePrice: relatedBook.salePrice,
                           originalPrice: relatedBook.originalPrice,

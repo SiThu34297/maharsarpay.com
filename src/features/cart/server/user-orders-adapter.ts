@@ -6,6 +6,10 @@ const USER_ORDERS_ENDPOINT = "/api/web/orders/user";
 export type UserOrderItem = {
   id: string;
   title: string;
+  authors: Array<{
+    id: string;
+    name: string;
+  }>;
   quantity: number;
   createdAt: string | null;
 };
@@ -37,10 +41,17 @@ type GetUserOrdersResult =
     };
 
 type BackendOrderItem = {
+  author?: unknown;
+  authors?: unknown;
   id?: unknown;
   bookTitle?: unknown;
   qty?: unknown;
   createdAt?: unknown;
+};
+
+type BackendAuthor = {
+  id?: unknown;
+  name?: unknown;
 };
 
 type BackendOrder = {
@@ -97,6 +108,45 @@ function toAmount(value: unknown): number {
   return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
 
+function toAuthor(value: unknown): { id: string; name: string } | null {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const candidate = value as BackendAuthor;
+  const name = toString(candidate.name);
+
+  if (!name) {
+    return null;
+  }
+
+  const id = toString(candidate.id) || "unknown-author";
+
+  return {
+    id,
+    name,
+  };
+}
+
+function toAuthors(rawAuthor: unknown, rawAuthors: unknown): Array<{ id: string; name: string }> {
+  const fromAuthorsArray = Array.isArray(rawAuthors)
+    ? rawAuthors.map(toAuthor).filter((item): item is { id: string; name: string } => Boolean(item))
+    : [];
+
+  if (fromAuthorsArray.length > 0) {
+    return fromAuthorsArray;
+  }
+
+  if (Array.isArray(rawAuthor)) {
+    return rawAuthor
+      .map(toAuthor)
+      .filter((item): item is { id: string; name: string } => Boolean(item));
+  }
+
+  const singleAuthor = toAuthor(rawAuthor);
+  return singleAuthor ? [singleAuthor] : [];
+}
+
 async function parseJson(response: Response): Promise<unknown> {
   try {
     return await response.json();
@@ -119,12 +169,14 @@ function toOrderItems(value: unknown, orderId: string): UserOrderItem[] {
       const candidate = item as BackendOrderItem;
       const id = toString(candidate.id) || `${orderId}-item-${index + 1}`;
       const title = toString(candidate.bookTitle) || "Untitled item";
+      const authors = toAuthors(candidate.author, candidate.authors);
       const quantity = toPositiveInteger(candidate.qty);
       const createdAt = toString(candidate.createdAt) || null;
 
       return {
         id,
         title,
+        authors,
         quantity,
         createdAt,
       } satisfies UserOrderItem;

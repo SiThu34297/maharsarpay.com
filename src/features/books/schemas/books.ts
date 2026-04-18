@@ -49,6 +49,12 @@ export type BookListItem = {
   authorId: string;
   authorImageSrc?: string | null;
   authorImageAlt?: string | null;
+  authors: Array<{
+    id: string;
+    name: string;
+    imageSrc?: string | null;
+    imageAlt?: string | null;
+  }>;
   categories: Array<{
     id: string;
     name: string;

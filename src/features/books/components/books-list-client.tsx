@@ -80,6 +80,22 @@ function toMyanmarDigits(value: string) {
   return value.replace(/\d/g, (digit) => String.fromCharCode(0x1040 + Number(digit)));
 }
 
+function getBookAuthorText(
+  book: {
+    author: string;
+    authors: Array<{ name: string }>;
+  },
+  locale: Locale,
+) {
+  const names = book.authors.map((author) => author.name.trim()).filter((name) => name.length > 0);
+
+  if (names.length > 0) {
+    return names.join(locale === "my" ? "၊ " : ", ");
+  }
+
+  return book.author;
+}
+
 function buildBaseParams(query: BookListQuery) {
   const params = new URLSearchParams();
 
@@ -368,6 +384,7 @@ export function BooksListClient({
                 const pricing = getDiscountPricing(book);
                 const hasDiscount =
                   Boolean(pricing.originalPrice) && (pricing.discountAmount ?? 0) > 0;
+                const displayAuthor = getBookAuthorText(book, locale);
 
                 return (
                   <article key={book.id} className="book-list-card">
@@ -398,7 +415,9 @@ export function BooksListClient({
                         {book.title}
                       </Link>
                     </h3>
-                    <p className="mt-1 text-sm text-[var(--color-text-muted)]">{book.author}</p>
+                    <p className="mt-1 line-clamp-1 text-sm text-[var(--color-text-muted)]">
+                      {displayAuthor}
+                    </p>
 
                     <div className="mt-3 flex flex-wrap items-center gap-2">
                       <p className="text-sm font-semibold text-[var(--color-brand)] sm:text-base">
@@ -415,7 +434,7 @@ export function BooksListClient({
                       item={{
                         cartProductId: book.cartProductId,
                         title: book.title,
-                        author: book.author,
+                        author: displayAuthor,
                         price: book.price,
                         salePrice: book.salePrice,
                         originalPrice: book.originalPrice,

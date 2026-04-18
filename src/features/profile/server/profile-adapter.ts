@@ -44,7 +44,16 @@ function toProfileOrders(
     deliveryFee: number;
     discountAmount: number;
     totalAmount: number;
-    items: Array<{ id: string; title: string; quantity: number; createdAt: string | null }>;
+    items: Array<{
+      id: string;
+      title: string;
+      authors: Array<{
+        id: string;
+        name: string;
+      }>;
+      quantity: number;
+      createdAt: string | null;
+    }>;
   }>,
 ): ProfileOrder[] {
   return orders.map((order) => ({
@@ -62,6 +71,7 @@ function toProfileOrders(
     items: order.items.map((item) => ({
       id: item.id,
       title: item.title,
+      authors: item.authors,
       quantity: item.quantity,
     })),
   }));

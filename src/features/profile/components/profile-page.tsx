@@ -330,6 +330,8 @@ export async function ProfilePage({ copy, locale, data }: ProfilePageProps) {
                 const itemsLabel = locale === "my" ? "ပစ္စည်းစာရင်း" : "Items";
                 const qtyShortLabel = locale === "my" ? "အရေအတွက်" : "Qty";
                 const moreItemsLabel = locale === "my" ? "ထပ်ရှိ" : "more";
+                const authorByLabel = locale === "my" ? "စာရေးသူ" : "by";
+                const authorListSeparator = locale === "my" ? "၊ " : ", ";
 
                 return (
                   <li
@@ -421,9 +423,19 @@ export async function ProfilePage({ copy, locale, data }: ProfilePageProps) {
                                     key={item.id}
                                     className="grid grid-cols-[minmax(0,1fr)_110px] items-center gap-3 px-3 py-2.5"
                                   >
-                                    <p className="truncate text-sm text-[var(--color-text-main)]">
-                                      {item.title}
-                                    </p>
+                                    <div className="min-w-0">
+                                      <p className="truncate text-sm text-[var(--color-text-main)]">
+                                        {item.title}
+                                      </p>
+                                      {item.authors.length > 0 ? (
+                                        <p className="mt-0.5 truncate text-xs text-[var(--color-text-muted)]">
+                                          {authorByLabel}:{" "}
+                                          {item.authors
+                                            .map((author) => author.name)
+                                            .join(authorListSeparator)}
+                                        </p>
+                                      ) : null}
+                                    </div>
                                     <p className="text-right text-sm font-semibold text-[var(--color-text-main)]">
                                       {formatLocalizedNumber(locale, item.quantity)}
                                     </p>

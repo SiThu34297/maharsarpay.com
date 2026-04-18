@@ -320,21 +320,51 @@ function toInteger(value: number | null | undefined, fallback = 0) {
 }
 
 function getPrimaryAuthor(book: BackendBookRecord) {
-  const author = book.authors.find((item) => normalizeWhitespace(item.name || "") !== "");
+  return getBookAuthors(book)[0];
+}
 
-  if (!author) {
-    return {
+function getBookAuthors(book: BackendBookRecord) {
+  const authors = book.authors
+    .map((item, index) => {
+      const name = normalizeWhitespace(item.name || "");
+
+      if (!name) {
+        return null;
+      }
+
+      const normalizedId = normalizeWhitespace(item.id || "");
+      const imageSrc = item.authorImage?.trim() || null;
+
+      return {
+        id: normalizedId || `unknown-author-${index + 1}`,
+        name,
+        imageSrc,
+        imageAlt: imageSrc ? `${name} portrait` : null,
+      };
+    })
+    .filter(
+      (
+        item,
+      ): item is {
+        id: string;
+        name: string;
+        imageSrc: string | null;
+        imageAlt: string | null;
+      } => Boolean(item),
+    );
+
+  if (authors.length > 0) {
+    return authors;
+  }
+
+  return [
+    {
       id: "unknown-author",
       name: "Unknown Author",
       imageSrc: null,
-    };
-  }
-
-  return {
-    id: author.id,
-    name: normalizeWhitespace(author.name),
-    imageSrc: author.authorImage?.trim() || null,
-  };
+      imageAlt: null,
+    },
+  ];
 }
 
 function getPrimaryCategory(book: BackendBookRecord) {
@@ -454,6 +484,7 @@ function sortBackendBooksDescending(left: BackendBookRecord, right: BackendBookR
 }
 
 function toBackendBookListItem(book: BackendBookRecord): BookListItem {
+  const authors = getBookAuthors(book);
   const author = getPrimaryAuthor(book);
   const categories = getBookCategories(book);
   const category = getPrimaryCategory(book);
@@ -468,7 +499,8 @@ function toBackendBookListItem(book: BackendBookRecord): BookListItem {
     author: author.name,
     authorId: author.id,
     authorImageSrc: author.imageSrc,
-    authorImageAlt: author.imageSrc ? `${author.name} portrait` : null,
+    authorImageAlt: author.imageAlt,
+    authors,
     categories,
     category: category.name,
     categoryId: category.id,
@@ -719,6 +751,14 @@ function toLocalizedBook(locale: Locale, book: SeedBook): BookListItem {
     title: book.title[locale],
     author: book.author[locale],
     authorId: book.authorId,
+    authors: [
+      {
+        id: book.authorId,
+        name: book.author[locale],
+        imageSrc: null,
+        imageAlt: null,
+      },
+    ],
     categories: [
       {
         id: book.categoryId,

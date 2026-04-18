@@ -326,7 +326,9 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                       {book.title}
                     </Link>
                   </h3>
-                  <p className="mt-1 text-sm text-[var(--color-text-muted)]">{book.author}</p>
+                  <p className="mt-1 min-h-[1.25rem] line-clamp-1 text-sm text-[var(--color-text-muted)]">
+                    {book.author}
+                  </p>
                   <div className="mt-3 flex flex-wrap items-center gap-2">
                     <p className="text-base font-semibold text-[var(--color-brand)]">
                       {formatPrice(locale, pricing.salePrice)}

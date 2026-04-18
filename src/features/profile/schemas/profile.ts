@@ -13,6 +13,10 @@ export type ProfileSummary = {
 export type ProfileOrderItem = {
   id: string;
   title: string;
+  authors: Array<{
+    id: string;
+    name: string;
+  }>;
   quantity: number;
 };
 
