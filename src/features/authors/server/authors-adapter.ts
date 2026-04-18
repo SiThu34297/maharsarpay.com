@@ -17,6 +17,12 @@ const BOOK_API_BASE_URL = process.env.BOOK_API_BASE_URL ?? "https://bookapi.saba
 
 type RawSearchParams = Record<string, string | string[] | undefined>;
 
+type BackendAuthorsListRequestQuery = {
+  page: number;
+  limit: number;
+  searchName?: string;
+};
+
 type LocalizedValue = {
   en: string;
   my: string;
@@ -275,6 +281,22 @@ function parseNumber(value: string | null): number | undefined {
   return parsed;
 }
 
+function parsePositiveInteger(value: string | null): number | undefined {
+  const parsed = parseNumber(value);
+
+  if (parsed === undefined) {
+    return undefined;
+  }
+
+  const integer = Math.floor(parsed);
+
+  if (!Number.isFinite(integer) || integer < 1) {
+    return undefined;
+  }
+
+  return integer;
+}
+
 function normalizeQuery(query: Partial<AuthorListQuery>): AuthorListQuery {
   const limit = clamp(query.limit ?? DEFAULT_LIMIT, 1, MAX_LIMIT);
 
@@ -445,6 +467,48 @@ async function fetchRuntimeAuthorsFromBackend(locale: Locale): Promise<RuntimeAu
   );
 }
 
+async function fetchRuntimeAuthorsFromBackendWithQuery(
+  locale: Locale,
+  query: BackendAuthorsListRequestQuery,
+): Promise<RuntimeAuthor[]> {
+  const params = new URLSearchParams();
+  params.set("page", String(query.page));
+  params.set("limit", String(query.limit));
+
+  if (query.searchName) {
+    params.set("searchName", query.searchName);
+  }
+
+  const response = await fetch(`${BOOK_API_BASE_URL}${AUTHORS_ENDPOINT}?${params.toString()}`, {
+    method: "GET",
+    cache: "no-store",
+    headers: {
+      Accept: "application/json",
+      "Accept-Language": locale,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Authors API request failed with status ${response.status}`);
+  }
+
+  const payload = (await response.json()) as Partial<BackendAuthorsResponse>;
+
+  if (payload.error || payload.authorized === false) {
+    throw new Error(payload.message || "Authors API returned an error");
+  }
+
+  if (!Array.isArray(payload.data)) {
+    throw new TypeError("Authors API returned an invalid response payload");
+  }
+
+  const activeAuthors = payload.data.filter((author) => author.status === 1);
+
+  return toBackendAuthorSlugTuples(activeAuthors).map(({ author, slug }, index) =>
+    toBackendRuntimeAuthor(locale, author, slug, index),
+  );
+}
+
 async function getRuntimeAuthors(locale: Locale) {
   try {
     const backendAuthors = await fetchRuntimeAuthorsFromBackend(locale);
@@ -460,7 +524,7 @@ function toUrlSearchParams(raw: RawSearchParams): URLSearchParams {
   const params = new URLSearchParams();
 
   for (const [key, value] of Object.entries(raw)) {
-    if (typeof value === "undefined") {
+    if (value === undefined) {
       continue;
     }
 
@@ -486,10 +550,15 @@ function buildAppliedFilters(query: AuthorListQuery): AppliedAuthorFilters {
 export function parseAuthorListQueryFromSearchParams(
   searchParams: URLSearchParams,
 ): AuthorListQuery {
+  const normalizedLimit = parsePositiveInteger(searchParams.get("limit")) ?? DEFAULT_LIMIT;
+  const page = parsePositiveInteger(searchParams.get("page"));
+
   return normalizeQuery({
-    q: searchParams.get("q") ?? undefined,
-    cursor: searchParams.get("cursor") ?? undefined,
-    limit: parseNumber(searchParams.get("limit")) ?? DEFAULT_LIMIT,
+    q: searchParams.get("q") ?? searchParams.get("searchName") ?? undefined,
+    cursor:
+      searchParams.get("cursor") ??
+      (page === undefined ? undefined : String((page - 1) * normalizedLimit)),
+    limit: normalizedLimit,
   });
 }
 
@@ -539,6 +608,31 @@ export async function searchAuthors(
   queryInput: Partial<AuthorListQuery>,
 ): Promise<AuthorListResponse> {
   const query = normalizeQuery(queryInput);
+  const offset = Number(query.cursor ?? "0");
+  const safeOffset = Number.isFinite(offset) && offset >= 0 ? Math.floor(offset) : 0;
+  const page = Math.floor(safeOffset / query.limit) + 1;
+
+  try {
+    const backendAuthors = await fetchRuntimeAuthorsFromBackendWithQuery(locale, {
+      page,
+      limit: query.limit,
+      searchName: query.q,
+    });
+
+    const items = backendAuthors.map((author) => toAuthorListItem(author));
+    const nextOffset = safeOffset + items.length;
+    const nextCursor = items.length < query.limit ? null : String(nextOffset);
+
+    return {
+      items,
+      total: nextOffset,
+      nextCursor,
+      appliedFilters: buildAppliedFilters(query),
+    };
+  } catch {
+    // Fall back to local seed search when backend is unavailable.
+  }
+
   const keyword = query.q ? normalizeSearchText(query.q) : undefined;
   const authors = await getRuntimeAuthors(locale);
   const filtered = authors.filter((author) => {
@@ -549,8 +643,6 @@ export async function searchAuthors(
     return author.searchText.includes(keyword);
   });
 
-  const offset = Number(query.cursor ?? "0");
-  const safeOffset = Number.isFinite(offset) && offset >= 0 ? offset : 0;
   const pageItems = filtered.slice(safeOffset, safeOffset + query.limit);
   const items = pageItems.map((author) => toAuthorListItem(author));
   const nextOffset = safeOffset + items.length;

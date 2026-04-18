@@ -16,6 +16,7 @@ export type Dictionary = {
   navigation: {
     home: string;
     books: string;
+    bookPreview: string;
     authors: string;
     categories: string;
     media: string;
@@ -100,6 +101,9 @@ export type Dictionary = {
     doorToDoorAdTitle: string;
     doorToDoorAdContact: string;
     doorToDoorAdShippingNote: string;
+    bookReviewsTitle: string;
+    viewAllBookReviews: string;
+    noBookReviews: string;
     relatedBooksTitle: string;
     viewAllBooks: string;
   };

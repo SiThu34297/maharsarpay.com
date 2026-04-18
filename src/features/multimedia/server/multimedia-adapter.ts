@@ -25,6 +25,12 @@ const MEDIA_TYPES = new Set<MediaType>(["video", "photo"]);
 
 type RawSearchParams = Record<string, string | string[] | undefined>;
 
+type BackendMultimediaListRequestQuery = {
+  page: number;
+  limit: number;
+  searchName?: string;
+};
+
 type LocalizedValue = {
   en: string;
   my: string;
@@ -546,6 +552,46 @@ async function fetchMultimediaFromBackend(locale: Locale): Promise<BackendMultim
   });
 }
 
+async function fetchMultimediaFromBackendWithQuery(
+  locale: Locale,
+  query: BackendMultimediaListRequestQuery,
+): Promise<BackendMultimediaRecord[]> {
+  const params = new URLSearchParams();
+  params.set("page", String(query.page));
+  params.set("limit", String(query.limit));
+
+  if (query.searchName) {
+    params.set("searchName", query.searchName);
+  }
+
+  const response = await fetch(`${BOOK_API_BASE_URL}${MULTIMEDIA_ENDPOINT}?${params.toString()}`, {
+    method: "GET",
+    cache: "no-store",
+    headers: {
+      Accept: "application/json",
+      "Accept-Language": locale,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Multimedia API request failed with status ${response.status}`);
+  }
+
+  const payload = (await response.json()) as Partial<BackendMultimediaResponse>;
+
+  if (payload.error) {
+    throw new Error(payload.message || "Multimedia API returned an error");
+  }
+
+  if (!Array.isArray(payload.data)) {
+    throw new TypeError("Multimedia API returned an invalid response payload");
+  }
+
+  return payload.data.filter((item): item is BackendMultimediaRecord => {
+    return Boolean(item && typeof item === "object" && typeof item.id === "string");
+  });
+}
+
 function matchesBackendMediaKeyword(media: BackendMultimediaRecord, keyword: string) {
   const narrative = resolveBackendNarrative(media, normalizeWhitespace(media.title || ""));
   const haystack = `${media.title} ${narrative.description} ${DEFAULT_MEDIA_CREATOR}`.toLowerCase();
@@ -569,6 +615,22 @@ function parseNumber(value: string | null): number | undefined {
   }
 
   return parsed;
+}
+
+function parsePositiveInteger(value: string | null): number | undefined {
+  const parsed = parseNumber(value);
+
+  if (parsed === undefined) {
+    return undefined;
+  }
+
+  const integer = Math.floor(parsed);
+
+  if (!Number.isFinite(integer) || integer < 1) {
+    return undefined;
+  }
+
+  return integer;
 }
 
 function parseMediaType(value: string | null): MediaType | undefined {
@@ -662,11 +724,16 @@ function normalizeSlug(value: string) {
 export function parseMultimediaListQueryFromSearchParams(
   searchParams: URLSearchParams,
 ): MediaListQuery {
+  const normalizedLimit = parsePositiveInteger(searchParams.get("limit")) ?? DEFAULT_LIMIT;
+  const page = parsePositiveInteger(searchParams.get("page"));
+
   return normalizeQuery({
-    q: searchParams.get("q") ?? undefined,
+    q: searchParams.get("q") ?? searchParams.get("searchName") ?? undefined,
     mediaType: parseMediaType(searchParams.get("mediaType")),
-    cursor: searchParams.get("cursor") ?? undefined,
-    limit: parseNumber(searchParams.get("limit")) ?? DEFAULT_LIMIT,
+    cursor:
+      searchParams.get("cursor") ??
+      (page === undefined ? undefined : String((page - 1) * normalizedLimit)),
+    limit: normalizedLimit,
   });
 }
 
@@ -816,6 +883,34 @@ export async function searchMultimedia(
 ): Promise<MediaListResponse> {
   const query = normalizeQuery(queryInput);
   const keyword = query.q?.toLowerCase();
+  const offset = Number(query.cursor ?? "0");
+  const safeOffset = Number.isFinite(offset) && offset >= 0 ? Math.floor(offset) : 0;
+  const page = Math.floor(safeOffset / query.limit) + 1;
+
+  if (!query.mediaType) {
+    try {
+      const backendMedia = getActiveBackendMedia(
+        await fetchMultimediaFromBackendWithQuery(locale, {
+          page,
+          limit: query.limit,
+          searchName: query.q,
+        }),
+      )
+        .sort(sortBackendMediaDescending)
+        .map((media) => toBackendMediaListItem(media));
+      const nextOffset = safeOffset + backendMedia.length;
+      const nextCursor = backendMedia.length < query.limit ? null : String(nextOffset);
+
+      return {
+        items: backendMedia,
+        total: nextOffset,
+        nextCursor,
+        appliedFilters: buildAppliedFilters(query),
+      };
+    } catch {
+      // Fall through to existing backend and seed fallback paths.
+    }
+  }
 
   try {
     const backendMedia = getActiveBackendMedia(await fetchMultimediaFromBackend(locale));
@@ -833,8 +928,6 @@ export async function searchMultimedia(
 
     const sorted = [...filtered].sort(sortBackendMediaDescending);
 
-    const offset = Number(query.cursor ?? "0");
-    const safeOffset = Number.isFinite(offset) && offset >= 0 ? offset : 0;
     const pageItems = sorted.slice(safeOffset, safeOffset + query.limit);
     const items = pageItems.map((media) => toBackendMediaListItem(media));
     const nextOffset = safeOffset + items.length;
@@ -868,8 +961,6 @@ export async function searchMultimedia(
     (left, right) => new Date(right.publishedAt).getTime() - new Date(left.publishedAt).getTime(),
   );
 
-  const offset = Number(query.cursor ?? "0");
-  const safeOffset = Number.isFinite(offset) && offset >= 0 ? offset : 0;
   const pageItems = sorted.slice(safeOffset, safeOffset + query.limit);
   const items = pageItems.map((item) => toLocalizedMediaListItem(locale, item));
   const nextOffset = safeOffset + items.length;

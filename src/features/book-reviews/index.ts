@@ -2,6 +2,7 @@ export { BookReviewsPage } from "./components/book-reviews-page";
 export { BookReviewDetailPage } from "./components/book-review-detail-page";
 export {
   getBookReviewById,
+  getBookReviewsByBookId,
   normalizeBookReviewListQuery,
   parseBookReviewListQueryFromObject,
   parseBookReviewListQueryFromSearchParams,

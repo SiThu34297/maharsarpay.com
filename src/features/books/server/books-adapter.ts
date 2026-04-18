@@ -21,6 +21,12 @@ const BACKEND_FALLBACK_COVER_SRC = "/images/home/real/books/book-1.jpg";
 
 type RawSearchParams = Record<string, string | string[] | undefined>;
 
+type BackendBooksListRequestQuery = {
+  page: number;
+  limit: number;
+  searchName?: string;
+};
+
 type LocalizedValue = {
   en: string;
   my: string;
@@ -465,6 +471,7 @@ function toBackendBookListItem(book: BackendBookRecord): BookListItem {
     rating: BACKEND_DEFAULT_RATING,
     coverImageSrc: resolveBackendBookCoverImage(book),
     coverImageAlt: `${title} cover`,
+    previewPdfSrc: resolveBackendBookPreviewPdfSrc(book.preview),
   };
 }
 
@@ -586,6 +593,46 @@ async function fetchBooksFromBackend(locale: Locale): Promise<BackendBookRecord[
   });
 }
 
+async function fetchBooksFromBackendWithQuery(
+  locale: Locale,
+  query: BackendBooksListRequestQuery,
+): Promise<BackendBookRecord[]> {
+  const params = new URLSearchParams();
+  params.set("page", String(query.page));
+  params.set("limit", String(query.limit));
+
+  if (query.searchName) {
+    params.set("searchName", query.searchName);
+  }
+
+  const response = await fetch(`${BOOK_API_BASE_URL}${BOOKS_ENDPOINT}?${params.toString()}`, {
+    method: "GET",
+    cache: "no-store",
+    headers: {
+      Accept: "application/json",
+      "Accept-Language": locale,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Books API request failed with status ${response.status}`);
+  }
+
+  const payload = (await response.json()) as Partial<BackendBooksResponse>;
+
+  if (payload.error) {
+    throw new Error(payload.message || "Books API returned an error");
+  }
+
+  if (!Array.isArray(payload.data)) {
+    throw new TypeError("Books API returned an invalid response payload");
+  }
+
+  return payload.data.filter((item): item is BackendBookRecord => {
+    return Boolean(item && typeof item === "object" && typeof item.id === "string");
+  });
+}
+
 function getActiveBackendBooks(books: BackendBookRecord[]) {
   return books.filter((book) => toInteger(book.status, 1) === 1);
 }
@@ -606,6 +653,22 @@ function parseNumber(value: string | null): number | undefined {
   }
 
   return parsed;
+}
+
+function parsePositiveInteger(value: string | null): number | undefined {
+  const parsed = parseNumber(value);
+
+  if (parsed === undefined) {
+    return undefined;
+  }
+
+  const integer = Math.floor(parsed);
+
+  if (!Number.isFinite(integer) || integer < 1) {
+    return undefined;
+  }
+
+  return integer;
 }
 
 function normalizeQuery(query: Partial<BookListQuery>): BookListQuery {
@@ -657,6 +720,7 @@ function toLocalizedBook(locale: Locale, book: SeedBook): BookListItem {
     rating: Number(book.rating.toFixed(1)),
     coverImageSrc: book.coverImageSrc,
     coverImageAlt: book.coverImageAlt[locale],
+    previewPdfSrc: null,
   };
 }
 
@@ -715,11 +779,16 @@ function matchesBookCategory(book: SeedBook, categoryQuery: string) {
 }
 
 export function parseBookListQueryFromSearchParams(searchParams: URLSearchParams): BookListQuery {
+  const normalizedLimit = parsePositiveInteger(searchParams.get("limit")) ?? DEFAULT_LIMIT;
+  const page = parsePositiveInteger(searchParams.get("page"));
+
   return normalizeQuery({
-    q: searchParams.get("q") ?? undefined,
+    q: searchParams.get("q") ?? searchParams.get("searchName") ?? undefined,
     category: searchParams.get("category") ?? undefined,
-    cursor: searchParams.get("cursor") ?? undefined,
-    limit: parseNumber(searchParams.get("limit")) ?? DEFAULT_LIMIT,
+    cursor:
+      searchParams.get("cursor") ??
+      (page === undefined ? undefined : String((page - 1) * normalizedLimit)),
+    limit: normalizedLimit,
   });
 }
 
@@ -906,6 +975,33 @@ export async function searchBooks(
 ): Promise<BookListResponse> {
   const query = normalizeQuery(queryInput);
   const keyword = query.q?.toLowerCase();
+  const offset = Number(query.cursor ?? "0");
+  const safeOffset = Number.isFinite(offset) && offset >= 0 ? Math.floor(offset) : 0;
+  const page = Math.floor(safeOffset / query.limit) + 1;
+
+  if (!query.category) {
+    try {
+      const backendBooks = getActiveBackendBooks(
+        await fetchBooksFromBackendWithQuery(locale, {
+          page,
+          limit: query.limit,
+          searchName: query.q,
+        }),
+      );
+      const items = backendBooks.map((book) => toBackendBookListItem(book));
+      const nextOffset = safeOffset + items.length;
+      const nextCursor = items.length < query.limit ? null : String(nextOffset);
+
+      return {
+        items,
+        total: nextOffset,
+        nextCursor,
+        appliedFilters: buildAppliedFilters(query),
+      };
+    } catch {
+      // Fall through to existing backend and seed fallback paths.
+    }
+  }
 
   try {
     const backendBooks = getActiveBackendBooks(await fetchBooksFromBackend(locale));
@@ -922,8 +1018,6 @@ export async function searchBooks(
     });
 
     const sortedBooks = [...filteredBooks].sort(sortBackendBooksDescending);
-    const offset = Number(query.cursor ?? "0");
-    const safeOffset = Number.isFinite(offset) && offset >= 0 ? offset : 0;
     const pageItems = sortedBooks.slice(safeOffset, safeOffset + query.limit);
     const items = pageItems.map((book) => toBackendBookListItem(book));
     const nextOffset = safeOffset + items.length;
@@ -957,8 +1051,6 @@ export async function searchBooks(
     (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
   );
 
-  const offset = Number(query.cursor ?? "0");
-  const safeOffset = Number.isFinite(offset) && offset >= 0 ? offset : 0;
   const pageItems = sorted.slice(safeOffset, safeOffset + query.limit);
   const items = pageItems.map((book) => toLocalizedBook(locale, book));
   const nextOffset = safeOffset + items.length;

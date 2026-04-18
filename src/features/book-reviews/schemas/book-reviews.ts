@@ -56,12 +56,14 @@ export type BookReviewDetail = BookReviewListItem;
 
 export type BookReviewListQuery = {
   q?: string;
+  bookId?: string;
   cursor?: string;
   limit: number;
 };
 
 export type AppliedBookReviewFilters = {
   q?: string;
+  bookId?: string;
 };
 
 export type BookReviewListResponse = {

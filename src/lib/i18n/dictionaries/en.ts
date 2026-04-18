@@ -18,6 +18,7 @@ export const enDictionary: Dictionary = {
   navigation: {
     home: "Home",
     books: "Books",
+    bookPreview: "စာမြည်း",
     authors: "Authors",
     categories: "Categories",
     media: "Media",
@@ -102,6 +103,9 @@ export const enDictionary: Dictionary = {
     doorToDoorAdTitle: "For customers who want to order with Door To Door service",
     doorToDoorAdContact: "Contact - 09450623383, 09450623384",
     doorToDoorAdShippingNote: "Delivery fees may vary by township.",
+    bookReviewsTitle: "Reader Reviews",
+    viewAllBookReviews: "View all book reviews",
+    noBookReviews: "No reviews yet for this book.",
     relatedBooksTitle: "Related Books",
     viewAllBooks: "View all books",
   },

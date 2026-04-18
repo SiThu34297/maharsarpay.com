@@ -21,7 +21,7 @@ type BookReviewsListClientProps = Readonly<{
 }>;
 
 type ActiveFilterChip = {
-  key: "q";
+  key: "q" | "bookId";
   label: string;
 };
 
@@ -88,6 +88,10 @@ function buildBaseParams(query: BookReviewListQuery) {
     params.set("q", query.q);
   }
 
+  if (query.bookId) {
+    params.set("bookId", query.bookId);
+  }
+
   params.set("limit", String(query.limit));
 
   return params;
@@ -115,9 +119,10 @@ export function BookReviewsListClient({
     () =>
       JSON.stringify({
         q: initialQuery.q,
+        bookId: initialQuery.bookId,
         limit: initialQuery.limit,
       }),
-    [initialQuery.limit, initialQuery.q],
+    [initialQuery.bookId, initialQuery.limit, initialQuery.q],
   );
 
   useEffect(() => {
@@ -127,13 +132,36 @@ export function BookReviewsListClient({
     setSearchInput(initialQuery.q ?? "");
   }, [initialQuery, initialResponse.items, initialResponse.nextCursor, queryKey]);
 
-  const activeFilterChips = useMemo<ActiveFilterChip[]>(() => {
-    if (!initialQuery.q) {
-      return [];
+  const activeBookTitle = useMemo(() => {
+    if (!initialQuery.bookId) {
+      return null;
     }
 
-    return [{ key: "q", label: initialQuery.q }];
-  }, [initialQuery.q]);
+    const matchedReview = initialResponse.items.find(
+      (item) => item.book.id === initialQuery.bookId || item.bookId === initialQuery.bookId,
+    );
+
+    return matchedReview?.book.title?.trim() || null;
+  }, [initialQuery.bookId, initialResponse.items]);
+
+  const activeFilterChips = useMemo<ActiveFilterChip[]>(() => {
+    const chips: ActiveFilterChip[] = [];
+
+    if (initialQuery.q) {
+      chips.push({ key: "q", label: initialQuery.q });
+    }
+
+    if (initialQuery.bookId) {
+      chips.push({
+        key: "bookId",
+        label: activeBookTitle
+          ? `${copy.reviewedBookLabel}: ${activeBookTitle}`
+          : copy.reviewedBookLabel,
+      });
+    }
+
+    return chips;
+  }, [activeBookTitle, copy.reviewedBookLabel, initialQuery.bookId, initialQuery.q]);
 
   const hasAnyFilter = activeFilterChips.length > 0;
 
@@ -233,14 +261,18 @@ export function BookReviewsListClient({
   const clearAllFilters = useCallback(() => {
     pushQuery((params) => {
       params.delete("q");
+      params.delete("bookId");
     });
   }, [pushQuery]);
 
-  const removeFilter = useCallback(() => {
-    pushQuery((params) => {
-      params.delete("q");
-    });
-  }, [pushQuery]);
+  const removeFilter = useCallback(
+    (key: "q" | "bookId") => {
+      pushQuery((params) => {
+        params.delete(key);
+      });
+    },
+    [pushQuery],
+  );
 
   const onSearchSubmit = useCallback(
     (event: React.FormEvent<HTMLFormElement>) => {
@@ -317,7 +349,7 @@ export function BookReviewsListClient({
                 key={`${chip.key}-${chip.label}`}
                 type="button"
                 className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-white px-3 py-1.5 text-xs font-medium text-[var(--color-text-main)]"
-                onClick={removeFilter}
+                onClick={() => removeFilter(chip.key)}
                 aria-label={`${copy.removeFilterLabel}: ${chip.label}`}
               >
                 <span>{chip.label}</span>

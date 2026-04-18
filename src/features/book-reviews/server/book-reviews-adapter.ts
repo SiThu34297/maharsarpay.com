@@ -116,6 +116,7 @@ function normalizeQuery(query: Partial<BookReviewListQuery>): BookReviewListQuer
 
   return {
     q: query.q?.trim() || undefined,
+    bookId: query.bookId?.trim() || undefined,
     cursor: query.cursor || undefined,
     limit,
   };
@@ -145,6 +146,7 @@ function toUrlSearchParams(raw: RawSearchParams): URLSearchParams {
 function buildAppliedFilters(query: BookReviewListQuery): AppliedBookReviewFilters {
   return {
     q: query.q,
+    bookId: query.bookId,
   };
 }
 
@@ -212,6 +214,7 @@ async function fetchBookReviewsFromBackend(
     page: number;
     limit: number;
     searchName?: string;
+    bookId?: string;
   },
 ): Promise<BackendBookReviewRecord[]> {
   const params = new URLSearchParams();
@@ -220,6 +223,10 @@ async function fetchBookReviewsFromBackend(
 
   if (query.searchName) {
     params.set("searchName", query.searchName);
+  }
+
+  if (query.bookId) {
+    params.set("bookId", query.bookId);
   }
 
   const response = await fetch(
@@ -275,6 +282,7 @@ export function parseBookReviewListQueryFromSearchParams(
 ): BookReviewListQuery {
   return normalizeQuery({
     q: searchParams.get("q") ?? searchParams.get("searchName") ?? undefined,
+    bookId: searchParams.get("bookId") ?? undefined,
     cursor: searchParams.get("cursor") ?? undefined,
     limit: parseNumber(searchParams.get("limit")) ?? DEFAULT_LIMIT,
   });
@@ -304,6 +312,7 @@ export async function searchBookReviews(
       page,
       limit: query.limit,
       searchName: query.q,
+      bookId: query.bookId,
     });
 
     const items = records.map((record) => toBookReviewListItem(locale, record));
@@ -346,5 +355,31 @@ export async function getBookReviewById(
     return toBookReviewListItem(locale, record);
   } catch {
     return null;
+  }
+}
+
+export async function getBookReviewsByBookId(
+  locale: Locale,
+  bookId: string,
+  limit = 4,
+): Promise<BookReviewListItem[]> {
+  const normalizedBookId = normalizeId(bookId);
+
+  if (!normalizedBookId) {
+    return [];
+  }
+
+  const safeLimit = clamp(limit, 1, 24);
+
+  try {
+    const records = await fetchBookReviewsFromBackend(locale, {
+      page: 1,
+      limit: safeLimit,
+      bookId: normalizedBookId,
+    });
+
+    return records.map((record) => toBookReviewListItem(locale, record));
+  } catch {
+    return [];
   }
 }

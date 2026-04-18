@@ -1,5 +1,6 @@
 export { BooksPage } from "./components/books-page";
 export { BookDetailPage } from "./components/book-detail-page";
+export { BookPreviewPage } from "./components/book-preview-page";
 export {
   getBookFilterOptions,
   getBookBySlug,

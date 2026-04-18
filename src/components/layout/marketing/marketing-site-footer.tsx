@@ -126,10 +126,10 @@ export async function MarketingSiteFooter({ copy, navigation }: MarketingSiteFoo
           </div>
         </div>
 
-        <div className="mt-10 flex items-center justify-between gap-4 border-t border-(--color-border) pt-6 text-xs md:mt-12">
-          <p className="text-(--color-text-muted)">{copy.footer.rights}</p>
+        <div className="mt-10 flex flex-col gap-4 border-t border-(--color-border) pt-6 text-xs md:mt-12 lg:flex-row lg:items-center lg:justify-between">
+          <p className="text-center text-(--color-text-muted) lg:text-left">{copy.footer.rights}</p>
 
-          <div className="flex items-center gap-3">
+          <div className="flex w-full flex-wrap items-center justify-center gap-3 lg:w-auto lg:flex-nowrap lg:justify-end">
             <span className="text-sm text-(--color-text-muted)">{copy.footer.socialLabel}</span>
             {footerContent.socialLinks.map((socialLink) => (
               <Link

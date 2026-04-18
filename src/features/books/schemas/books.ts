@@ -56,6 +56,7 @@ export type BookListItem = {
   rating: number;
   coverImageSrc: string;
   coverImageAlt: string;
+  previewPdfSrc?: string | null;
 };
 
 export type BookDetail = BookListItem & {
@@ -110,6 +111,13 @@ export type BooksPageData = {
 
 export type BookDetailPageData = {
   book: BookDetail;
+  bookReviews: Array<{
+    id: string;
+    reviewerName: string;
+    excerpt: string;
+    createdAt: string;
+    viewCount: number;
+  }>;
   relatedBooks: BookListItem[];
   filterOptions: BookFilterOptions;
 };

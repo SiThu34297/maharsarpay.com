@@ -171,8 +171,24 @@ export function MultimediaListClient({
     setLoadMoreError(false);
 
     try {
-      const params = buildBaseParams(initialQuery);
-      params.set("cursor", nextCursor);
+      const params = new URLSearchParams();
+      params.set("limit", String(initialQuery.limit));
+
+      const nextOffset = Number(nextCursor);
+      const page =
+        Number.isFinite(nextOffset) && nextOffset >= 0
+          ? Math.floor(nextOffset / initialQuery.limit) + 1
+          : 1;
+      params.set("page", String(page));
+
+      if (initialQuery.q) {
+        params.set("searchName", initialQuery.q);
+      }
+
+      if (initialQuery.mediaType) {
+        params.set("mediaType", initialQuery.mediaType);
+      }
+
       params.set("lang", locale);
 
       const response = await fetch(`/api/media?${params.toString()}`, {

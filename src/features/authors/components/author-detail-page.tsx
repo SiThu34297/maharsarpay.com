@@ -171,19 +171,19 @@ export function AuthorDetailPage({ copy, locale, data, breadcrumbSource }: Autho
                   {copy.authorDetail.viewAllAuthors}
                 </Link>
               </div>
-            </div>
-          </section>
 
-          <section className="author-detail-about">
-            <h2>{copy.authorDetail.aboutTitle}</h2>
-            {authorLongBioHtml ? (
-              <div
-                className="author-detail-rich-text"
-                dangerouslySetInnerHTML={{ __html: authorLongBioHtml }}
-              />
-            ) : (
-              <p>{authorLongBioFallback}</p>
-            )}
+              <section className="author-detail-about-inline">
+                <h2>{copy.authorDetail.aboutTitle}</h2>
+                {authorLongBioHtml ? (
+                  <div
+                    className="author-detail-rich-text"
+                    dangerouslySetInnerHTML={{ __html: authorLongBioHtml }}
+                  />
+                ) : (
+                  <p>{authorLongBioFallback}</p>
+                )}
+              </section>
+            </div>
           </section>
 
           <section id="author-books" className="author-detail-books">

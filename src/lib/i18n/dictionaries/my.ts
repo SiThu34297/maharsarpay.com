@@ -18,6 +18,7 @@ export const myDictionary: Dictionary = {
   navigation: {
     home: "ပင်မ",
     books: "စာအုပ်များ",
+    bookPreview: "စာမြည်း",
     authors: "စာရေးသူများ",
     categories: "အမျိုးအစားများ",
     media: "မီဒီယာ",
@@ -105,6 +106,9 @@ export const myDictionary: Dictionary = {
     doorToDoorAdTitle: "အိမ်အရောက်ပို့ ( Door To Door ) စနစ်ဖြင့်မှာယူလိုသူများအတွက်",
     doorToDoorAdContact: "ဆက်သွယ်ရန် - 09450623383 ၊ 09450623384",
     doorToDoorAdShippingNote: "မြို့နယ်အလိုက် ပို့ဆောင်ခ ကွာခြားနိုင်ပါသည်။",
+    bookReviewsTitle: "စာဖတ်သူတို့စာညွှန်းများ",
+    viewAllBookReviews: "စာအုပ်စာညွှန်းအားလုံး ကြည့်မည်",
+    noBookReviews: "ဤစာအုပ်အတွက် စာညွှန်း မရှိသေးပါ။",
     relatedBooksTitle: "ဆက်စပ်စာအုပ်များ",
     viewAllBooks: "စာအုပ်အားလုံး ကြည့်မည်",
   },

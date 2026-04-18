@@ -1,11 +1,24 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { forwardRef, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ComponentType,
+  type ReactNode,
+} from "react";
+import { createPortal } from "react-dom";
 
-import { Document, Page, pdfjs } from "react-pdf";
+const PdfDocument = dynamic(() => import("react-pdf").then((module) => module.Document), {
+  ssr: false,
+}) as ComponentType<Record<string, unknown>>;
 
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+const PdfPage = dynamic(() => import("react-pdf").then((module) => module.Page), {
+  ssr: false,
+}) as ComponentType<Record<string, unknown>>;
 
 const FlipBook = dynamic(() => import("react-pageflip").then((module) => module.default), {
   ssr: false,
@@ -35,7 +48,7 @@ const FlipPage = forwardRef<HTMLDivElement, FlipPageProps>(function FlipPage(
   return (
     <div ref={ref} className="book-preview-flip-page">
       <div className="book-preview-flip-page-inner">
-        <Page
+        <PdfPage
           pageNumber={pageNumber}
           width={pageWidth}
           renderAnnotationLayer={false}
@@ -69,6 +82,7 @@ export function BookPreviewModal({
   triggerVariant = "section",
 }: BookPreviewModalProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
   const [isReaderLoading, setIsReaderLoading] = useState(false);
   const [pageCount, setPageCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -83,7 +97,8 @@ export function BookPreviewModal({
       cMapUrl: "/pdfjs/cmaps/",
       cMapPacked: true,
       standardFontDataUrl: "/pdfjs/standard_fonts/",
-      useSystemFonts: true,
+      // Avoid noisy runtime warnings for unavailable local fonts in browser environments.
+      useSystemFonts: false,
     }),
     [],
   );
@@ -163,6 +178,26 @@ export function BookPreviewModal({
   }
 
   useEffect(() => {
+    setPortalContainer(document.body);
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    void import("react-pdf").then(({ pdfjs }) => {
+      if (!isMounted) {
+        return;
+      }
+
+      pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/legacy/build/pdf.worker.min.mjs`;
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
     if (!isOpen) {
       return;
     }
@@ -240,105 +275,108 @@ export function BookPreviewModal({
         triggerButton
       )}
 
-      {isOpen ? (
-        <dialog
-          open
-          className="book-preview-modal-overlay"
-          aria-label={previewTitle}
-          onClose={closeReader}
-        >
-          <button
-            type="button"
-            className="book-preview-modal-backdrop"
-            aria-label={closePreviewLabel}
-            onClick={closeReader}
-          />
+      {isOpen && portalContainer
+        ? createPortal(
+            <dialog
+              open
+              className="book-preview-modal-overlay"
+              aria-label={previewTitle}
+              onClose={closeReader}
+            >
+              <button
+                type="button"
+                className="book-preview-modal-backdrop"
+                aria-label={closePreviewLabel}
+                onClick={closeReader}
+              />
 
-          <div className="book-preview-modal">
-            <div className="book-preview-modal-header">
-              <h3>{title}</h3>
-              <div className="book-preview-modal-header-actions">
-                <a
-                  href={proxiedPdfSrc}
-                  download
-                  className="book-preview-modal-download-mobile"
-                  aria-label={downloadPreviewLabel}
-                  title={openPreviewLabel}
-                >
-                  {downloadPreviewLabel}
-                </a>
+              <div className="book-preview-modal">
+                <div className="book-preview-modal-header">
+                  <h3>{title}</h3>
+                  <div className="book-preview-modal-header-actions">
+                    <a
+                      href={proxiedPdfSrc}
+                      download
+                      className="book-preview-modal-download-mobile"
+                      aria-label={downloadPreviewLabel}
+                      title={openPreviewLabel}
+                    >
+                      {downloadPreviewLabel}
+                    </a>
 
-                <button
-                  type="button"
-                  className="book-preview-modal-close"
-                  aria-label={closePreviewLabel}
-                  onClick={closeReader}
-                >
-                  ×
-                </button>
-              </div>
-            </div>
-
-            <div className="book-preview-modal-reader" aria-busy={isReaderLoading}>
-              <div className="book-preview-reader-toolbar">
-                <div className="book-preview-reader-switch">
-                  <button
-                    type="button"
-                    className="book-preview-reader-nav"
-                    aria-label="Previous page"
-                    onClick={handlePrevPage}
-                    disabled={currentPage <= 1 || hasReaderError || pageCount === 0}
-                  >
-                    ←
-                  </button>
-
-                  <button
-                    type="button"
-                    className="book-preview-reader-nav"
-                    aria-label="Next page"
-                    onClick={handleNextPage}
-                    disabled={currentPage >= pageCount || hasReaderError || pageCount === 0}
-                  >
-                    →
-                  </button>
+                    <button
+                      type="button"
+                      className="book-preview-modal-close"
+                      aria-label={closePreviewLabel}
+                      onClick={closeReader}
+                    >
+                      ×
+                    </button>
+                  </div>
                 </div>
 
-                <a
-                  href={proxiedPdfSrc}
-                  download
-                  className="book-preview-reader-download"
-                  aria-label={downloadPreviewLabel}
-                  title={openPreviewLabel}
-                >
-                  {downloadPreviewLabel}
-                </a>
+                <div className="book-preview-modal-reader" aria-busy={isReaderLoading}>
+                  <div className="book-preview-reader-toolbar">
+                    <div className="book-preview-reader-switch">
+                      <button
+                        type="button"
+                        className="book-preview-reader-nav"
+                        aria-label="Previous page"
+                        onClick={handlePrevPage}
+                        disabled={currentPage <= 1 || hasReaderError || pageCount === 0}
+                      >
+                        ←
+                      </button>
+
+                      <button
+                        type="button"
+                        className="book-preview-reader-nav"
+                        aria-label="Next page"
+                        onClick={handleNextPage}
+                        disabled={currentPage >= pageCount || hasReaderError || pageCount === 0}
+                      >
+                        →
+                      </button>
+                    </div>
+
+                    <a
+                      href={proxiedPdfSrc}
+                      download
+                      className="book-preview-reader-download"
+                      aria-label={downloadPreviewLabel}
+                      title={openPreviewLabel}
+                    >
+                      {downloadPreviewLabel}
+                    </a>
+                  </div>
+
+                  {isReaderLoading ? (
+                    <div className="book-preview-modal-reader-overlay" aria-hidden />
+                  ) : null}
+
+                  <PdfDocument
+                    file={proxiedPdfSrc}
+                    options={pdfDocumentOptions}
+                    onLoadSuccess={({ numPages }: { numPages: number }) => {
+                      setPageCount(numPages);
+                      setCurrentPage(1);
+                      setIsReaderLoading(false);
+                    }}
+                    onLoadError={() => {
+                      setHasReaderError(true);
+                      setIsReaderLoading(false);
+                    }}
+                    loading={null}
+                    error={null}
+                  >
+                    <div className="book-preview-reader-stage">{readerContent}</div>
+                  </PdfDocument>
+                </div>
               </div>
-
-              {isReaderLoading ? (
-                <div className="book-preview-modal-reader-overlay" aria-hidden />
-              ) : null}
-
-              <Document
-                file={proxiedPdfSrc}
-                options={pdfDocumentOptions}
-                onLoadSuccess={({ numPages }) => {
-                  setPageCount(numPages);
-                  setCurrentPage(1);
-                  setIsReaderLoading(false);
-                }}
-                onLoadError={() => {
-                  setHasReaderError(true);
-                  setIsReaderLoading(false);
-                }}
-                loading={null}
-                error={null}
-              >
-                <div className="book-preview-reader-stage">{readerContent}</div>
-              </Document>
-            </div>
-          </div>
-        </dialog>
-      ) : null}
+            </dialog>,
+            portalContainer,
+          )
+        : null}
     </>
   );
 }

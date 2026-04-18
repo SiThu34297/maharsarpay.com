@@ -6,6 +6,7 @@ import { locales } from "@/lib/i18n";
 const publicRoutes = [
   "",
   "/books",
+  "/book-preview",
   "/authors",
   "/multimedia",
   "/book-reviews",

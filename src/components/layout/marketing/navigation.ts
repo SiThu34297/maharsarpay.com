@@ -3,6 +3,7 @@ import type { Dictionary, Locale } from "@/lib/i18n";
 export type MarketingNavId =
   | "home"
   | "books"
+  | "bookPreview"
   | "authors"
   | "categories"
   | "media"
@@ -18,6 +19,7 @@ export type MarketingNavItem = {
 export type MarketingPageId =
   | "home"
   | "books"
+  | "bookPreview"
   | "authors"
   | "media"
   | "bookReviews"
@@ -30,6 +32,8 @@ export function getNavigationLabel(copy: Dictionary["navigation"], id: Marketing
       return copy.home;
     case "books":
       return copy.books;
+    case "bookPreview":
+      return copy.bookPreview;
     case "authors":
       return copy.authors;
     case "categories":
@@ -53,6 +57,7 @@ export function getMarketingNavigation(locale: Locale): MarketingNavItem[] {
   return [
     { id: "home", href: base },
     { id: "books", href: `${base}/books` },
+    { id: "bookPreview", href: `${base}/book-preview` },
     { id: "authors", href: `${base}/authors` },
     { id: "categories", href: `${base}/books` },
     { id: "media", href: `${base}/multimedia` },

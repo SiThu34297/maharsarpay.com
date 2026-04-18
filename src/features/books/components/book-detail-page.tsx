@@ -20,6 +20,21 @@ type BookDetailPageProps = Readonly<{
   breadcrumbSource: "home" | "books";
 }>;
 
+const EN_MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
 function formatPrice(locale: Locale, value: number) {
   if (locale === "my") {
     return `${new Intl.NumberFormat("my-MM", {
@@ -77,6 +92,38 @@ function getSafePdfUrl(value: string | null) {
   }
 }
 
+function toMyanmarDigits(value: string) {
+  return value.replace(/\d/g, (digit) => String.fromCharCode(0x1040 + Number(digit)));
+}
+
+function formatDate(locale: Locale, value: string) {
+  const parsed = new Date(value);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return value;
+  }
+
+  const day = parsed.getUTCDate();
+  const month = parsed.getUTCMonth() + 1;
+  const year = parsed.getUTCFullYear();
+
+  if (locale === "my") {
+    return toMyanmarDigits(`${day}/${month}/${year}`);
+  }
+
+  return `${EN_MONTHS[month - 1]} ${day}, ${year}`;
+}
+
+function formatViews(locale: Locale, views: number) {
+  const grouped = String(Math.max(0, views)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return locale === "my" ? toMyanmarDigits(grouped) : grouped;
+}
+
+function getInitial(name: string) {
+  const firstChar = Array.from(name.trim())[0];
+  return firstChar ? firstChar.toLocaleUpperCase() : "R";
+}
+
 export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDetailPageProps) {
   const isMyanmar = locale === "my";
   const navigation = getMarketingNavigation(locale);
@@ -88,6 +135,7 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
   const detailHrefSuffix = breadcrumbSource === "home" ? "?from=home" : "?from=books";
   const pricing = getDiscountPricing(book);
   const previewPdfSrc = getSafePdfUrl(book.previewPdfSrc);
+  const viewAllBookReviewsHref = `/${locale}/book-reviews?bookId=${encodeURIComponent(book.id)}`;
 
   return (
     <div
@@ -233,6 +281,59 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
           <section className="book-detail-long-description">
             <h2>{copy.bookDetail.aboutThisBookLabel}</h2>
             <p>{book.description}</p>
+          </section>
+
+          <section className="mt-10">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h2 className="text-2xl text-[var(--color-text-main)]">
+                {copy.bookDetail.bookReviewsTitle}
+              </h2>
+              <Link href={viewAllBookReviewsHref} className="book-detail-related-all-link">
+                {copy.bookDetail.viewAllBookReviews}
+              </Link>
+            </div>
+
+            {data.bookReviews.length > 0 ? (
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {data.bookReviews.map((review) => (
+                  <article
+                    key={review.id}
+                    className="rounded-2xl border border-[var(--color-border)] bg-white p-4 shadow-[var(--shadow-soft)]"
+                  >
+                    <div className="flex items-start gap-3">
+                      <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[var(--color-brand-subtle)] text-sm font-semibold text-[var(--color-brand)]">
+                        {getInitial(review.reviewerName)}
+                      </span>
+
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-[var(--color-text-main)]">
+                          {review.reviewerName}
+                        </p>
+                        <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+                          {formatDate(locale, review.createdAt)} {" • "}
+                          {copy.bookReviewDetail.viewsLabel} {formatViews(locale, review.viewCount)}
+                        </p>
+                      </div>
+                    </div>
+
+                    <p className="mt-3 line-clamp-4 text-sm text-[var(--color-text-main)]">
+                      {review.excerpt}
+                    </p>
+
+                    <Link
+                      href={`/${locale}/book-reviews/${review.id}`}
+                      className="mt-3 inline-flex rounded-full bg-[var(--color-brand)] px-4 py-2 text-xs font-semibold text-white transition hover:brightness-95"
+                    >
+                      {copy.bookReviewsList.readReviewLabel}
+                    </Link>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-[var(--color-border)] bg-white p-6 text-center text-sm text-[var(--color-text-muted)]">
+                {copy.bookDetail.noBookReviews}
+              </div>
+            )}
           </section>
 
           {data.relatedBooks.length > 0 ? (
