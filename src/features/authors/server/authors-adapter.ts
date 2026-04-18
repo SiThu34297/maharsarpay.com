@@ -573,7 +573,10 @@ export function normalizeAuthorListQuery(query: Partial<AuthorListQuery>): Autho
 export async function getAuthorBySlug(locale: Locale, slug: string): Promise<AuthorDetail | null> {
   const normalizedSlug = normalizeSlug(slug);
   const authors = await getRuntimeAuthors(locale);
-  const author = authors.find((item) => normalizeSlug(item.slug) === normalizedSlug);
+  const author = authors.find(
+    (item) =>
+      normalizeSlug(item.slug) === normalizedSlug || normalizeSlug(item.id) === normalizedSlug,
+  );
 
   if (!author) {
     return null;

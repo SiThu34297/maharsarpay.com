@@ -78,6 +78,11 @@ h6 {
   letter-spacing: -0.02em;
 }
 
+.rich-text-content :is(h1, h2, h3, h4, h5, h6) {
+  font-family: inherit;
+  letter-spacing: normal;
+}
+
 .home-shell {
   margin-inline: auto;
   max-width: 1440px;
@@ -354,18 +359,29 @@ h6 {
   gap: 12px;
 }
 
+.book-detail-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .book-detail-category-chip {
-  align-self: flex-start;
-  margin: 0;
+  display: inline-flex;
+  align-items: center;
   border-radius: 999px;
   padding: 6px 12px;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  text-decoration: none;
   color: var(--color-brand);
   background: color-mix(in srgb, var(--color-brand-subtle) 72%, #ffffff 28%);
   border: 1px solid color-mix(in srgb, var(--color-border) 70%, var(--color-brand) 30%);
+}
+
+.book-detail-category-chip:hover {
+  border-color: color-mix(in srgb, var(--color-brand) 55%, var(--color-border) 45%);
 }
 
 .book-detail-title {
@@ -376,14 +392,69 @@ h6 {
 }
 
 .book-detail-author {
+  display: grid;
+  gap: 8px;
   margin: 0;
-  font-size: 0.95rem;
+}
+
+.book-detail-author-label {
+  margin: 0;
+  font-size: 0.85rem;
   color: var(--color-text-muted);
 }
 
-.book-detail-author span {
+.book-detail-author-identity {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 10px;
+}
+
+.book-detail-author-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 1px solid var(--color-border);
+  background: #ffffff;
+}
+
+.book-detail-author-avatar-link {
+  display: inline-flex;
+  border-radius: 999px;
+}
+
+.book-detail-author-avatar-link:hover .book-detail-author-avatar {
+  border-color: var(--color-brand);
+}
+
+.book-detail-author-avatar-link:hover .book-detail-author-avatar-fallback {
+  color: color-mix(in srgb, var(--color-brand) 84%, black 16%);
+}
+
+.book-detail-author-avatar-fallback {
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--color-brand) 28%, var(--color-border) 72%);
+  background: var(--color-brand-subtle);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-brand);
+}
+
+.book-detail-author-name {
   color: var(--color-text-main);
   font-weight: 600;
+  font-size: 0.97rem;
+  text-decoration: none;
+}
+
+.book-detail-author-name:hover {
+  color: var(--color-brand);
 }
 
 .book-detail-meta-row {
@@ -531,7 +602,39 @@ h6 {
   font-size: clamp(1.3rem, 2.2vw, 1.8rem);
 }
 
-.book-detail-long-description p {
+.book-detail-rich-text {
+  margin-top: 12px;
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--color-text-main);
+}
+
+.book-detail-rich-text :is(p, ul, ol, blockquote) {
+  margin: 0;
+}
+
+.book-detail-rich-text :is(p, ul, ol, blockquote) + :is(p, ul, ol, blockquote) {
+  margin-top: 12px;
+}
+
+.book-detail-rich-text ul,
+.book-detail-rich-text ol {
+  padding-left: 1.3rem;
+}
+
+.book-detail-rich-text blockquote {
+  border-left: 3px solid var(--color-border);
+  padding-left: 12px;
+  color: var(--color-text-muted);
+}
+
+.book-detail-rich-text a {
+  color: var(--color-brand);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.book-detail-long-description > p {
   margin: 12px 0 0;
   font-size: 1rem;
   line-height: 1.8;
@@ -2393,10 +2496,7 @@ h6 {
   line-height: 1.9;
 }
 
-/* Keep the reCAPTCHA badge visible and clear of the bottom-right floating cart CTA. */
+/* Hide reCAPTCHA badge globally. */
 .grecaptcha-badge {
-  right: auto !important;
-  left: 12px !important;
-  bottom: 12px !important;
-  z-index: 80 !important;
+  display: none !important;
 }

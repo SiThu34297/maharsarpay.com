@@ -90,15 +90,27 @@ export async function LoginPage({
 
       <main className="home-shell section-gap">
         <section className="mx-auto w-full max-w-xl rounded-2xl border border-[var(--color-border)] bg-white p-6 shadow-[var(--shadow-soft)] md:p-8">
-          <h1 className="text-2xl font-semibold md:text-3xl">{copy.loginPage.title}</h1>
-          <p className="mt-2 text-sm text-[var(--color-text-muted)] md:text-base">
+          <h1
+            className={`text-2xl font-semibold md:text-3xl ${
+              isMyanmar ? "leading-[1.35]" : "leading-tight"
+            }`}
+          >
+            {copy.loginPage.title}
+          </h1>
+          <p
+            className={`mt-2 text-sm text-[var(--color-text-muted)] md:text-base ${
+              isMyanmar ? "leading-[1.9]" : "leading-relaxed"
+            }`}
+          >
             {copy.loginPage.description}
           </p>
 
           {errorMessage ? (
             <p
               role="alert"
-              className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+              className={`mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 ${
+                isMyanmar ? "leading-[1.8]" : "leading-relaxed"
+              }`}
             >
               {errorMessage}
             </p>
@@ -129,14 +141,18 @@ export async function LoginPage({
           <RecaptchaServerActionForm
             action={signInWithCredentialsAction}
             recaptchaAction="login"
-            className="space-y-4"
+            className="space-y-5"
             captchaErrorMessage={copy.loginPage.errorCaptcha}
           >
             <input type="hidden" name="locale" value={locale} />
             <input type="hidden" name="callbackUrl" value={callbackPath} />
 
             <label className="block">
-              <span className="mb-1.5 block text-sm font-medium text-[var(--color-text-main)]">
+              <span
+                className={`mb-1.5 block text-sm font-medium text-[var(--color-text-main)] ${
+                  isMyanmar ? "leading-[1.75]" : "leading-relaxed"
+                }`}
+              >
                 {copy.loginPage.emailLabel}
               </span>
               <input
@@ -150,7 +166,11 @@ export async function LoginPage({
             </label>
 
             <label className="block">
-              <span className="mb-1.5 block text-sm font-medium text-[var(--color-text-main)]">
+              <span
+                className={`mb-1.5 block text-sm font-medium text-[var(--color-text-main)] ${
+                  isMyanmar ? "leading-[1.75]" : "leading-relaxed"
+                }`}
+              >
                 {copy.loginPage.passwordLabel}
               </span>
               <input
@@ -169,7 +189,11 @@ export async function LoginPage({
             />
           </RecaptchaServerActionForm>
 
-          <p className="mt-4 text-sm text-[var(--color-text-muted)]">
+          <p
+            className={`mt-4 text-sm text-[var(--color-text-muted)] ${
+              isMyanmar ? "leading-[1.85]" : "leading-relaxed"
+            }`}
+          >
             {copy.loginPage.registerPrompt}{" "}
             <Link
               href={registerPath}

@@ -176,7 +176,7 @@ export function AuthorDetailPage({ copy, locale, data, breadcrumbSource }: Autho
                 <h2>{copy.authorDetail.aboutTitle}</h2>
                 {authorLongBioHtml ? (
                   <div
-                    className="author-detail-rich-text"
+                    className="author-detail-rich-text rich-text-content"
                     dangerouslySetInnerHTML={{ __html: authorLongBioHtml }}
                   />
                 ) : (

@@ -47,6 +47,12 @@ export type BookListItem = {
   title: string;
   author: string;
   authorId: string;
+  authorImageSrc?: string | null;
+  authorImageAlt?: string | null;
+  categories: Array<{
+    id: string;
+    name: string;
+  }>;
   category: string;
   categoryId: string;
   price: number;

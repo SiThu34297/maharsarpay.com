@@ -95,7 +95,7 @@ export default async function PrivacyPolicyRoutePage({ params }: PrivacyPolicyRo
 
         <section className="contact-surface">
           <div
-            className="space-y-4 text-base leading-relaxed text-(--color-text-muted) [&_a]:text-(--color-brand) [&_a]:underline [&_h2]:mt-8 [&_h2]:text-2xl [&_h2]:text-foreground [&_h3]:mt-6 [&_h3]:text-xl [&_h3]:text-foreground [&_li]:ml-5 [&_li]:list-disc"
+            className="rich-text-content space-y-4 text-base leading-relaxed text-(--color-text-muted) [&_a]:text-(--color-brand) [&_a]:underline [&_h2]:mt-8 [&_h2]:text-2xl [&_h2]:text-foreground [&_h3]:mt-6 [&_h3]:text-xl [&_h3]:text-foreground [&_li]:ml-5 [&_li]:list-disc"
             dangerouslySetInnerHTML={{ __html: pageInfo.privacyPolicyHtml }}
           />
         </section>

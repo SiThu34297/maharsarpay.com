@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { CameraIcon, PlayIcon } from "@radix-ui/react-icons";
+import { ArrowRightIcon, CameraIcon, PlayIcon } from "@radix-ui/react-icons";
 
 import {
   MarketingSiteFooter,
@@ -23,6 +23,20 @@ type HomePageProps = Readonly<{
 type SectionHeadingProps = Readonly<{
   title: string;
   description: string;
+  actionHref?: string;
+  actionLabel?: string;
+}>;
+
+type MobileScrollViewAllCardProps = Readonly<{
+  href: string;
+  label: string;
+  minWidthClass: string;
+}>;
+
+type ViewAllLinkProps = Readonly<{
+  href: string;
+  label: string;
+  className?: string;
 }>;
 
 function formatPrice(locale: Locale, value: number) {
@@ -75,12 +89,47 @@ function getDiscountPricing(book: {
   };
 }
 
-function SectionHeading({ title, description }: SectionHeadingProps) {
+function ViewAllLink({ href, label, className }: ViewAllLinkProps) {
+  return (
+    <Link
+      href={href}
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap font-semibold leading-none text-[var(--color-brand)] transition hover:text-[var(--color-brand-strong)] ${className ?? ""}`}
+    >
+      <span>{label}</span>
+      <ArrowRightIcon className="h-4 w-4" aria-hidden />
+    </Link>
+  );
+}
+
+function SectionHeading({ title, description, actionHref, actionLabel }: SectionHeadingProps) {
   return (
     <div className="mb-6 md:mb-8">
-      <h2 className="text-3xl text-[var(--color-text-main)] md:text-4xl">{title}</h2>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-3xl text-[var(--color-text-main)] md:text-4xl">{title}</h2>
+
+        {actionHref && actionLabel ? (
+          <ViewAllLink
+            href={actionHref}
+            label={actionLabel}
+            className="hidden md:inline-flex md:text-sm"
+          />
+        ) : null}
+      </div>
+
       <p className="mt-3 text-base text-[var(--color-text-muted)] md:text-lg">{description}</p>
     </div>
+  );
+}
+
+function MobileScrollViewAllCard({ href, label, minWidthClass }: MobileScrollViewAllCardProps) {
+  return (
+    <li className={`${minWidthClass} snap-start flex`}>
+      <ViewAllLink
+        href={href}
+        label={label}
+        className="flex h-full min-h-[220px] w-full items-center justify-center px-2 text-center text-xs"
+      />
+    </li>
   );
 }
 
@@ -174,6 +223,8 @@ export async function HomePage({ copy, locale }: HomePageProps) {
           <SectionHeading
             title={copy.bestsellers.title}
             description={copy.bestsellers.description}
+            actionHref={`/${locale}/books`}
+            actionLabel={copy.bookDetail.viewAllBooks}
           />
 
           <div className="md:hidden">
@@ -233,6 +284,12 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                   </li>
                 );
               })}
+
+              <MobileScrollViewAllCard
+                href={`/${locale}/books`}
+                label={copy.bookDetail.viewAllBooks}
+                minWidthClass="min-w-[230px]"
+              />
             </ul>
           </div>
 
@@ -292,7 +349,12 @@ export async function HomePage({ copy, locale }: HomePageProps) {
         </section>
 
         <section id="authors" className="home-shell section-gap">
-          <SectionHeading title={copy.authors.title} description={copy.authors.description} />
+          <SectionHeading
+            title={copy.authors.title}
+            description={copy.authors.description}
+            actionHref={`/${locale}/authors`}
+            actionLabel={copy.authorDetail.viewAllAuthors}
+          />
 
           <div className="md:hidden">
             <ul className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4">
@@ -324,6 +386,12 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                   </p>
                 </li>
               ))}
+
+              <MobileScrollViewAllCard
+                href={`/${locale}/authors`}
+                label={copy.authorDetail.viewAllAuthors}
+                minWidthClass="min-w-[200px]"
+              />
             </ul>
           </div>
 
@@ -356,7 +424,12 @@ export async function HomePage({ copy, locale }: HomePageProps) {
         </section>
 
         <section id="media" className="home-shell section-gap">
-          <SectionHeading title={copy.media.title} description={copy.media.description} />
+          <SectionHeading
+            title={copy.media.title}
+            description={copy.media.description}
+            actionHref={`/${locale}/multimedia`}
+            actionLabel={copy.multimediaDetail.viewAllMedia}
+          />
 
           <div className="md:hidden">
             <ul className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4">
@@ -395,6 +468,12 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                   <p className="mt-2 text-sm text-[var(--color-text-muted)]">{item.description}</p>
                 </li>
               ))}
+
+              <MobileScrollViewAllCard
+                href={`/${locale}/multimedia`}
+                label={copy.multimediaDetail.viewAllMedia}
+                minWidthClass="min-w-[250px]"
+              />
             </ul>
           </div>
 

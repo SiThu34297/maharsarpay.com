@@ -100,7 +100,12 @@ function formatLocalizedNumber(locale: Locale, value: number): string {
 }
 
 function formatLocalizedAmount(locale: Locale, value: number): string {
-  return formatLocalizedNumber(locale, value);
+  const numberLocale = locale === "my" ? "my-MM" : "en-US";
+
+  return new Intl.NumberFormat(numberLocale, {
+    useGrouping: true,
+    maximumFractionDigits: 0,
+  }).format(value);
 }
 
 function formatOrderStatus(status: string, copy: Dictionary["profilePage"]): string {
@@ -181,6 +186,24 @@ function getOrderHeaderSurfaceClassName(status: string): string {
   }
 
   return "bg-gradient-to-r from-[var(--color-surface-soft)] to-white";
+}
+
+function getOrderTopBorderClassName(status: string): string {
+  const normalized = status.trim().toLowerCase();
+
+  if (normalized.includes("cancel")) {
+    return "bg-[#b91c1c]";
+  }
+
+  if (
+    normalized.includes("deliver") ||
+    normalized.includes("ship") ||
+    normalized.includes("paid")
+  ) {
+    return "bg-[#15803d]";
+  }
+
+  return "bg-[#b45309]";
 }
 
 export async function ProfilePage({ copy, locale, data }: ProfilePageProps) {
@@ -295,12 +318,18 @@ export async function ProfilePage({ copy, locale, data }: ProfilePageProps) {
                 const localizedOrderItemsQtyLabel = copy.profilePage.orderItemsQtyLabel
                   .replace("{items}", formatLocalizedNumber(locale, itemsCount))
                   .replace("{qty}", formatLocalizedNumber(locale, totalQty));
-                const visibleItems = order.items.slice(0, 4);
+                const visibleItems = order.items.slice(0, 6);
                 const remainingItemsCount = Math.max(order.items.length - visibleItems.length, 0);
                 const localizedStatus = formatOrderStatus(order.status, copy.profilePage);
                 const statusClassName = getOrderStatusClassName(order.status);
                 const cardBorderClassName = getOrderCardBorderClassName(order.status);
                 const headerSurfaceClassName = getOrderHeaderSurfaceClassName(order.status);
+                const topBorderClassName = getOrderTopBorderClassName(order.status);
+                const placedOnDisplay = `${copy.profilePage.placedOnLabel}: ${formatDate(locale, order.placedAt)}`;
+                const billToLabel = locale === "my" ? "လက်ခံသူ" : "Bill To";
+                const itemsLabel = locale === "my" ? "ပစ္စည်းစာရင်း" : "Items";
+                const qtyShortLabel = locale === "my" ? "အရေအတွက်" : "Qty";
+                const moreItemsLabel = locale === "my" ? "ထပ်ရှိ" : "more";
 
                 return (
                   <li
@@ -308,96 +337,119 @@ export async function ProfilePage({ copy, locale, data }: ProfilePageProps) {
                     className={`overflow-hidden rounded-2xl border bg-white shadow-[var(--shadow-soft)] ${cardBorderClassName}`}
                   >
                     <div
-                      className={`flex flex-col gap-2 border-b border-[var(--color-border)] px-4 py-3 md:flex-row md:items-center md:justify-between md:px-5 ${headerSurfaceClassName}`}
+                      className={`relative border-b border-[var(--color-border)] px-4 py-4 md:px-5 ${headerSurfaceClassName}`}
                     >
-                      <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
-                          {copy.profilePage.orderNumberLabel}
-                        </p>
-                        <p className="text-sm font-semibold text-[var(--color-text-main)]">
-                          {order.orderNumber}
-                        </p>
-                      </div>
+                      <span className={`absolute inset-x-0 top-0 h-[3px] ${topBorderClassName}`} />
 
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-xs text-[var(--color-text-muted)]">
-                          {copy.profilePage.placedOnLabel}: {formatDate(locale, order.placedAt)}
-                        </p>
-                        <span
-                          className={`orders-editor-status inline-flex w-fit rounded-full border px-3 py-1 text-xs font-semibold ${statusClassName}`}
-                        >
-                          {localizedStatus}
-                        </span>
+                      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                        <div>
+                          <p className="text-xs font-medium text-[var(--color-text-muted)]">
+                            {placedOnDisplay}
+                          </p>
+                          <p className="mt-1 text-lg font-semibold text-[var(--color-text-main)] md:text-xl">
+                            #{order.orderNumber}
+                          </p>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2 md:justify-end">
+                          <span
+                            className={`orders-editor-status inline-flex w-fit rounded-full border px-3 py-1 text-xs font-semibold ${statusClassName}`}
+                          >
+                            {localizedStatus}
+                          </span>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="grid gap-4 p-4 md:grid-cols-[minmax(0,1fr)_240px] md:p-5">
-                      <div className="space-y-3">
-                        <dl className="grid gap-2 sm:grid-cols-2">
-                          <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-soft)] px-3 py-2.5">
-                            <dt className="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
-                              {copy.profilePage.customerNameLabel}
-                            </dt>
-                            <dd className="mt-1 text-sm text-[var(--color-text-main)]">
-                              {formatDetailValue(
-                                order.customerName,
-                                copy.profilePage.valueNotAvailable,
-                              )}
-                            </dd>
+                    <div className="grid gap-4 p-4 md:grid-cols-[minmax(0,1.35fr)_minmax(250px,1fr)] md:p-5">
+                      <div className="space-y-4">
+                        <div className="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-soft)]">
+                          <div className="p-3">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">
+                              {billToLabel}
+                            </p>
+
+                            <dl className="mt-2 grid gap-2 sm:grid-cols-2">
+                              <div>
+                                <dt className="text-[11px] font-medium text-[var(--color-text-muted)]">
+                                  {copy.profilePage.customerNameLabel}
+                                </dt>
+                                <dd className="mt-0.5 text-sm text-[var(--color-text-main)]">
+                                  {formatDetailValue(
+                                    order.customerName,
+                                    copy.profilePage.valueNotAvailable,
+                                  )}
+                                </dd>
+                              </div>
+
+                              <div>
+                                <dt className="text-[11px] font-medium text-[var(--color-text-muted)]">
+                                  {copy.profilePage.customerPhoneLabel}
+                                </dt>
+                                <dd className="mt-0.5 text-sm text-[var(--color-text-main)]">
+                                  {formatDetailValue(
+                                    order.customerPhone,
+                                    copy.profilePage.valueNotAvailable,
+                                  )}
+                                </dd>
+                              </div>
+
+                              <div className="sm:col-span-2">
+                                <dt className="text-[11px] font-medium text-[var(--color-text-muted)]">
+                                  {copy.profilePage.shippingAddressLabel}
+                                </dt>
+                                <dd className="mt-0.5 text-sm text-[var(--color-text-main)]">
+                                  {formatDetailValue(
+                                    order.shippingAddress,
+                                    copy.profilePage.valueNotAvailable,
+                                  )}
+                                </dd>
+                              </div>
+                            </dl>
                           </div>
 
-                          <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-soft)] px-3 py-2.5">
-                            <dt className="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
-                              {copy.profilePage.customerPhoneLabel}
-                            </dt>
-                            <dd className="mt-1 text-sm text-[var(--color-text-main)]">
-                              {formatDetailValue(
-                                order.customerPhone,
-                                copy.profilePage.valueNotAvailable,
-                              )}
-                            </dd>
-                          </div>
+                          <div className="border-t border-dashed border-[var(--color-border)] bg-white/85">
+                            <div className="grid grid-cols-[minmax(0,1fr)_110px] border-b border-[var(--color-border)] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--color-text-muted)]">
+                              <p>{itemsLabel}</p>
+                              <p className="text-right">{qtyShortLabel}</p>
+                            </div>
 
-                          <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-soft)] px-3 py-2.5 sm:col-span-2">
-                            <dt className="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
-                              {copy.profilePage.shippingAddressLabel}
-                            </dt>
-                            <dd className="mt-1 text-sm text-[var(--color-text-main)]">
-                              {formatDetailValue(
-                                order.shippingAddress,
-                                copy.profilePage.valueNotAvailable,
-                              )}
-                            </dd>
-                          </div>
-                        </dl>
+                            {visibleItems.length > 0 ? (
+                              <ul className="divide-y divide-[var(--color-border)]">
+                                {visibleItems.map((item) => (
+                                  <li
+                                    key={item.id}
+                                    className="grid grid-cols-[minmax(0,1fr)_110px] items-center gap-3 px-3 py-2.5"
+                                  >
+                                    <p className="truncate text-sm text-[var(--color-text-main)]">
+                                      {item.title}
+                                    </p>
+                                    <p className="text-right text-sm font-semibold text-[var(--color-text-main)]">
+                                      {formatLocalizedNumber(locale, item.quantity)}
+                                    </p>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className="px-3 py-3 text-sm text-[var(--color-text-muted)]">
+                                {copy.profilePage.valueNotAvailable}
+                              </p>
+                            )}
 
-                        <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-soft)] px-3 py-2.5">
-                          <p className="text-xs font-medium text-[var(--color-text-muted)]">
-                            {localizedOrderItemsQtyLabel}
-                          </p>
-
-                          {visibleItems.length > 0 ? (
-                            <ul className="mt-2 flex flex-wrap gap-2">
-                              {visibleItems.map((item) => (
-                                <li
-                                  key={item.id}
-                                  className="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-brand-subtle)] px-2.5 py-1 text-xs text-[var(--color-brand)]"
-                                >
-                                  {item.title} x {formatLocalizedNumber(locale, item.quantity)}
-                                </li>
-                              ))}
-
+                            <div className="border-t border-dashed border-[var(--color-border)] bg-[var(--color-surface-soft)] px-3 py-2 text-xs text-[var(--color-text-muted)]">
+                              {localizedOrderItemsQtyLabel}
                               {remainingItemsCount > 0 ? (
-                                <li className="inline-flex items-center rounded-full border border-[var(--color-brand)] bg-white px-2.5 py-1 text-xs font-semibold text-[var(--color-brand)]">
-                                  +{formatLocalizedNumber(locale, remainingItemsCount)}
-                                </li>
+                                <span className="ml-1 font-semibold text-[var(--color-brand)]">
+                                  (+{formatLocalizedNumber(locale, remainingItemsCount)}{" "}
+                                  {moreItemsLabel})
+                                </span>
                               ) : null}
-                            </ul>
-                          ) : null}
+                            </div>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="rounded-xl border border-[var(--color-border)] bg-gradient-to-b from-[var(--color-brand-subtle)] to-white p-3">
+                      <div className="rounded-xl border border-[var(--color-border)] bg-gradient-to-b from-[var(--color-brand-subtle)] via-white to-white p-3 md:p-4">
                         <div className="space-y-2 text-sm">
                           <p className="flex items-center justify-between gap-3 text-[var(--color-text-muted)]">
                             <span>{copy.profilePage.subtotalLabel}</span>
@@ -423,7 +475,9 @@ export async function ProfilePage({ copy, locale, data }: ProfilePageProps) {
                             </span>
                           </p>
 
-                          <p className="mt-2 flex items-center justify-between gap-3 rounded-lg border border-[var(--color-brand)] bg-[var(--color-brand-subtle)] px-2.5 py-2 text-sm font-semibold text-[var(--color-brand)]">
+                          <div className="my-2 border-t border-dashed border-[var(--color-border)]" />
+
+                          <p className="flex items-center justify-between gap-3 py-1 text-sm font-semibold text-[var(--color-brand)]">
                             <span>{copy.profilePage.totalLabel}</span>
                             <span>
                               {formatLocalizedAmount(locale, order.totalAmount)}{" "}

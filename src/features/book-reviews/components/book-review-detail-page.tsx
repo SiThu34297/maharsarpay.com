@@ -217,7 +217,7 @@ export function BookReviewDetailPage({ copy, locale, data }: BookReviewDetailPag
             </div>
 
             <article
-              className="prose prose-sm mt-6 max-w-none text-[var(--color-text-main)] prose-a:text-[var(--color-brand)] prose-strong:text-[var(--color-text-main)]"
+              className="rich-text-content prose prose-sm mt-6 max-w-none text-[var(--color-text-main)] prose-a:text-[var(--color-brand)] prose-strong:text-[var(--color-text-main)]"
               dangerouslySetInnerHTML={{ __html: safeReviewHtml }}
             />
 

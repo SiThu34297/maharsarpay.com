@@ -319,21 +319,6 @@ function toInteger(value: number | null | undefined, fallback = 0) {
   return Math.max(0, Math.round(toSafeNumber(value, fallback)));
 }
 
-function stripHtmlToText(value: string | null | undefined) {
-  if (!value) {
-    return "";
-  }
-
-  return value
-    .replace(/<[^>]*>/g, " ")
-    .replace(/&nbsp;/gi, " ")
-    .replace(/&amp;/gi, "&")
-    .replace(/&quot;/gi, '"')
-    .replace(/&#39;/gi, "'")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
 function getPrimaryAuthor(book: BackendBookRecord) {
   const author = book.authors.find((item) => normalizeWhitespace(item.name || "") !== "");
 
@@ -341,29 +326,48 @@ function getPrimaryAuthor(book: BackendBookRecord) {
     return {
       id: "unknown-author",
       name: "Unknown Author",
+      imageSrc: null,
     };
   }
 
   return {
     id: author.id,
     name: normalizeWhitespace(author.name),
+    imageSrc: author.authorImage?.trim() || null,
   };
 }
 
 function getPrimaryCategory(book: BackendBookRecord) {
-  const category = book.categories.find((item) => normalizeWhitespace(item.name || "") !== "");
+  return getBookCategories(book)[0];
+}
 
-  if (!category) {
-    return {
-      id: "uncategorized",
-      name: "Uncategorized",
-    };
+function getBookCategories(book: BackendBookRecord) {
+  const categories = book.categories
+    .map((item) => {
+      const name = normalizeWhitespace(item.name || "");
+      const id = normalizeWhitespace(item.id || "");
+
+      if (!name) {
+        return null;
+      }
+
+      return {
+        id: id || name.toLowerCase(),
+        name,
+      };
+    })
+    .filter((item): item is { id: string; name: string } => Boolean(item));
+
+  if (categories.length > 0) {
+    return categories;
   }
 
-  return {
-    id: category.id,
-    name: normalizeWhitespace(category.name),
-  };
+  return [
+    {
+      id: "uncategorized",
+      name: "Uncategorized",
+    },
+  ];
 }
 
 function resolveBackendBookPricing(book: BackendBookRecord) {
@@ -451,6 +455,7 @@ function sortBackendBooksDescending(left: BackendBookRecord, right: BackendBookR
 
 function toBackendBookListItem(book: BackendBookRecord): BookListItem {
   const author = getPrimaryAuthor(book);
+  const categories = getBookCategories(book);
   const category = getPrimaryCategory(book);
   const title = normalizeWhitespace(book.bookTitle || "Untitled Book");
   const pricing = resolveBackendBookPricing(book);
@@ -462,6 +467,9 @@ function toBackendBookListItem(book: BackendBookRecord): BookListItem {
     title,
     author: author.name,
     authorId: author.id,
+    authorImageSrc: author.imageSrc,
+    authorImageAlt: author.imageSrc ? `${author.name} portrait` : null,
+    categories,
     category: category.name,
     categoryId: category.id,
     price: pricing.price,
@@ -477,7 +485,7 @@ function toBackendBookListItem(book: BackendBookRecord): BookListItem {
 
 function toBackendBookDetail(locale: Locale, book: BackendBookRecord): BookDetail {
   const base = toBackendBookListItem(book);
-  const description = stripHtmlToText(book.about) || base.title;
+  const description = book.about?.trim() || base.title;
   const galleryImageSources = [
     book.bookImageFront,
     book.bookImageBack,
@@ -711,6 +719,12 @@ function toLocalizedBook(locale: Locale, book: SeedBook): BookListItem {
     title: book.title[locale],
     author: book.author[locale],
     authorId: book.authorId,
+    categories: [
+      {
+        id: book.categoryId,
+        name: book.category[locale],
+      },
+    ],
     category: book.category[locale],
     categoryId: book.categoryId,
     price: book.price,

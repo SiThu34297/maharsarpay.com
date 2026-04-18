@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import sanitizeHtml from "sanitize-html";
 
 import {
   MarketingSiteFooter,
@@ -19,6 +20,23 @@ type BookDetailPageProps = Readonly<{
   data: BookDetailPageData;
   breadcrumbSource: "home" | "books";
 }>;
+
+const BOOK_DESCRIPTION_ALLOWED_TAGS = [
+  "p",
+  "br",
+  "strong",
+  "em",
+  "b",
+  "i",
+  "u",
+  "ul",
+  "ol",
+  "li",
+  "blockquote",
+  "h3",
+  "h4",
+  "a",
+] as const;
 
 const EN_MONTHS = [
   "Jan",
@@ -124,6 +142,35 @@ function getInitial(name: string) {
   return firstChar ? firstChar.toLocaleUpperCase() : "R";
 }
 
+function toSafeBookDescriptionHtml(value: string): string {
+  const sanitized = sanitizeHtml(value, {
+    allowedTags: [...BOOK_DESCRIPTION_ALLOWED_TAGS],
+    allowedAttributes: {
+      a: ["href", "target", "rel"],
+    },
+    allowedSchemes: ["http", "https", "mailto", "tel"],
+    allowedSchemesAppliedToAttributes: ["href"],
+    disallowedTagsMode: "discard",
+  }).trim();
+
+  if (sanitized) {
+    return sanitized;
+  }
+
+  const fallbackText = sanitizeHtml(value, {
+    allowedTags: [],
+    allowedAttributes: {},
+  })
+    .replaceAll(/\s+/g, " ")
+    .trim();
+
+  if (!fallbackText) {
+    return "";
+  }
+
+  return `<p>${sanitizeHtml(fallbackText, { allowedTags: [], allowedAttributes: {} })}</p>`;
+}
+
 export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDetailPageProps) {
   const isMyanmar = locale === "my";
   const navigation = getMarketingNavigation(locale);
@@ -136,6 +183,20 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
   const pricing = getDiscountPricing(book);
   const previewPdfSrc = getSafePdfUrl(book.previewPdfSrc);
   const viewAllBookReviewsHref = `/${locale}/book-reviews?bookId=${encodeURIComponent(book.id)}`;
+  const bookDescriptionHtml = toSafeBookDescriptionHtml(book.description);
+  const hasAuthorDetail = book.authorId.trim().length > 0 && book.authorId !== "unknown-author";
+  const authorDetailHref = `/${locale}/authors/${encodeURIComponent(book.authorId)}`;
+  const bookCategories =
+    book.categories.length > 0
+      ? book.categories
+      : [
+          {
+            id: book.categoryId,
+            name: book.category,
+          },
+        ];
+  const authorImageSrc = book.authorImageSrc?.trim() || null;
+  const authorImageAlt = book.authorImageAlt?.trim() || `${book.author} portrait`;
 
   return (
     <div
@@ -173,12 +234,62 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
             <BookDetailImagePreview title={book.title} images={book.galleryImages} />
 
             <div className="book-detail-content">
-              <p className="book-detail-category-chip">{book.category}</p>
+              <div className="book-detail-categories" aria-label={copy.booksList.categoryLabel}>
+                {bookCategories.map((category) => (
+                  <Link
+                    key={`${category.id}:${category.name}`}
+                    href={`/${locale}/books?category=${encodeURIComponent(category.id || category.name)}`}
+                    className="book-detail-category-chip"
+                  >
+                    {category.name}
+                  </Link>
+                ))}
+              </div>
               <h1 className="book-detail-title">{book.title}</h1>
-              <p className="book-detail-author">
-                {copy.bookDetail.byAuthorLabel}
-                <span>{book.author}</span>
-              </p>
+              <div className="book-detail-author">
+                <p className="book-detail-author-label">{copy.bookDetail.byAuthorLabel}</p>
+                <div className="book-detail-author-identity">
+                  {authorImageSrc ? (
+                    hasAuthorDetail ? (
+                      <Link href={authorDetailHref} className="book-detail-author-avatar-link">
+                        <Image
+                          src={authorImageSrc}
+                          alt={authorImageAlt}
+                          width={44}
+                          height={44}
+                          className="book-detail-author-avatar"
+                        />
+                      </Link>
+                    ) : (
+                      <Image
+                        src={authorImageSrc}
+                        alt={authorImageAlt}
+                        width={44}
+                        height={44}
+                        className="book-detail-author-avatar"
+                      />
+                    )
+                  ) : hasAuthorDetail ? (
+                    <Link href={authorDetailHref} className="book-detail-author-avatar-link">
+                      <span className="book-detail-author-avatar-fallback">
+                        {getInitial(book.author)}
+                      </span>
+                    </Link>
+                  ) : (
+                    <span className="book-detail-author-avatar-fallback">
+                      {getInitial(book.author)}
+                    </span>
+                  )}
+
+                  {hasAuthorDetail ? (
+                    <Link href={authorDetailHref} className="book-detail-author-name">
+                      {book.author}
+                    </Link>
+                  ) : (
+                    <span className="book-detail-author-name">{book.author}</span>
+                  )}
+                </div>
+              </div>
 
               <div className="mt-1 flex flex-wrap items-center gap-2">
                 <p className="book-detail-price">{formatPrice(locale, pricing.salePrice)}</p>
@@ -278,9 +389,16 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
             </div>
           </section>
 
-          <section className="book-detail-long-description">
+          <section className="book-detail-long-description rich-text-content">
             <h2>{copy.bookDetail.aboutThisBookLabel}</h2>
-            <p>{book.description}</p>
+            {bookDescriptionHtml ? (
+              <div
+                className="book-detail-rich-text"
+                dangerouslySetInnerHTML={{ __html: bookDescriptionHtml }}
+              />
+            ) : (
+              <p>{book.description}</p>
+            )}
           </section>
 
           <section className="mt-10">
