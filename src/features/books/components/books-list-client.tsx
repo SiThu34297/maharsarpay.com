@@ -7,7 +7,6 @@ import { usePathname, useRouter } from "next/navigation";
 
 import { Cross2Icon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 
-import { AddToCartButton } from "@/features/cart";
 import type {
   BookFilterOptions,
   BookListQuery,
@@ -78,22 +77,6 @@ function groupDigits(value: number) {
 
 function toMyanmarDigits(value: string) {
   return value.replace(/\d/g, (digit) => String.fromCharCode(0x1040 + Number(digit)));
-}
-
-function getBookAuthorText(
-  book: {
-    author: string;
-    authors: Array<{ name: string }>;
-  },
-  locale: Locale,
-) {
-  const names = book.authors.map((author) => author.name.trim()).filter((name) => name.length > 0);
-
-  if (names.length > 0) {
-    return names.join(locale === "my" ? "၊ " : ", ");
-  }
-
-  return book.author;
 }
 
 function buildBaseParams(query: BookListQuery) {
@@ -379,35 +362,41 @@ export function BooksListClient({
 
         <div>
           {items.length > 0 ? (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="book-list-grid">
               {items.map((book) => {
                 const pricing = getDiscountPricing(book);
                 const hasDiscount =
                   Boolean(pricing.originalPrice) && (pricing.discountAmount ?? 0) > 0;
-                const displayAuthor = getBookAuthorText(book, locale);
+                const authorLinks =
+                  book.authors.length > 0
+                    ? book.authors
+                    : [{ id: book.authorId, name: book.author }];
 
                 return (
-                  <article key={book.id} className="book-list-card flex flex-col">
+                  <article
+                    key={book.id}
+                    className="book-list-card book-list-card-clean flex flex-col"
+                  >
                     <Link
                       href={`/${locale}/books/${book.slug}?from=books`}
-                      className="relative block overflow-hidden rounded-xl"
+                      className="book-list-image-wrap relative block overflow-hidden"
                     >
                       <Image
                         src={book.coverImageSrc}
                         alt={book.coverImageAlt}
                         width={360}
                         height={470}
-                        className="h-[200px] w-full object-cover sm:h-[220px]"
+                        className="book-list-image h-[300px] w-full object-cover sm:h-[330px] lg:h-[360px]"
                         sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                       />
                       {hasDiscount ? (
-                        <span className="absolute left-2 top-2 z-10 rounded-full bg-[var(--color-accent)] px-2 py-1 text-[10px] font-semibold text-white shadow-sm sm:left-3 sm:top-3 sm:text-xs">
+                        <span className="absolute right-0 top-0 z-10 rounded-bl-md bg-[var(--color-secondary)] px-3 py-1 text-[11px] font-semibold text-white">
                           -{formatPrice(locale, pricing.discountAmount ?? 0)}
                         </span>
                       ) : null}
                     </Link>
 
-                    <h3 className="book-list-title mt-3 text-base text-[var(--color-text-main)] sm:text-lg">
+                    <h3 className="book-list-title mt-5 text-center text-[1.05rem] text-[var(--color-text-main)] sm:text-lg">
                       <Link
                         href={`/${locale}/books/${book.slug}?from=books`}
                         className="hover:text-[var(--color-brand)]"
@@ -415,38 +404,31 @@ export function BooksListClient({
                         {book.title}
                       </Link>
                     </h3>
-                    <p className="mt-1 line-clamp-1 text-sm text-[var(--color-text-muted)]">
-                      {displayAuthor}
+                    <p className="mt-1 line-clamp-1 text-center text-sm text-[var(--color-text-muted)]">
+                      {authorLinks.map((author, index) => (
+                        <span key={author.id}>
+                          <Link
+                            href={`/${locale}/authors/${encodeURIComponent(author.id)}?from=books`}
+                            className="transition hover:text-[var(--color-brand)]"
+                          >
+                            {author.name}
+                          </Link>
+                          {index < authorLinks.length - 1 ? (
+                            <span>{locale === "my" ? "၊ " : ", "}</span>
+                          ) : null}
+                        </span>
+                      ))}
                     </p>
 
-                    <div className="mt-3 flex flex-wrap items-center gap-2">
-                      <p className="text-sm font-semibold text-[var(--color-brand)] sm:text-base">
-                        {formatPrice(locale, pricing.salePrice)}
-                      </p>
+                    <div className="mt-3 flex flex-col items-center justify-center gap-1 pb-5">
                       {pricing.originalPrice ? (
                         <p className="text-xs text-[var(--color-text-muted)] line-through">
                           {formatPrice(locale, pricing.originalPrice)}
                         </p>
                       ) : null}
-                    </div>
-
-                    <div className="mt-auto pt-4">
-                      <AddToCartButton
-                        item={{
-                          cartProductId: book.cartProductId,
-                          title: book.title,
-                          author: displayAuthor,
-                          price: book.price,
-                          salePrice: book.salePrice,
-                          originalPrice: book.originalPrice,
-                          discountAmount: book.discountAmount,
-                          coverImageSrc: book.coverImageSrc,
-                          coverImageAlt: book.coverImageAlt,
-                        }}
-                        addLabel={copy.addToCart}
-                        addedLabel={copy.addedToCart}
-                        className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-button-secondary)] text-white transition hover:brightness-95"
-                      />
+                      <p className="text-[1.15rem] font-semibold leading-none text-[var(--color-brand)] sm:text-[1.3rem]">
+                        {formatPrice(locale, pricing.salePrice)}
+                      </p>
                     </div>
                   </article>
                 );
@@ -454,11 +436,14 @@ export function BooksListClient({
 
               {isFetchingMore
                 ? Array.from({ length: SKELETON_COUNT }, (_, index) => (
-                    <article key={`skeleton-${index}`} className="book-list-card animate-pulse">
-                      <div className="h-[200px] rounded-xl bg-[var(--color-brand-subtle)] sm:h-[220px]" />
-                      <div className="mt-3 h-4 w-4/5 rounded bg-[var(--color-brand-subtle)]" />
-                      <div className="mt-2 h-3 w-2/3 rounded bg-[var(--color-brand-subtle)]" />
-                      <div className="mt-4 h-9 rounded-full bg-[var(--color-brand-subtle)]" />
+                    <article
+                      key={`skeleton-${index}`}
+                      className="book-list-card book-list-card-clean animate-pulse"
+                    >
+                      <div className="h-[300px] bg-[var(--color-brand-subtle)] sm:h-[330px] lg:h-[360px]" />
+                      <div className="mx-auto mt-5 h-4 w-4/5 rounded bg-[var(--color-brand-subtle)]" />
+                      <div className="mx-auto mt-2 h-3 w-2/3 rounded bg-[var(--color-brand-subtle)]" />
+                      <div className="mx-auto mt-4 h-8 w-28 rounded bg-[var(--color-brand-subtle)]" />
                     </article>
                   ))
                 : null}

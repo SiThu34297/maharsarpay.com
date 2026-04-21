@@ -131,6 +131,11 @@ async function getHomeBooks(locale: Locale): Promise<BookItem[]> {
     cartProductId: book.cartProductId,
     title: book.title,
     author: getBookAuthorText(book, locale),
+    authorId: book.authorId,
+    authors: book.authors.map((author) => ({
+      id: author.id,
+      name: author.name,
+    })),
     price: book.price,
     salePrice: book.salePrice,
     originalPrice: book.originalPrice,

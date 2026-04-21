@@ -21,7 +21,7 @@ export const enDictionary: Dictionary = {
     bookPreview: "စာမြည်း",
     authors: "Authors",
     categories: "Categories",
-    media: "Media",
+    media: "Multi Media",
     bookReviews: "Book Reviews",
     contact: "Contact",
     profile: "Profile",

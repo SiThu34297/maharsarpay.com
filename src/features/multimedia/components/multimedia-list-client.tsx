@@ -27,6 +27,7 @@ type ActiveFilterChip = {
 };
 
 const SKELETON_COUNT = 4;
+const MULTIMEDIA_DISPLAY_LOCALE: Locale = "en";
 const EN_MONTHS = [
   "Jan",
   "Feb",
@@ -89,7 +90,7 @@ function formatDate(locale: Locale, value: string) {
 }
 
 function getMediaTypeLabel(copy: Dictionary["multimediaList"], mediaType: MediaType) {
-  return mediaType === "video" ? copy.videoFilterLabel : copy.photoFilterLabel;
+  return mediaType === "video" ? "Blog" : "Photo Essay";
 }
 
 export function MultimediaListClient({
@@ -145,6 +146,8 @@ export function MultimediaListClient({
   }, [copy, initialQuery.mediaType, initialQuery.q]);
 
   const hasAnyFilter = activeFilterChips.length > 0;
+  const photoItems = useMemo(() => items.filter((item) => item.mediaType === "photo"), [items]);
+  const videoItems = useMemo(() => items.filter((item) => item.mediaType === "video"), [items]);
 
   const pushQuery = useCallback(
     (updateFn: (params: URLSearchParams) => void) => {
@@ -323,7 +326,11 @@ export function MultimediaListClient({
 
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-[var(--color-text-muted)]">
-            {replaceResultCount(copy.showingResults, initialResponse.total, locale)}
+            {replaceResultCount(
+              copy.showingResults,
+              initialResponse.total,
+              MULTIMEDIA_DISPLAY_LOCALE,
+            )}
           </p>
 
           {hasAnyFilter ? (
@@ -356,52 +363,106 @@ export function MultimediaListClient({
 
         <div>
           {items.length > 0 ? (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-5 lg:grid-cols-3 xl:grid-cols-4">
-              {items.map((item) => (
-                <article key={item.id} className="multimedia-list-card">
-                  <div className="relative overflow-hidden rounded-xl">
-                    <Link href={`/${locale}/multimedia/${item.slug}?from=multimedia`}>
-                      <Image
-                        src={item.imageSrc}
-                        alt={item.imageAlt}
-                        width={420}
-                        height={265}
-                        className="h-[210px] w-full object-cover sm:h-[230px]"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-                      />
-                    </Link>
-                    <span
-                      className={`media-type-pill ${
-                        item.mediaType === "video"
-                          ? "media-type-pill-video"
-                          : "media-type-pill-photo"
-                      }`}
-                      aria-label={getMediaTypeLabel(copy, item.mediaType)}
-                    >
-                      {item.mediaType === "video" ? <PlayIcon /> : <CameraIcon />}
-                      <span>{getMediaTypeLabel(copy, item.mediaType)}</span>
-                    </span>
-                  </div>
-
-                  <h2 className="mt-3 text-lg font-semibold text-[var(--color-text-main)] sm:text-xl">
-                    <Link href={`/${locale}/multimedia/${item.slug}?from=multimedia`}>
-                      {item.title}
-                    </Link>
+            <div className="space-y-8 md:space-y-10">
+              {photoItems.length > 0 ? (
+                <section>
+                  <h2 className="mb-4 text-2xl text-[var(--color-text-main)] md:text-3xl">
+                    Photo Essay
                   </h2>
-                  <p className="mt-2 text-sm leading-relaxed text-[var(--color-text-muted)]">
-                    {item.description}
-                  </p>
-                  <p className="mt-3 text-xs font-semibold uppercase tracking-[0.06em] text-[var(--color-brand)]">
-                    {copy.byLabel} {item.creator}
-                  </p>
-                  <p className="mt-1 text-xs text-[var(--color-text-muted)]">
-                    {copy.publishedOnLabel} {formatDate(locale, item.publishedAt)}
-                  </p>
-                </article>
-              ))}
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-5 lg:grid-cols-3 xl:grid-cols-4">
+                    {photoItems.map((item) => (
+                      <article key={item.id} className="multimedia-list-card">
+                        <div className="relative overflow-hidden rounded-xl">
+                          <Link href={`/${locale}/multimedia/${item.slug}?from=multimedia`}>
+                            <Image
+                              src={item.imageSrc}
+                              alt={item.imageAlt}
+                              width={420}
+                              height={265}
+                              className="h-[210px] w-full object-cover sm:h-[230px]"
+                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                            />
+                          </Link>
+                          <span
+                            className="media-type-pill media-type-pill-photo"
+                            aria-label={getMediaTypeLabel(copy, item.mediaType)}
+                          >
+                            <CameraIcon />
+                            <span>{getMediaTypeLabel(copy, item.mediaType)}</span>
+                          </span>
+                        </div>
 
-              {isFetchingMore
-                ? Array.from({ length: SKELETON_COUNT }, (_, index) => (
+                        <h3 className="mt-3 text-lg font-semibold text-[var(--color-text-main)] sm:text-xl">
+                          <Link href={`/${locale}/multimedia/${item.slug}?from=multimedia`}>
+                            {item.title}
+                          </Link>
+                        </h3>
+                        <p className="mt-2 text-sm leading-relaxed text-[var(--color-text-muted)]">
+                          {item.description}
+                        </p>
+                        <p className="mt-3 text-xs font-semibold uppercase tracking-[0.06em] text-[var(--color-brand)]">
+                          {copy.byLabel} {item.creator}
+                        </p>
+                        <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+                          {copy.publishedOnLabel}{" "}
+                          {formatDate(MULTIMEDIA_DISPLAY_LOCALE, item.publishedAt)}
+                        </p>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              ) : null}
+
+              {videoItems.length > 0 ? (
+                <section>
+                  <h2 className="mb-4 text-2xl text-[var(--color-text-main)] md:text-3xl">Blog</h2>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-5 lg:grid-cols-3 xl:grid-cols-4">
+                    {videoItems.map((item) => (
+                      <article key={item.id} className="multimedia-list-card">
+                        <div className="relative overflow-hidden rounded-xl">
+                          <Link href={`/${locale}/multimedia/${item.slug}?from=multimedia`}>
+                            <Image
+                              src={item.imageSrc}
+                              alt={item.imageAlt}
+                              width={420}
+                              height={265}
+                              className="h-[210px] w-full object-cover sm:h-[230px]"
+                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                            />
+                          </Link>
+                          <span
+                            className="media-type-pill media-type-pill-video"
+                            aria-label={getMediaTypeLabel(copy, item.mediaType)}
+                          >
+                            <PlayIcon />
+                            <span>{getMediaTypeLabel(copy, item.mediaType)}</span>
+                          </span>
+                        </div>
+
+                        <h3 className="mt-3 text-lg font-semibold text-[var(--color-text-main)] sm:text-xl">
+                          <Link href={`/${locale}/multimedia/${item.slug}?from=multimedia`}>
+                            {item.title}
+                          </Link>
+                        </h3>
+                        <p className="mt-2 text-sm leading-relaxed text-[var(--color-text-muted)]">
+                          {item.description}
+                        </p>
+                        <p className="mt-3 text-xs font-semibold uppercase tracking-[0.06em] text-[var(--color-brand)]">
+                          {copy.byLabel} {item.creator}
+                        </p>
+                        <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+                          {copy.publishedOnLabel}{" "}
+                          {formatDate(MULTIMEDIA_DISPLAY_LOCALE, item.publishedAt)}
+                        </p>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              ) : null}
+
+              {isFetchingMore ? (
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-5 lg:grid-cols-3 xl:grid-cols-4">
+                  {Array.from({ length: SKELETON_COUNT }, (_, index) => (
                     <article
                       key={`skeleton-${index}`}
                       className="multimedia-list-card animate-pulse"
@@ -411,8 +472,9 @@ export function MultimediaListClient({
                       <div className="mt-2 h-3 w-2/3 rounded bg-[var(--color-brand-subtle)]" />
                       <div className="mt-3 h-3 w-1/2 rounded bg-[var(--color-brand-subtle)]" />
                     </article>
-                  ))
-                : null}
+                  ))}
+                </div>
+              ) : null}
             </div>
           ) : (
             <div className="rounded-2xl border border-dashed border-[var(--color-border)] bg-white p-8 text-center">

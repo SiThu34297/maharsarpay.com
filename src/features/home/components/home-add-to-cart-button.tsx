@@ -7,9 +7,15 @@ type HomeAddToCartButtonProps = Readonly<{
   book: BookItem;
   addLabel: string;
   addedLabel: string;
+  className?: string;
 }>;
 
-export function HomeAddToCartButton({ book, addLabel, addedLabel }: HomeAddToCartButtonProps) {
+export function HomeAddToCartButton({
+  book,
+  addLabel,
+  addedLabel,
+  className,
+}: HomeAddToCartButtonProps) {
   return (
     <AddToCartButton
       item={{
@@ -25,7 +31,10 @@ export function HomeAddToCartButton({ book, addLabel, addedLabel }: HomeAddToCar
       }}
       addLabel={addLabel}
       addedLabel={addedLabel}
-      className="mt-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-button-secondary)] text-white transition hover:brightness-95"
+      className={
+        className ??
+        "mt-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-button-secondary)] text-white transition hover:brightness-95"
+      }
     />
   );
 }

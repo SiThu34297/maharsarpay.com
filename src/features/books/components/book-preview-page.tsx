@@ -53,35 +53,40 @@ export function BookPreviewPage({ copy, locale, books, filterOptions }: BookPrev
           </div>
 
           {books.length ? (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="book-list-grid">
               {books.map((book, index) => (
-                <article key={book.id} className="book-list-card">
+                <article
+                  key={book.id}
+                  className="book-list-card book-list-card-clean flex flex-col"
+                >
                   <Link
                     href={`/${locale}/books/${book.slug}?from=books`}
-                    className="relative block overflow-hidden rounded-xl"
+                    className="book-list-image-wrap relative block overflow-hidden"
                   >
                     <Image
                       src={book.coverImageSrc}
                       alt={book.coverImageAlt}
                       width={360}
                       height={470}
-                      className="h-50 w-full object-cover sm:h-55"
+                      className="book-list-image h-[260px] w-full object-cover sm:h-[280px]"
                       sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                       loading={index === 0 ? "eager" : "lazy"}
                     />
                   </Link>
 
-                  <h2 className="book-list-title mt-3 text-base text-foreground sm:text-lg">
+                  <h2 className="book-list-title mt-5 text-center text-[1.05rem] text-[var(--color-text-main)] sm:text-lg">
                     <Link
                       href={`/${locale}/books/${book.slug}?from=books`}
-                      className="hover:text-(--color-brand)"
+                      className="hover:text-[var(--color-brand)]"
                     >
                       {book.title}
                     </Link>
                   </h2>
-                  <p className="mt-1 text-sm text-(--color-text-muted)">{book.author}</p>
+                  <p className="mt-1 min-h-[1.25rem] line-clamp-1 px-4 text-center text-sm text-[var(--color-text-muted)]">
+                    {book.author}
+                  </p>
 
-                  <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <div className="book-preview-card-actions mt-auto px-4 pb-4 pt-4">
                     <BookPreviewModal
                       title={book.title}
                       pdfSrc={book.previewPdfSrc}

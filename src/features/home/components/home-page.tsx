@@ -12,7 +12,6 @@ import { getBookFilterOptions } from "@/features/books";
 import { HomeHeroSlider } from "@/features/home/components/home-hero-slider";
 import { getHomePageData } from "@/features/home/server/get-home-page-data";
 import type { Dictionary, Locale } from "@/lib/i18n";
-import { HomeAddToCartButton } from "./home-add-to-cart-button";
 
 type HomePageProps = Readonly<{
   copy: Dictionary;
@@ -133,7 +132,7 @@ function MobileScrollViewAllCard({ href, label, minWidthClass }: MobileScrollVie
 }
 
 function getMediaLabel(copy: Dictionary["media"], mediaType: "video" | "photo") {
-  return mediaType === "video" ? copy.videoLabel : copy.photoLabel;
+  return mediaType === "video" ? "Blog" : "Photo Essay";
 }
 
 export async function HomePage({ copy, locale }: HomePageProps) {
@@ -147,6 +146,8 @@ export async function HomePage({ copy, locale }: HomePageProps) {
     label: category.label,
     href: `/${locale}/books?category=${encodeURIComponent(category.value)}`,
   }));
+  const photoMediaItems = data.mediaItems.filter((item) => item.mediaType === "photo");
+  const videoMediaItems = data.mediaItems.filter((item) => item.mediaType === "video");
 
   return (
     <div
@@ -186,27 +187,34 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                 const pricing = getDiscountPricing(book);
                 const hasDiscount =
                   Boolean(pricing.originalPrice) && (pricing.discountAmount ?? 0) > 0;
+                const authorLinks =
+                  book.authors.length > 0
+                    ? book.authors
+                    : [{ id: book.authorId, name: book.author }];
 
                 return (
-                  <li key={book.id} className="home-card min-w-[230px] snap-start flex flex-col">
+                  <li
+                    key={book.id}
+                    className="book-list-card book-list-card-clean min-w-[230px] snap-start flex flex-col"
+                  >
                     <Link
                       href={`/${locale}/books/${book.slug}?from=home`}
-                      className="relative block overflow-hidden rounded-xl"
+                      className="book-list-image-wrap relative block overflow-hidden"
                     >
                       <Image
                         src={book.imageSrc}
                         alt={book.imageAlt}
                         width={320}
                         height={420}
-                        className="h-[220px] w-full rounded-xl object-cover"
+                        className="book-list-image h-[300px] w-full object-cover"
                       />
                       {hasDiscount ? (
-                        <span className="absolute left-2 top-2 z-10 rounded-full bg-[var(--color-accent)] px-2 py-1 text-[10px] font-semibold text-white shadow-sm">
+                        <span className="absolute right-0 top-0 z-10 rounded-bl-md bg-[var(--color-secondary)] px-3 py-1 text-[11px] font-semibold text-white">
                           -{formatPrice(locale, pricing.discountAmount ?? 0)}
                         </span>
                       ) : null}
                     </Link>
-                    <h3 className="mt-4 min-h-[3.5rem] text-lg leading-snug">
+                    <h3 className="book-list-title mt-5 text-center text-[1.05rem] leading-snug sm:text-lg">
                       <Link
                         href={`/${locale}/books/${book.slug}?from=home`}
                         className="line-clamp-2 hover:text-[var(--color-brand)]"
@@ -214,25 +222,30 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                         {book.title}
                       </Link>
                     </h3>
-                    <p className="mt-1 min-h-[1.25rem] line-clamp-1 text-sm text-[var(--color-text-muted)]">
-                      {book.author}
+                    <p className="mt-1 min-h-[1.25rem] line-clamp-1 px-4 text-center text-sm text-[var(--color-text-muted)]">
+                      {authorLinks.map((author, index) => (
+                        <span key={author.id}>
+                          <Link
+                            href={`/${locale}/authors/${encodeURIComponent(author.id)}?from=home`}
+                            className="transition hover:text-[var(--color-brand)]"
+                          >
+                            {author.name}
+                          </Link>
+                          {index < authorLinks.length - 1 ? (
+                            <span>{locale === "my" ? "၊ " : ", "}</span>
+                          ) : null}
+                        </span>
+                      ))}
                     </p>
-                    <div className="mt-3 flex flex-wrap items-center gap-2">
-                      <p className="text-base font-semibold text-[var(--color-brand)]">
-                        {formatPrice(locale, pricing.salePrice)}
-                      </p>
+                    <div className="mt-3 flex flex-col items-center justify-center gap-1 pb-5">
                       {pricing.originalPrice ? (
                         <p className="text-xs text-[var(--color-text-muted)] line-through">
                           {formatPrice(locale, pricing.originalPrice)}
                         </p>
                       ) : null}
-                    </div>
-                    <div className="mt-auto">
-                      <HomeAddToCartButton
-                        book={book}
-                        addLabel={copy.bestsellers.addToCart}
-                        addedLabel={copy.booksList.addedToCart}
-                      />
+                      <p className="text-[1.15rem] font-semibold leading-none text-[var(--color-brand)] sm:text-[1.3rem]">
+                        {formatPrice(locale, pricing.salePrice)}
+                      </p>
                     </div>
                   </li>
                 );
@@ -251,27 +264,32 @@ export async function HomePage({ copy, locale }: HomePageProps) {
               const pricing = getDiscountPricing(book);
               const hasDiscount =
                 Boolean(pricing.originalPrice) && (pricing.discountAmount ?? 0) > 0;
+              const authorLinks =
+                book.authors.length > 0 ? book.authors : [{ id: book.authorId, name: book.author }];
 
               return (
-                <article key={book.id} className="home-card">
+                <article
+                  key={book.id}
+                  className="book-list-card book-list-card-clean flex flex-col"
+                >
                   <Link
                     href={`/${locale}/books/${book.slug}?from=home`}
-                    className="relative block overflow-hidden rounded-xl"
+                    className="book-list-image-wrap relative block overflow-hidden"
                   >
                     <Image
                       src={book.imageSrc}
                       alt={book.imageAlt}
                       width={320}
                       height={420}
-                      className="h-[250px] w-full rounded-xl object-cover"
+                      className="book-list-image h-[340px] w-full object-cover"
                     />
                     {hasDiscount ? (
-                      <span className="absolute left-2 top-2 z-10 rounded-full bg-[var(--color-accent)] px-2 py-1 text-[10px] font-semibold text-white shadow-sm sm:left-3 sm:top-3 sm:text-xs">
+                      <span className="absolute right-0 top-0 z-10 rounded-bl-md bg-[var(--color-secondary)] px-3 py-1 text-[11px] font-semibold text-white">
                         -{formatPrice(locale, pricing.discountAmount ?? 0)}
                       </span>
                     ) : null}
                   </Link>
-                  <h3 className="mt-4 text-xl leading-snug">
+                  <h3 className="book-list-title mt-5 text-center text-[1.05rem] leading-snug sm:text-lg">
                     <Link
                       href={`/${locale}/books/${book.slug}?from=home`}
                       className="hover:text-[var(--color-brand)]"
@@ -279,24 +297,31 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                       {book.title}
                     </Link>
                   </h3>
-                  <p className="mt-1 min-h-[1.25rem] line-clamp-1 text-sm text-[var(--color-text-muted)]">
-                    {book.author}
+                  <p className="mt-1 min-h-[1.25rem] line-clamp-1 px-4 text-center text-sm text-[var(--color-text-muted)]">
+                    {authorLinks.map((author, index) => (
+                      <span key={author.id}>
+                        <Link
+                          href={`/${locale}/authors/${encodeURIComponent(author.id)}?from=home`}
+                          className="transition hover:text-[var(--color-brand)]"
+                        >
+                          {author.name}
+                        </Link>
+                        {index < authorLinks.length - 1 ? (
+                          <span>{locale === "my" ? "၊ " : ", "}</span>
+                        ) : null}
+                      </span>
+                    ))}
                   </p>
-                  <div className="mt-3 flex flex-wrap items-center gap-2">
-                    <p className="text-base font-semibold text-[var(--color-brand)]">
-                      {formatPrice(locale, pricing.salePrice)}
-                    </p>
+                  <div className="mt-3 flex flex-col items-center justify-center gap-1 pb-5">
                     {pricing.originalPrice ? (
                       <p className="text-xs text-[var(--color-text-muted)] line-through">
                         {formatPrice(locale, pricing.originalPrice)}
                       </p>
                     ) : null}
+                    <p className="text-[1.15rem] font-semibold leading-none text-[var(--color-brand)] sm:text-[1.3rem]">
+                      {formatPrice(locale, pricing.salePrice)}
+                    </p>
                   </div>
-                  <HomeAddToCartButton
-                    book={book}
-                    addLabel={copy.bestsellers.addToCart}
-                    addedLabel={copy.booksList.addedToCart}
-                  />
                 </article>
               );
             })}
@@ -386,86 +411,170 @@ export async function HomePage({ copy, locale }: HomePageProps) {
             actionLabel={copy.multimediaDetail.viewAllMedia}
           />
 
-          <div className="md:hidden">
-            <ul className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4">
-              {data.mediaItems.map((item) => (
-                <li key={item.id} className="home-card min-w-[250px] snap-start">
-                  <div className="relative">
-                    <Link href={`/${locale}/multimedia/${item.slug}?from=home`}>
-                      <Image
-                        src={item.imageSrc}
-                        alt={item.imageAlt}
-                        width={380}
-                        height={250}
-                        className="h-[160px] w-full rounded-xl object-cover"
-                      />
-                    </Link>
-                    <span
-                      className={`media-type-pill ${
-                        item.mediaType === "video"
-                          ? "media-type-pill-video"
-                          : "media-type-pill-photo"
-                      }`}
-                      aria-label={getMediaLabel(copy.media, item.mediaType)}
-                    >
-                      {item.mediaType === "video" ? <PlayIcon /> : <CameraIcon />}
-                      <span>{getMediaLabel(copy.media, item.mediaType)}</span>
-                    </span>
-                  </div>
-                  <h3 className="mt-4 text-lg">
-                    <Link
-                      href={`/${locale}/multimedia/${item.slug}?from=home`}
-                      className="hover:text-[var(--color-brand)]"
-                    >
-                      {item.title}
-                    </Link>
-                  </h3>
-                  <p className="mt-2 text-sm text-[var(--color-text-muted)]">{item.description}</p>
-                </li>
-              ))}
-
-              <MobileScrollViewAllCard
-                href={`/${locale}/multimedia`}
-                label={copy.multimediaDetail.viewAllMedia}
-                minWidthClass="min-w-[250px]"
-              />
-            </ul>
-          </div>
-
-          <div className="hidden gap-6 md:grid md:grid-cols-2 xl:grid-cols-4">
-            {data.mediaItems.map((item) => (
-              <article key={item.id} className="home-card">
-                <div className="relative">
-                  <Link href={`/${locale}/multimedia/${item.slug}?from=home`}>
-                    <Image
-                      src={item.imageSrc}
-                      alt={item.imageAlt}
-                      width={420}
-                      height={265}
-                      className="h-[180px] w-full rounded-xl object-cover"
-                    />
-                  </Link>
-                  <span
-                    className={`media-type-pill ${
-                      item.mediaType === "video" ? "media-type-pill-video" : "media-type-pill-photo"
-                    }`}
-                    aria-label={getMediaLabel(copy.media, item.mediaType)}
-                  >
-                    {item.mediaType === "video" ? <PlayIcon /> : <CameraIcon />}
-                    <span>{getMediaLabel(copy.media, item.mediaType)}</span>
-                  </span>
+          <div className="space-y-8 md:space-y-10">
+            {photoMediaItems.length > 0 ? (
+              <section>
+                <h3 className="mb-4 text-2xl text-[var(--color-text-main)]">Photo Essay</h3>
+                <div className="md:hidden">
+                  <ul className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4">
+                    {photoMediaItems.map((item) => (
+                      <li key={item.id} className="home-card min-w-[250px] snap-start">
+                        <div className="relative">
+                          <Link href={`/${locale}/multimedia/${item.slug}?from=home`}>
+                            <Image
+                              src={item.imageSrc}
+                              alt={item.imageAlt}
+                              width={380}
+                              height={250}
+                              className="h-[160px] w-full rounded-xl object-cover"
+                            />
+                          </Link>
+                          <span
+                            className="media-type-pill media-type-pill-photo"
+                            aria-label={getMediaLabel(copy.media, item.mediaType)}
+                          >
+                            <CameraIcon />
+                            <span>{getMediaLabel(copy.media, item.mediaType)}</span>
+                          </span>
+                        </div>
+                        <h4 className="mt-4 text-lg">
+                          <Link
+                            href={`/${locale}/multimedia/${item.slug}?from=home`}
+                            className="hover:text-[var(--color-brand)]"
+                          >
+                            {item.title}
+                          </Link>
+                        </h4>
+                        <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+                          {item.description}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <h3 className="mt-4 text-xl">
-                  <Link
-                    href={`/${locale}/multimedia/${item.slug}?from=home`}
-                    className="hover:text-[var(--color-brand)]"
-                  >
-                    {item.title}
-                  </Link>
-                </h3>
-                <p className="mt-2 text-sm text-[var(--color-text-muted)]">{item.description}</p>
-              </article>
-            ))}
+
+                <div className="hidden gap-6 md:grid md:grid-cols-2 xl:grid-cols-4">
+                  {photoMediaItems.map((item) => (
+                    <article key={item.id} className="home-card">
+                      <div className="relative">
+                        <Link href={`/${locale}/multimedia/${item.slug}?from=home`}>
+                          <Image
+                            src={item.imageSrc}
+                            alt={item.imageAlt}
+                            width={420}
+                            height={265}
+                            className="h-[180px] w-full rounded-xl object-cover"
+                          />
+                        </Link>
+                        <span
+                          className="media-type-pill media-type-pill-photo"
+                          aria-label={getMediaLabel(copy.media, item.mediaType)}
+                        >
+                          <CameraIcon />
+                          <span>{getMediaLabel(copy.media, item.mediaType)}</span>
+                        </span>
+                      </div>
+                      <h4 className="mt-4 text-xl">
+                        <Link
+                          href={`/${locale}/multimedia/${item.slug}?from=home`}
+                          className="hover:text-[var(--color-brand)]"
+                        >
+                          {item.title}
+                        </Link>
+                      </h4>
+                      <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+                        {item.description}
+                      </p>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
+            {videoMediaItems.length > 0 ? (
+              <section>
+                <h3 className="mb-4 text-2xl text-[var(--color-text-main)]">Blog</h3>
+                <div className="md:hidden">
+                  <ul className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4">
+                    {videoMediaItems.map((item) => (
+                      <li key={item.id} className="home-card min-w-[250px] snap-start">
+                        <div className="relative">
+                          <Link href={`/${locale}/multimedia/${item.slug}?from=home`}>
+                            <Image
+                              src={item.imageSrc}
+                              alt={item.imageAlt}
+                              width={380}
+                              height={250}
+                              className="h-[160px] w-full rounded-xl object-cover"
+                            />
+                          </Link>
+                          <span
+                            className="media-type-pill media-type-pill-video"
+                            aria-label={getMediaLabel(copy.media, item.mediaType)}
+                          >
+                            <PlayIcon />
+                            <span>{getMediaLabel(copy.media, item.mediaType)}</span>
+                          </span>
+                        </div>
+                        <h4 className="mt-4 text-lg">
+                          <Link
+                            href={`/${locale}/multimedia/${item.slug}?from=home`}
+                            className="hover:text-[var(--color-brand)]"
+                          >
+                            {item.title}
+                          </Link>
+                        </h4>
+                        <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+                          {item.description}
+                        </p>
+                      </li>
+                    ))}
+
+                    <MobileScrollViewAllCard
+                      href={`/${locale}/multimedia`}
+                      label={copy.multimediaDetail.viewAllMedia}
+                      minWidthClass="min-w-[250px]"
+                    />
+                  </ul>
+                </div>
+
+                <div className="hidden gap-6 md:grid md:grid-cols-2 xl:grid-cols-4">
+                  {videoMediaItems.map((item) => (
+                    <article key={item.id} className="home-card">
+                      <div className="relative">
+                        <Link href={`/${locale}/multimedia/${item.slug}?from=home`}>
+                          <Image
+                            src={item.imageSrc}
+                            alt={item.imageAlt}
+                            width={420}
+                            height={265}
+                            className="h-[180px] w-full rounded-xl object-cover"
+                          />
+                        </Link>
+                        <span
+                          className="media-type-pill media-type-pill-video"
+                          aria-label={getMediaLabel(copy.media, item.mediaType)}
+                        >
+                          <PlayIcon />
+                          <span>{getMediaLabel(copy.media, item.mediaType)}</span>
+                        </span>
+                      </div>
+                      <h4 className="mt-4 text-xl">
+                        <Link
+                          href={`/${locale}/multimedia/${item.slug}?from=home`}
+                          className="hover:text-[var(--color-brand)]"
+                        >
+                          {item.title}
+                        </Link>
+                      </h4>
+                      <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+                        {item.description}
+                      </p>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            ) : null}
           </div>
         </section>
       </main>

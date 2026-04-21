@@ -154,16 +154,20 @@ function getOrderStatusClassName(status: string): string {
 function getOrderCardBorderClassName(status: string): string {
   const normalized = status.trim().toLowerCase();
 
+  if (normalized.includes("cancel")) {
+    return "border-[var(--color-secondary)]/30";
+  }
+
   if (normalized.includes("paid")) {
-    return "border-emerald-200";
+    return "border-[var(--color-brand)]/30";
   }
 
   if (normalized.includes("process")) {
-    return "border-amber-200";
+    return "border-[var(--color-brand-strong)]/30";
   }
 
   if (normalized.includes("ship") || normalized.includes("deliver")) {
-    return "border-sky-200";
+    return "border-[var(--color-brand)]/30";
   }
 
   return "border-[var(--color-border)]";
@@ -172,16 +176,20 @@ function getOrderCardBorderClassName(status: string): string {
 function getOrderHeaderSurfaceClassName(status: string): string {
   const normalized = status.trim().toLowerCase();
 
+  if (normalized.includes("cancel")) {
+    return "bg-gradient-to-r from-[var(--color-accent-soft)] to-[var(--color-surface-soft)]";
+  }
+
   if (normalized.includes("paid")) {
-    return "bg-gradient-to-r from-emerald-50 to-[var(--color-surface-soft)]";
+    return "bg-gradient-to-r from-[var(--color-brand-subtle)] to-[var(--color-surface-soft)]";
   }
 
   if (normalized.includes("process")) {
-    return "bg-gradient-to-r from-amber-50 to-[var(--color-surface-soft)]";
+    return "bg-gradient-to-r from-[var(--color-brand-soft)] to-[var(--color-surface-soft)]";
   }
 
   if (normalized.includes("ship") || normalized.includes("deliver")) {
-    return "bg-gradient-to-r from-sky-50 to-[var(--color-surface-soft)]";
+    return "bg-gradient-to-r from-[var(--color-brand-subtle)] to-[var(--color-surface-soft)]";
   }
 
   return "bg-gradient-to-r from-[var(--color-surface-soft)] to-white";
@@ -191,7 +199,7 @@ function getOrderTopBorderClassName(status: string): string {
   const normalized = status.trim().toLowerCase();
 
   if (normalized.includes("cancel")) {
-    return "bg-[#b91c1c]";
+    return "bg-[var(--color-secondary)]";
   }
 
   if (
@@ -199,10 +207,10 @@ function getOrderTopBorderClassName(status: string): string {
     normalized.includes("ship") ||
     normalized.includes("paid")
   ) {
-    return "bg-[#15803d]";
+    return "bg-[var(--color-brand)]";
   }
 
-  return "bg-[#b45309]";
+  return "bg-[var(--color-brand-strong)]";
 }
 
 export async function ProfilePage({ copy, locale, data }: ProfilePageProps) {
@@ -465,7 +473,7 @@ export async function ProfilePage({ copy, locale, data }: ProfilePageProps) {
                             </span>
                           </p>
 
-                          <p className="flex items-center justify-between gap-3 text-amber-700">
+                          <p className="flex items-center justify-between gap-3 text-[var(--color-brand-strong)]">
                             <span>{copy.profilePage.deliveryFeeLabel}</span>
                             <span>
                               {formatLocalizedAmount(locale, order.deliveryFee)}{" "}
@@ -473,7 +481,7 @@ export async function ProfilePage({ copy, locale, data }: ProfilePageProps) {
                             </span>
                           </p>
 
-                          <p className="flex items-center justify-between gap-3 text-rose-700">
+                          <p className="flex items-center justify-between gap-3 text-[var(--color-secondary)]">
                             <span>{copy.profilePage.discountLabel}</span>
                             <span>
                               {formatLocalizedAmount(locale, order.discountAmount)}{" "}

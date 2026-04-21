@@ -42,31 +42,6 @@ export function BookDetailImagePreview({ images, title }: BookDetailImagePreview
 
   return (
     <div className="book-detail-image-preview">
-      <div className="book-detail-image-main-row">
-        <div
-          className="book-detail-image-main"
-          onMouseEnter={() => setIsZoomActive(true)}
-          onMouseLeave={() => setIsZoomActive(false)}
-          onMouseMove={handleImageHover}
-          aria-label={`${title} image preview`}
-        >
-          <div className="book-detail-cover-glow" aria-hidden />
-          <Image
-            src={selectedImage.src}
-            alt={selectedImage.alt}
-            width={680}
-            height={900}
-            className="book-detail-cover book-detail-cover-zoomable"
-            sizes="(max-width: 1024px) 100vw, 42vw"
-            priority
-            style={{
-              transform: isZoomActive ? `scale(${ZOOM_SCALE})` : "scale(1)",
-              transformOrigin: `${zoomX}% ${zoomY}%`,
-            }}
-          />
-        </div>
-      </div>
-
       <div className="book-detail-image-thumbs" role="tablist" aria-label={`${title} thumbnails`}>
         {safeImages.map((image, index) => {
           const isActive = index === selectedIndex;
@@ -90,6 +65,31 @@ export function BookDetailImagePreview({ images, title }: BookDetailImagePreview
             </button>
           );
         })}
+      </div>
+
+      <div className="book-detail-image-main-row">
+        <div
+          className="book-detail-image-main"
+          onMouseEnter={() => setIsZoomActive(true)}
+          onMouseLeave={() => setIsZoomActive(false)}
+          onMouseMove={handleImageHover}
+          aria-label={`${title} image preview`}
+        >
+          <div className="book-detail-cover-glow" aria-hidden />
+          <Image
+            src={selectedImage.src}
+            alt={selectedImage.alt}
+            width={680}
+            height={900}
+            className="book-detail-cover book-detail-cover-zoomable"
+            sizes="(max-width: 1024px) 100vw, 42vw"
+            priority
+            style={{
+              transform: isZoomActive ? `scale(${ZOOM_SCALE})` : "scale(1)",
+              transformOrigin: `${zoomX}% ${zoomY}%`,
+            }}
+          />
+        </div>
       </div>
     </div>
   );

@@ -8,7 +8,6 @@ import {
   MarketingSiteHeader,
   getMarketingNavigation,
 } from "@/components/layout/marketing";
-import { AddToCartButton } from "@/features/cart";
 import type { MultimediaDetailPageData, MediaType } from "@/features/multimedia/schemas/multimedia";
 import type { Dictionary, Locale } from "@/lib/i18n";
 
@@ -47,45 +46,7 @@ const EN_MONTHS = [
   "Nov",
   "Dec",
 ];
-
-function formatPrice(locale: Locale, value: number) {
-  if (locale === "my") {
-    return `${new Intl.NumberFormat("my-MM", {
-      maximumFractionDigits: 0,
-    }).format(value)} ကျပ်`;
-  }
-
-  return `MMK ${new Intl.NumberFormat("en-US", {
-    maximumFractionDigits: 0,
-  }).format(value)}`;
-}
-
-function getDiscountPricing(book: {
-  price: number;
-  salePrice?: number | null;
-  originalPrice?: number | null;
-  discountAmount?: number | null;
-}) {
-  const salePrice = book.salePrice && book.salePrice > 0 ? book.salePrice : book.price;
-  const originalPrice =
-    book.originalPrice && book.originalPrice > salePrice ? book.originalPrice : null;
-
-  if (!originalPrice) {
-    return {
-      salePrice,
-      originalPrice: null,
-      discountAmount: null,
-    };
-  }
-
-  const fallbackDiscountAmount = originalPrice - salePrice;
-
-  return {
-    salePrice,
-    originalPrice,
-    discountAmount: book.discountAmount ?? fallbackDiscountAmount,
-  };
-}
+const MULTIMEDIA_DISPLAY_LOCALE: Locale = "en";
 
 function toMyanmarDigits(value: string) {
   return value.replaceAll(/\d/g, (digit) => String.fromCodePoint(0x1040 + Number(digit)));
@@ -363,7 +324,8 @@ export function MultimediaDetailPage({
                 <span>{media.creator}</span>
               </p>
               <p className="multimedia-detail-published">
-                {copy.multimediaDetail.publishedOnLabel} {formatDate(locale, media.publishedAt)}
+                {copy.multimediaDetail.publishedOnLabel}{" "}
+                {formatDate(MULTIMEDIA_DISPLAY_LOCALE, media.publishedAt)}
               </p>
             </div>
 
@@ -411,84 +373,6 @@ export function MultimediaDetailPage({
                 <h3>{copy.multimediaDetail.noRelatedMediaTitle}</h3>
                 <p>{copy.multimediaDetail.noRelatedMediaDescription}</p>
                 <Link href={`/${locale}/multimedia`}>{copy.multimediaDetail.browseMedia}</Link>
-              </div>
-            )}
-          </section>
-
-          <section className="multimedia-detail-related-books">
-            <div className="multimedia-detail-section-header">
-              <h2>{copy.multimediaDetail.relatedBooksTitle}</h2>
-              <Link href={`/${locale}/books`} className="multimedia-detail-section-link">
-                {copy.multimediaDetail.viewAllBooks}
-              </Link>
-            </div>
-
-            {data.relatedBooks.length > 0 ? (
-              <div className="multimedia-detail-related-books-grid">
-                {data.relatedBooks.map((book) => {
-                  const pricing = getDiscountPricing(book);
-                  const hasDiscount =
-                    Boolean(pricing.originalPrice) && (pricing.discountAmount ?? 0) > 0;
-
-                  return (
-                    <article key={book.id} className="multimedia-detail-related-book-card">
-                      <Link
-                        href={`/${locale}/books/${book.slug}?from=books`}
-                        className="relative block"
-                      >
-                        <Image
-                          src={book.coverImageSrc}
-                          alt={book.coverImageAlt}
-                          width={360}
-                          height={460}
-                          className="multimedia-detail-related-book-cover"
-                          sizes="(max-width: 768px) 50vw, 20vw"
-                        />
-                        {hasDiscount ? (
-                          <span className="absolute left-2 top-2 z-10 rounded-full bg-[var(--color-accent)] px-2 py-1 text-[10px] font-semibold text-white shadow-sm sm:left-3 sm:top-3 sm:text-xs">
-                            -{formatPrice(locale, pricing.discountAmount ?? 0)}
-                          </span>
-                        ) : null}
-                      </Link>
-
-                      <h3>
-                        <Link href={`/${locale}/books/${book.slug}?from=books`}>{book.title}</Link>
-                      </h3>
-                      <p>{book.author}</p>
-                      <p className="multimedia-detail-related-book-price">
-                        {formatPrice(locale, pricing.salePrice)}
-                      </p>
-                      {pricing.originalPrice ? (
-                        <p className="mt-1 text-xs text-[var(--color-text-muted)] line-through">
-                          {formatPrice(locale, pricing.originalPrice)}
-                        </p>
-                      ) : null}
-
-                      <AddToCartButton
-                        item={{
-                          cartProductId: book.cartProductId,
-                          title: book.title,
-                          author: book.author,
-                          price: book.price,
-                          salePrice: book.salePrice,
-                          originalPrice: book.originalPrice,
-                          discountAmount: book.discountAmount,
-                          coverImageSrc: book.coverImageSrc,
-                          coverImageAlt: book.coverImageAlt,
-                        }}
-                        addLabel={copy.booksList.addToCart}
-                        addedLabel={copy.booksList.addedToCart}
-                        className="multimedia-detail-add-to-cart"
-                      />
-                    </article>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="multimedia-detail-empty">
-                <h3>{copy.multimediaDetail.noRelatedBooksTitle}</h3>
-                <p>{copy.multimediaDetail.noRelatedBooksDescription}</p>
-                <Link href={`/${locale}/books`}>{copy.multimediaDetail.browseBooks}</Link>
               </div>
             )}
           </section>

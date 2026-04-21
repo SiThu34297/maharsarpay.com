@@ -342,8 +342,8 @@ export function CartPageClient({ copy, locale, initialSessionUser }: CartPageCli
                 {copy.checkoutDescription}
               </p>
 
-              <div className="mt-3 rounded-xl border border-[var(--color-brand)] bg-[var(--color-brand-subtle)] p-3">
-                <p className="text-sm font-semibold text-[var(--color-brand)]">
+              <div className="mt-3 border-y border-[var(--color-border)] py-3">
+                <p className="text-sm font-semibold text-[var(--color-text-main)]">
                   {copy.doorToDoorAdTitle}
                 </p>
                 <p className="mt-1 text-sm text-[var(--color-text-main)]">
@@ -421,7 +421,7 @@ export function CartPageClient({ copy, locale, initialSessionUser }: CartPageCli
                   </label>
 
                   {orderError ? (
-                    <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+                    <p className="rounded-lg border border-[var(--color-secondary)]/25 bg-[var(--color-accent-soft)] px-3 py-2 text-xs text-[var(--color-secondary)]">
                       {orderError}
                     </p>
                   ) : null}

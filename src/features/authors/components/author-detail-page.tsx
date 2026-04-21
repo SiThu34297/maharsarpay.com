@@ -7,7 +7,6 @@ import {
   MarketingSiteHeader,
   getMarketingNavigation,
 } from "@/components/layout/marketing";
-import { AddToCartButton } from "@/features/cart";
 import type { AuthorDetailPageData } from "@/features/authors/schemas/authors";
 import type { Dictionary, Locale } from "@/lib/i18n";
 
@@ -199,55 +198,45 @@ export function AuthorDetailPage({ copy, locale, data, breadcrumbSource }: Autho
                     Boolean(pricing.originalPrice) && (pricing.discountAmount ?? 0) > 0;
 
                   return (
-                    <article key={book.id} className="author-detail-book-card">
+                    <article
+                      key={book.id}
+                      className="book-list-card book-list-card-clean flex flex-col"
+                    >
                       <Link
                         href={`/${locale}/books/${book.slug}?from=books`}
-                        className="relative block"
+                        className="book-list-image-wrap relative block overflow-hidden"
                       >
                         <Image
                           src={book.coverImageSrc}
                           alt={book.coverImageAlt}
                           width={360}
                           height={460}
-                          className="author-detail-book-cover"
+                          className="book-list-image h-[260px] w-full object-cover sm:h-[280px]"
                           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                         />
                         {hasDiscount ? (
-                          <span className="absolute left-2 top-2 z-10 rounded-full bg-[var(--color-accent)] px-2 py-1 text-[10px] font-semibold text-white shadow-sm sm:left-3 sm:top-3 sm:text-xs">
+                          <span className="absolute right-0 top-0 z-10 rounded-bl-md bg-[var(--color-secondary)] px-3 py-1 text-[11px] font-semibold text-white">
                             -{formatPrice(locale, pricing.discountAmount ?? 0)}
                           </span>
                         ) : null}
                       </Link>
 
-                      <h3 className="author-detail-book-title">
+                      <h3 className="book-list-title mt-5 text-center text-[1.05rem] leading-snug sm:text-lg">
                         <Link href={`/${locale}/books/${book.slug}?from=books`}>{book.title}</Link>
                       </h3>
-                      <p className="author-detail-book-author">{book.author}</p>
-                      <p className="author-detail-book-price">
-                        {formatPrice(locale, pricing.salePrice)}
+                      <p className="mt-1 min-h-[1.25rem] line-clamp-1 px-4 text-center text-sm text-[var(--color-text-muted)]">
+                        {book.author}
                       </p>
-                      {pricing.originalPrice ? (
-                        <p className="mt-1 text-xs text-[var(--color-text-muted)] line-through">
-                          {formatPrice(locale, pricing.originalPrice)}
+                      <div className="mt-3 flex flex-col items-center justify-center gap-1 pb-5">
+                        {pricing.originalPrice ? (
+                          <p className="text-xs text-[var(--color-text-muted)] line-through">
+                            {formatPrice(locale, pricing.originalPrice)}
+                          </p>
+                        ) : null}
+                        <p className="text-[1.15rem] font-semibold leading-none text-[var(--color-brand)] sm:text-[1.3rem]">
+                          {formatPrice(locale, pricing.salePrice)}
                         </p>
-                      ) : null}
-
-                      <AddToCartButton
-                        item={{
-                          cartProductId: book.cartProductId,
-                          title: book.title,
-                          author: book.author,
-                          price: book.price,
-                          salePrice: book.salePrice,
-                          originalPrice: book.originalPrice,
-                          discountAmount: book.discountAmount,
-                          coverImageSrc: book.coverImageSrc,
-                          coverImageAlt: book.coverImageAlt,
-                        }}
-                        addLabel={copy.booksList.addToCart}
-                        addedLabel={copy.booksList.addedToCart}
-                        className="author-detail-add-to-cart"
-                      />
+                      </div>
                     </article>
                   );
                 })}

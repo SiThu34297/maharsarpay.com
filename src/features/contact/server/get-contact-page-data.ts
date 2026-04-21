@@ -46,13 +46,15 @@ export async function getContactPageData(locale: Locale): Promise<ContactPageDat
     },
     websiteTitle: pageInfo.title,
     websiteDescription: pageInfo.description,
-    socialLinks: pageInfo.socialLinks.map((socialLink) => ({
-      id: socialLink.id,
-      label: socialLink.label,
-      href: socialLink.href,
-      handle: socialLink.handle,
-      icon: toContactSocialIcon(socialLink.platform),
-    })),
+    socialLinks: pageInfo.socialLinks
+      .filter((socialLink) => socialLink.platform !== "website")
+      .map((socialLink) => ({
+        id: socialLink.id,
+        label: socialLink.label,
+        href: socialLink.href,
+        handle: socialLink.handle,
+        icon: toContactSocialIcon(socialLink.platform),
+      })),
     map: {
       embedUrl: pageInfo.contact.embedMapUrl,
       locationText: pageInfo.contact.address,

@@ -131,18 +131,20 @@ export async function MarketingSiteFooter({ copy, navigation }: MarketingSiteFoo
 
           <div className="flex w-full flex-wrap items-center justify-center gap-3 lg:w-auto lg:flex-nowrap lg:justify-end">
             <span className="text-sm text-(--color-text-muted)">{copy.footer.socialLabel}</span>
-            {footerContent.socialLinks.map((socialLink) => (
-              <Link
-                key={`footer-social-${socialLink.id}`}
-                href={socialLink.href}
-                className="icon-button"
-                aria-label={socialLink.label}
-                target={isExternalHref(socialLink.href) ? "_blank" : undefined}
-                rel={isExternalHref(socialLink.href) ? "noreferrer" : undefined}
-              >
-                {getSocialIcon(socialLink)}
-              </Link>
-            ))}
+            {footerContent.socialLinks
+              .filter((socialLink) => socialLink.platform !== "website")
+              .map((socialLink) => (
+                <Link
+                  key={`footer-social-${socialLink.id}`}
+                  href={socialLink.href}
+                  className="icon-button"
+                  aria-label={socialLink.label}
+                  target={isExternalHref(socialLink.href) ? "_blank" : undefined}
+                  rel={isExternalHref(socialLink.href) ? "noreferrer" : undefined}
+                >
+                  {getSocialIcon(socialLink)}
+                </Link>
+              ))}
           </div>
         </div>
       </div>

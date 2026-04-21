@@ -47,6 +47,11 @@ export type BookItem = {
   cartProductId: string;
   title: string;
   author: string;
+  authorId: string;
+  authors: Array<{
+    id: string;
+    name: string;
+  }>;
   price: number;
   salePrice?: number | null;
   originalPrice?: number | null;
