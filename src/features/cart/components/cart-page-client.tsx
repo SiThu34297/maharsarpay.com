@@ -429,7 +429,7 @@ export function CartPageClient({ copy, locale, initialSessionUser }: CartPageCli
                   <button
                     type="submit"
                     disabled={isPlacingOrder}
-                    className="inline-flex w-full items-center justify-center rounded-full bg-[var(--color-brand)] px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="inline-flex w-full items-center justify-center rounded-full bg-[var(--color-button-secondary)] px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-70"
                   >
                     {isPlacingOrder ? copy.placingOrderButton : copy.placeOrderButton}
                   </button>
@@ -441,7 +441,7 @@ export function CartPageClient({ copy, locale, initialSessionUser }: CartPageCli
                   </p>
                   <Link
                     href={loginPath}
-                    className="inline-flex w-full items-center justify-center rounded-full bg-[var(--color-brand)] px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-95"
+                    className="inline-flex w-full items-center justify-center rounded-full bg-[var(--color-button-secondary)] px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-95"
                   >
                     {copy.loginToOrderButton}
                   </Link>

@@ -19,13 +19,13 @@ export function MainLoadingScreen({ variant = "page" }: MainLoadingScreenProps) 
               priority
             />
           </div>
-          <p className="animate-pulse text-2xl font-semibold tracking-[0.08em] text-[var(--color-brand)] sm:text-3xl">
+          <p className="animate-pulse text-2xl font-semibold tracking-[0.08em] text-[var(--color-button-secondary)] sm:text-3xl">
             မဟာစာပေ
           </p>
           <div className="mt-1 flex items-center gap-1.5" aria-hidden>
-            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[var(--color-brand)] [animation-delay:-0.2s]" />
-            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[var(--color-brand)] [animation-delay:-0.1s]" />
-            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[var(--color-brand)]" />
+            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[var(--color-button-secondary)] [animation-delay:-0.2s]" />
+            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[var(--color-button-secondary)] [animation-delay:-0.1s]" />
+            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[var(--color-button-secondary)]" />
           </div>
         </div>
       </div>
@@ -36,7 +36,7 @@ export function MainLoadingScreen({ variant = "page" }: MainLoadingScreenProps) 
     <div className="flex min-h-screen items-center justify-center bg-[var(--color-page-bg)] px-4">
       <div className="flex flex-col items-center gap-4">
         <div className="relative h-24 w-24 sm:h-28 sm:w-28">
-          <div className="absolute -inset-2 animate-spin rounded-full border-4 border-[var(--color-border)] border-t-[var(--color-brand)]" />
+          <div className="absolute -inset-2 animate-spin rounded-full border-4 border-[var(--color-border)] border-t-[var(--color-button-secondary)]" />
           <div className="relative flex h-full w-full items-center justify-center rounded-full bg-white shadow-[var(--shadow-soft)]">
             <Image
               src="/images/brand/maharsarpay-logo.png"

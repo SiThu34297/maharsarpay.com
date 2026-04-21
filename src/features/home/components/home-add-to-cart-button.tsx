@@ -25,7 +25,7 @@ export function HomeAddToCartButton({ book, addLabel, addedLabel }: HomeAddToCar
       }}
       addLabel={addLabel}
       addedLabel={addedLabel}
-      className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--color-brand)] px-4 py-2.5 text-xs font-semibold text-white transition hover:brightness-95 sm:text-sm"
+      className="mt-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-button-secondary)] text-white transition hover:brightness-95"
     />
   );
 }

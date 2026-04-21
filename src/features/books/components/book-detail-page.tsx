@@ -5,7 +5,6 @@ import sanitizeHtml from "sanitize-html";
 import {
   MarketingSiteFooter,
   MarketingSiteHeader,
-  MarketingTopBrandStrip,
   getMarketingNavigation,
 } from "@/components/layout/marketing";
 import { AddToCartButton } from "@/features/cart";
@@ -231,11 +230,6 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
         isMyanmar ? "locale-my" : ""
       }`}
     >
-      <MarketingTopBrandStrip
-        locale={locale}
-        title="မဟာစာပေ"
-        message="သိမ်းထားတဲ့အရာတွေ ပုပ်သိုးမသွားခင် လိုအပ်သူကို ပေးအပ်လိုက်ဖို့ ၀န်မလေးပါနဲ့"
-      />
       <MarketingSiteHeader
         copy={copy}
         locale={locale}
@@ -273,7 +267,6 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
               </div>
               <h1 className="book-detail-title">{book.title}</h1>
               <div className="book-detail-author">
-                <p className="book-detail-author-label">{copy.bookDetail.byAuthorLabel}</p>
                 <div className="book-detail-author-list">
                   {bookAuthors.map((author) => {
                     const hasAuthorDetail =
@@ -484,7 +477,7 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
 
                     <Link
                       href={`/${locale}/book-reviews/${review.id}`}
-                      className="mt-3 inline-flex rounded-full bg-[var(--color-brand)] px-4 py-2 text-xs font-semibold text-white transition hover:brightness-95"
+                      className="mt-3 inline-flex rounded-full bg-[var(--color-button-secondary)] px-4 py-2 text-xs font-semibold text-white transition hover:brightness-95"
                     >
                       {copy.bookReviewsList.readReviewLabel}
                     </Link>

@@ -6,7 +6,6 @@ import { ArrowRightIcon, CameraIcon, PlayIcon } from "@radix-ui/react-icons";
 import {
   MarketingSiteFooter,
   MarketingSiteHeader,
-  MarketingTopBrandStrip,
   getMarketingNavigation,
 } from "@/components/layout/marketing";
 import { getBookFilterOptions } from "@/features/books";
@@ -148,9 +147,6 @@ export async function HomePage({ copy, locale }: HomePageProps) {
     label: category.label,
     href: `/${locale}/books?category=${encodeURIComponent(category.value)}`,
   }));
-  const categoryHrefByLabel = new Map(
-    bookCategoryLinks.map((category) => [category.label, category.href]),
-  );
 
   return (
     <div
@@ -159,11 +155,6 @@ export async function HomePage({ copy, locale }: HomePageProps) {
         isMyanmar ? "locale-my" : ""
       }`}
     >
-      <MarketingTopBrandStrip
-        locale={locale}
-        title="မဟာစာပေ"
-        message="သိမ်းထားတဲ့အရာတွေ ပုပ်သိုးမသွားခင် လိုအပ်သူကို ပေးအပ်လိုက်ဖို့ ၀န်မလေးပါနဲ့"
-      />
       <MarketingSiteHeader
         copy={copy}
         locale={locale}
@@ -179,44 +170,6 @@ export async function HomePage({ copy, locale }: HomePageProps) {
             previousLabel={copy.hero.previousSlide}
             nextLabel={copy.hero.nextSlide}
           />
-        </section>
-
-        <section id="categories" className="home-shell pb-5">
-          <SectionHeading
-            title={copy.categorySpotlight.title}
-            description={copy.categorySpotlight.description}
-          />
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            {data.categories.map((category) => (
-              <Link
-                key={category.id}
-                href={
-                  categoryHrefByLabel.get(category.name) ??
-                  `/${locale}/books?q=${encodeURIComponent(category.name)}`
-                }
-                className="group rounded-2xl border border-[var(--color-border)] bg-white p-3 transition hover:-translate-y-0.5 hover:border-[var(--color-brand)] hover:shadow-[var(--shadow-soft)]"
-              >
-                <div className="flex flex-col items-center gap-2 text-center">
-                  {category.imageSrc ? (
-                    <Image
-                      src={category.imageSrc}
-                      alt={category.imageAlt}
-                      width={68}
-                      height={68}
-                      className="h-[68px] w-[68px] border border-[var(--color-border)] object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-[68px] w-[68px] items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-brand-subtle)] text-xl font-semibold text-[var(--color-brand)]">
-                      {category.name.slice(0, 1)}
-                    </div>
-                  )}
-                  <span className="line-clamp-2 text-sm font-semibold text-[var(--color-text-main)] transition group-hover:text-[var(--color-brand)]">
-                    {category.name}
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </div>
         </section>
 
         <section id="books" className="home-shell section-gap">

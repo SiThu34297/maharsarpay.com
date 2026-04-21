@@ -19,7 +19,7 @@ export function CartFloatingButton({ locale, ariaLabel }: CartFloatingButtonProp
     <Link
       href={`/${locale}/cart`}
       aria-label={ariaLabel}
-      className="fixed bottom-6 right-5 z-[70] inline-flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-brand)] text-white shadow-[0_10px_24px_rgba(122,172,35,0.4)] transition hover:brightness-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)] md:right-7"
+      className="fixed bottom-6 right-5 z-[70] inline-flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-button-secondary)] text-white shadow-[0_10px_24px_rgba(17,17,17,0.35)] transition hover:brightness-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-button-secondary)] md:right-7"
     >
       <BackpackIcon />
       {totalItems > 0 ? (

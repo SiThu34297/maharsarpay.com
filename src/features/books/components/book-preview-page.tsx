@@ -4,7 +4,6 @@ import Link from "next/link";
 import {
   MarketingSiteFooter,
   MarketingSiteHeader,
-  MarketingTopBrandStrip,
   getMarketingNavigation,
 } from "@/components/layout/marketing";
 import type { BookFilterOptions, BookListItem } from "@/features/books/schemas/books";
@@ -36,11 +35,6 @@ export function BookPreviewPage({ copy, locale, books, filterOptions }: BookPrev
       id="top"
       className={`min-h-screen bg-background text-foreground ${isMyanmar ? "locale-my" : ""}`}
     >
-      <MarketingTopBrandStrip
-        locale={locale}
-        title="မဟာစာပေ"
-        message="သိမ်းထားတဲ့အရာတွေ ပုပ်သိုးမသွားခင် လိုအပ်သူကို ပေးအပ်လိုက်ဖို့ ၀န်မလေးပါနဲ့"
-      />
       <MarketingSiteHeader
         copy={copy}
         locale={locale}

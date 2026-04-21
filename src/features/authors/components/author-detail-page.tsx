@@ -5,7 +5,6 @@ import sanitizeHtml from "sanitize-html";
 import {
   MarketingSiteFooter,
   MarketingSiteHeader,
-  MarketingTopBrandStrip,
   getMarketingNavigation,
 } from "@/components/layout/marketing";
 import { AddToCartButton } from "@/features/cart";
@@ -116,11 +115,6 @@ export function AuthorDetailPage({ copy, locale, data, breadcrumbSource }: Autho
         isMyanmar ? "locale-my" : ""
       }`}
     >
-      <MarketingTopBrandStrip
-        locale={locale}
-        title="မဟာစာပေ"
-        message="သိမ်းထားတဲ့အရာတွေ ပုပ်သိုးမသွားခင် လိုအပ်သူကို ပေးအပ်လိုက်ဖို့ ၀န်မလေးပါနဲ့"
-      />
       <MarketingSiteHeader
         copy={copy}
         locale={locale}

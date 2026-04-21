@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import {
   MarketingSiteFooter,
   MarketingSiteHeader,
-  MarketingTopBrandStrip,
   getMarketingNavigation,
 } from "@/components/layout/marketing";
 import { getBookFilterOptions } from "@/features/books";
@@ -76,7 +75,6 @@ export default async function PrivacyPolicyRoutePage({ params }: PrivacyPolicyRo
       id="top"
       className={`min-h-screen bg-background text-foreground ${isMyanmar ? "locale-my" : ""}`}
     >
-      <MarketingTopBrandStrip locale={lang} />
       <MarketingSiteHeader
         copy={dictionary}
         locale={lang}

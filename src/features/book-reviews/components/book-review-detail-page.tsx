@@ -5,7 +5,6 @@ import sanitizeHtml from "sanitize-html";
 import {
   MarketingSiteFooter,
   MarketingSiteHeader,
-  MarketingTopBrandStrip,
   getMarketingNavigation,
 } from "@/components/layout/marketing";
 import type { BookReviewDetailPageData } from "@/features/book-reviews/schemas/book-reviews";
@@ -121,11 +120,6 @@ export function BookReviewDetailPage({ copy, locale, data }: BookReviewDetailPag
         isMyanmar ? "locale-my" : ""
       }`}
     >
-      <MarketingTopBrandStrip
-        locale={locale}
-        title="မဟာစာပေ"
-        message="သိမ်းထားတဲ့အရာတွေ ပုပ်သိုးမသွားခင် လိုအပ်သူကို ပေးအပ်လိုက်ဖို့ ၀န်မလေးပါနဲ့"
-      />
       <MarketingSiteHeader
         copy={copy}
         locale={locale}
@@ -225,7 +219,7 @@ export function BookReviewDetailPage({ copy, locale, data }: BookReviewDetailPag
               <Link
                 href={`/${locale}/book-reviews`}
                 prefetch={false}
-                className="inline-flex rounded-full bg-[var(--color-brand)] px-5 py-2 text-sm font-semibold text-white transition hover:brightness-95"
+                className="inline-flex rounded-full bg-[var(--color-button-secondary)] px-5 py-2 text-sm font-semibold text-white transition hover:brightness-95"
               >
                 {copy.bookReviewDetail.backToReviews}
               </Link>

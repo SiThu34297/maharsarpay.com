@@ -336,7 +336,7 @@ export function BooksListClient({
               />
               <button
                 type="submit"
-                className="rounded-full bg-[var(--color-brand)] px-4 py-2 text-xs font-semibold text-white transition hover:brightness-95"
+                className="rounded-full bg-[var(--color-button-secondary)] px-4 py-2 text-xs font-semibold text-white transition hover:brightness-95"
               >
                 {copy.searchButton}
               </button>
@@ -387,7 +387,7 @@ export function BooksListClient({
                 const displayAuthor = getBookAuthorText(book, locale);
 
                 return (
-                  <article key={book.id} className="book-list-card">
+                  <article key={book.id} className="book-list-card flex flex-col">
                     <Link
                       href={`/${locale}/books/${book.slug}?from=books`}
                       className="relative block overflow-hidden rounded-xl"
@@ -430,22 +430,24 @@ export function BooksListClient({
                       ) : null}
                     </div>
 
-                    <AddToCartButton
-                      item={{
-                        cartProductId: book.cartProductId,
-                        title: book.title,
-                        author: displayAuthor,
-                        price: book.price,
-                        salePrice: book.salePrice,
-                        originalPrice: book.originalPrice,
-                        discountAmount: book.discountAmount,
-                        coverImageSrc: book.coverImageSrc,
-                        coverImageAlt: book.coverImageAlt,
-                      }}
-                      addLabel={copy.addToCart}
-                      addedLabel={copy.addedToCart}
-                      className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--color-brand)] px-4 py-2.5 text-xs font-semibold text-white transition hover:brightness-95 sm:text-sm"
-                    />
+                    <div className="mt-auto pt-4">
+                      <AddToCartButton
+                        item={{
+                          cartProductId: book.cartProductId,
+                          title: book.title,
+                          author: displayAuthor,
+                          price: book.price,
+                          salePrice: book.salePrice,
+                          originalPrice: book.originalPrice,
+                          discountAmount: book.discountAmount,
+                          coverImageSrc: book.coverImageSrc,
+                          coverImageAlt: book.coverImageAlt,
+                        }}
+                        addLabel={copy.addToCart}
+                        addedLabel={copy.addedToCart}
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-button-secondary)] text-white transition hover:brightness-95"
+                      />
+                    </div>
                   </article>
                 );
               })}

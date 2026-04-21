@@ -295,9 +295,13 @@ export function BookReviewsListClient({
     <section className="section-gap">
       <div className="home-shell">
         <div className="mb-6 md:mb-8">
-          <h1 className="text-3xl text-[var(--color-text-main)] md:text-4xl">{copy.title}</h1>
+          <h1 className="text-3xl text-[var(--color-text-main)] md:text-4xl">
+            {locale === "my" ? "စာဖတ်သူတို့စာညွှန်းများ" : copy.title}
+          </h1>
           <p className="mt-2 max-w-3xl text-sm text-[var(--color-text-muted)] md:text-base">
-            {copy.description}
+            {locale === "my"
+              ? "စာဖတ်သူများ၏ တကယ့်အမြင်နှင့် စာညွှန်းများကို လေ့လာဖတ်ရှုနိုင်ပါသည်။"
+              : copy.description}
           </p>
         </div>
 
@@ -318,7 +322,7 @@ export function BookReviewsListClient({
               />
               <button
                 type="submit"
-                className="rounded-full bg-[var(--color-brand)] px-4 py-2 text-xs font-semibold text-white transition hover:brightness-95"
+                className="rounded-full bg-[var(--color-button-secondary)] px-4 py-2 text-xs font-semibold text-white transition hover:brightness-95"
               >
                 {copy.searchButton}
               </button>
@@ -361,7 +365,7 @@ export function BookReviewsListClient({
 
         <div>
           {items.length > 0 ? (
-            <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-3">
               {items.map((item) => {
                 const detailHref = `/${locale}/book-reviews/${item.id}`;
                 const bookHref = item.book.id
@@ -371,7 +375,7 @@ export function BookReviewsListClient({
                 return (
                   <article
                     key={item.id}
-                    className="rounded-2xl border border-[var(--color-border)] bg-white p-4 shadow-[var(--shadow-soft)]"
+                    className="flex h-full flex-col rounded-2xl border border-[var(--color-border)] bg-white p-4 shadow-[var(--shadow-soft)]"
                   >
                     <div className="flex items-start gap-3">
                       <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[var(--color-brand-subtle)] text-sm font-semibold text-[var(--color-brand)]">
@@ -420,14 +424,14 @@ export function BookReviewsListClient({
                       </div>
                     </div>
 
-                    <p className="mt-4 line-clamp-4 text-sm leading-relaxed text-[var(--color-text-main)]">
+                    <p className="my-4 line-clamp-4 min-h-[5.6rem] text-sm leading-relaxed text-[var(--color-text-main)]">
                       {item.excerpt}
                     </p>
 
                     <Link
                       href={detailHref}
                       prefetch={false}
-                      className="mt-4 inline-flex rounded-full bg-[var(--color-brand)] px-4 py-2 text-xs font-semibold text-white transition hover:brightness-95"
+                      className="mt-auto inline-flex items-center justify-center whitespace-nowrap text-center rounded-full bg-[var(--color-button-secondary)] px-4 py-2 text-xs font-semibold text-white transition hover:brightness-95"
                     >
                       {copy.readReviewLabel}
                     </Link>

@@ -1,7 +1,6 @@
 import {
   MarketingSiteFooter,
   MarketingSiteHeader,
-  MarketingTopBrandStrip,
   getMarketingNavigation,
 } from "@/components/layout/marketing";
 import { AsyncSubmitButton } from "@/components/ui/async-submit-button";
@@ -75,11 +74,6 @@ export async function LoginPage({
         isMyanmar ? "locale-my" : ""
       }`}
     >
-      <MarketingTopBrandStrip
-        locale={locale}
-        title="မဟာစာပေ"
-        message="သိမ်းထားတဲ့အရာတွေ ပုပ်သိုးမသွားခင် လိုအပ်သူကို ပေးအပ်လိုက်ဖို့ ၀န်မလေးပါနဲ့"
-      />
       <MarketingSiteHeader
         copy={copy}
         locale={locale}
@@ -185,7 +179,7 @@ export async function LoginPage({
 
             <AsyncSubmitButton
               label={copy.loginPage.credentialsButton}
-              className="w-full rounded-full bg-[var(--color-brand)] px-5 py-3 text-sm font-semibold text-white transition hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)] disabled:cursor-not-allowed disabled:opacity-70"
+              className="w-full rounded-full bg-[var(--color-button-secondary)] px-5 py-3 text-sm font-semibold text-white transition hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-button-secondary)] disabled:cursor-not-allowed disabled:opacity-70"
             />
           </RecaptchaServerActionForm>
 

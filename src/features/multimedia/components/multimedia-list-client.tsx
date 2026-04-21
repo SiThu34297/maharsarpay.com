@@ -271,19 +271,6 @@ export function MultimediaListClient({
     [pushQuery],
   );
 
-  const setMediaTypeFilter = useCallback(
-    (mediaType?: MediaType) => {
-      pushQuery((params) => {
-        if (mediaType) {
-          params.set("mediaType", mediaType);
-        } else {
-          params.delete("mediaType");
-        }
-      });
-    },
-    [pushQuery],
-  );
-
   const onSearchSubmit = useCallback(
     (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
@@ -302,41 +289,11 @@ export function MultimediaListClient({
   return (
     <section className="section-gap">
       <div className="home-shell">
-        <div className="multimedia-hero">
-          <p className="multimedia-hero-badge">{copy.heroBadge}</p>
-          <h1 className="mt-2 text-3xl text-[var(--color-text-main)] md:text-4xl">{copy.title}</h1>
+        <div className="mb-5 md:mb-6">
+          <h1 className="text-3xl text-[var(--color-text-main)] md:text-4xl">{copy.title}</h1>
           <p className="mt-3 max-w-2xl text-base text-[var(--color-text-muted)] md:text-lg">
             {copy.description}
           </p>
-          <div className="mt-5 flex flex-wrap gap-2">
-            <button
-              type="button"
-              className={`multimedia-filter-chip ${
-                !initialQuery.mediaType ? "multimedia-filter-chip-active" : ""
-              }`}
-              onClick={() => setMediaTypeFilter(undefined)}
-            >
-              {copy.allFilterLabel}
-            </button>
-            <button
-              type="button"
-              className={`multimedia-filter-chip ${
-                initialQuery.mediaType === "video" ? "multimedia-filter-chip-active" : ""
-              }`}
-              onClick={() => setMediaTypeFilter("video")}
-            >
-              {copy.videoFilterLabel}
-            </button>
-            <button
-              type="button"
-              className={`multimedia-filter-chip ${
-                initialQuery.mediaType === "photo" ? "multimedia-filter-chip-active" : ""
-              }`}
-              onClick={() => setMediaTypeFilter("photo")}
-            >
-              {copy.photoFilterLabel}
-            </button>
-          </div>
         </div>
 
         <div className="sticky top-[72px] z-30 -mx-2 mb-4 rounded-xl border border-[var(--color-border)] bg-white/95 px-2 py-2 backdrop-blur-md md:top-[68px] lg:static lg:mx-0 lg:mb-6 lg:rounded-none lg:border-none lg:bg-transparent lg:p-0">
@@ -356,7 +313,7 @@ export function MultimediaListClient({
               />
               <button
                 type="submit"
-                className="rounded-full bg-[var(--color-brand)] px-4 py-2 text-xs font-semibold text-white transition hover:brightness-95"
+                className="rounded-full bg-[var(--color-button-secondary)] px-4 py-2 text-xs font-semibold text-white transition hover:brightness-95"
               >
                 {copy.searchButton}
               </button>

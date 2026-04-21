@@ -21,6 +21,7 @@ type MarketingMobileHeaderProps = Readonly<{
   navigation: MarketingNavItem[];
   activeNavId: MarketingNavId;
   bookCategoryLinks: BookCategoryLink[];
+  logoSrc: string;
   accountState: {
     isLoggedIn: boolean;
     imageSrc: string | null;
@@ -34,6 +35,7 @@ export function MarketingMobileHeader({
   navigation,
   activeNavId,
   bookCategoryLinks,
+  logoSrc,
   accountState,
 }: MarketingMobileHeaderProps) {
   const profilePath = `/${locale}/profile`;
@@ -114,7 +116,20 @@ export function MarketingMobileHeader({
           {isMenuOpen ? <Cross2Icon /> : <HamburgerMenuIcon />}
         </button>
 
-        <div aria-hidden className="h-10 w-10" />
+        <Link
+          href={`/${locale}`}
+          className="inline-flex items-center"
+          aria-label={copy.header.logo}
+        >
+          <Image
+            src={logoSrc}
+            alt={copy.header.logo}
+            width={180}
+            height={78}
+            className="h-9 w-auto object-contain"
+            priority
+          />
+        </Link>
 
         <Link href={accountHref} className="icon-button" aria-label={copy.header.accountLabel}>
           {accountState.isLoggedIn ? (

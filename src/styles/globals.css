@@ -3,18 +3,19 @@
 :root {
   color-scheme: light;
 
-  --color-page-bg: #f9fbf6;
+  --color-page-bg: #f5f7fa;
   --color-card-bg: #ffffff;
-  --color-text-main: #1f2933;
+  --color-text-main: #111827;
   --color-text-muted: #6b7280;
-  --color-brand: #7aac23;
-  --color-brand-subtle: #edf5de;
-  --color-brand-soft: #f3f8ea;
-  --color-brand-strong: #5d8316;
-  --color-accent: #d97b2d;
-  --color-accent-soft: #fdf0e3;
-  --color-surface-soft: #f3f4f6;
-  --color-border: #e5e7eb;
+  --color-brand: #017bff;
+  --color-brand-subtle: #e8f2ff;
+  --color-brand-soft: #f2f7ff;
+  --color-brand-strong: #005fcc;
+  --color-accent: #111111;
+  --color-accent-soft: #eceef1;
+  --color-surface-soft: #eef2f6;
+  --color-border: #d1d5db;
+  --color-button-secondary: #111111;
 
   --space-1: 8px;
   --space-2: 16px;
@@ -30,18 +31,19 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  --color-page-bg: #0f151c;
-  --color-card-bg: #131c24;
-  --color-text-main: #e6edf3;
-  --color-text-muted: #9aa7b4;
-  --color-brand: #9bcf43;
-  --color-brand-subtle: #203018;
-  --color-brand-soft: #2a3e1f;
-  --color-brand-strong: #b8e96a;
-  --color-accent: #f0a35b;
-  --color-accent-soft: #3a2818;
-  --color-surface-soft: #1b2630;
-  --color-border: #2d3945;
+  --color-page-bg: #0f1115;
+  --color-card-bg: #161a20;
+  --color-text-main: #f3f4f6;
+  --color-text-muted: #9ca3af;
+  --color-brand: #4da3ff;
+  --color-brand-subtle: #132a42;
+  --color-brand-soft: #1a3654;
+  --color-brand-strong: #7dbdff;
+  --color-accent: #111111;
+  --color-accent-soft: #2f333b;
+  --color-surface-soft: #20242c;
+  --color-border: #3a404a;
+  --color-button-secondary: #111111;
   --shadow-soft: 0 18px 46px rgba(0, 0, 0, 0.36);
 }
 
@@ -173,7 +175,7 @@ h6 {
 }
 
 .cta-primary {
-  background: var(--color-brand);
+  background: var(--color-button-secondary);
   color: #ffffff;
 }
 
@@ -394,7 +396,7 @@ h6 {
 .book-detail-author {
   display: grid;
   gap: 8px;
-  margin: 0;
+  margin-top: 16px;
 }
 
 .book-detail-author-label {
@@ -520,24 +522,16 @@ h6 {
 
 .book-detail-add-to-cart {
   display: inline-flex;
-  min-height: 46px;
+  height: 44px;
+  width: 44px;
   align-items: center;
   justify-content: center;
-  gap: 8px;
   margin-top: 6px;
   border: none;
   border-radius: 999px;
-  padding: 0 20px;
-  width: fit-content;
-  font-size: 0.85rem;
-  font-weight: 700;
   color: #ffffff;
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--color-brand) 92%, black 8%),
-    color-mix(in srgb, var(--color-brand) 70%, var(--color-accent) 30%)
-  );
-  box-shadow: 0 12px 24px rgba(122, 172, 35, 0.34);
+  background: var(--color-button-secondary);
+  box-shadow: 0 10px 20px rgba(17, 17, 17, 0.25);
   transition:
     transform 0.2s ease,
     filter 0.2s ease;
@@ -680,7 +674,7 @@ h6 {
   font-size: 0.78rem;
   font-weight: 700;
   color: #ffffff;
-  background: var(--color-brand);
+  background: var(--color-button-secondary);
   transition: filter 0.2s ease;
 }
 
@@ -946,8 +940,8 @@ h6 {
   width: 34px;
   height: 34px;
   border-radius: 999px;
-  border: 3px solid color-mix(in srgb, var(--color-brand) 24%, transparent 76%);
-  border-top-color: var(--color-brand);
+  border: 3px solid color-mix(in srgb, var(--color-button-secondary) 24%, transparent 76%);
+  border-top-color: var(--color-button-secondary);
   animation: book-preview-reader-spin 0.9s linear infinite;
 }
 
@@ -1543,24 +1537,16 @@ h6 {
 
 .author-detail-add-to-cart {
   display: inline-flex;
-  min-height: 40px;
+  height: 40px;
+  width: 40px;
   align-items: center;
   justify-content: center;
-  gap: 8px;
   margin-top: 10px;
   border: none;
   border-radius: 999px;
-  padding: 0 16px;
-  width: fit-content;
-  font-size: 0.78rem;
-  font-weight: 700;
   color: #ffffff;
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--color-brand) 90%, black 10%),
-    color-mix(in srgb, var(--color-brand) 68%, var(--color-accent) 32%)
-  );
-  box-shadow: 0 10px 20px rgba(122, 172, 35, 0.3);
+  background: var(--color-button-secondary);
+  box-shadow: 0 10px 20px rgba(17, 17, 17, 0.22);
   transition:
     transform 0.2s ease,
     filter 0.2s ease;
@@ -2229,24 +2215,16 @@ h6 {
 
 .multimedia-detail-add-to-cart {
   display: inline-flex;
-  min-height: 40px;
+  height: 40px;
+  width: 40px;
   align-items: center;
   justify-content: center;
-  gap: 8px;
   margin-top: 10px;
   border: none;
   border-radius: 999px;
-  padding: 0 16px;
-  width: fit-content;
-  font-size: 0.78rem;
-  font-weight: 700;
   color: #ffffff;
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--color-brand) 90%, black 10%),
-    color-mix(in srgb, var(--color-brand) 68%, var(--color-accent) 32%)
-  );
-  box-shadow: 0 10px 20px rgba(122, 172, 35, 0.3);
+  background: var(--color-button-secondary);
+  box-shadow: 0 10px 20px rgba(17, 17, 17, 0.22);
   transition:
     transform 0.2s ease,
     filter 0.2s ease;
