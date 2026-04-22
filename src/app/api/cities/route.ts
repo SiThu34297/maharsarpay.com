@@ -1,0 +1,20 @@
+import { NextRequest, NextResponse } from "next/server";
+
+import { fetchCities } from "@/features/cart-server";
+
+export async function GET(request: NextRequest) {
+  const provinceId = request.nextUrl.searchParams.get("provinceId") ?? undefined;
+
+  try {
+    const data = await fetchCities(provinceId);
+    return NextResponse.json({ items: data });
+  } catch {
+    return NextResponse.json(
+      {
+        items: [],
+        message: "Unable to fetch cities.",
+      },
+      { status: 500 },
+    );
+  }
+}

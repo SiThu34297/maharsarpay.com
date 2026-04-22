@@ -73,8 +73,14 @@ export type MediaListResponse = {
 };
 
 export type MultimediaPageData = {
-  initialResponse: MediaListResponse;
-  initialQuery: MediaListQuery;
+  initialPhotoResponse: MediaListResponse;
+  initialBlogResponse: MediaListResponse;
+  initialQuery: {
+    q?: string;
+    limit: number;
+    photoPage: number;
+    blogPage: number;
+  };
 };
 
 export type MultimediaDetailPageData = {

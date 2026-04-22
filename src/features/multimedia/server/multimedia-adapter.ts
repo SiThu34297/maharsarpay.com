@@ -28,6 +28,7 @@ type RawSearchParams = Record<string, string | string[] | undefined>;
 type BackendMultimediaListRequestQuery = {
   page: number;
   limit: number;
+  type?: MediaType;
   searchName?: string;
 };
 
@@ -559,6 +560,9 @@ async function fetchMultimediaFromBackendWithQuery(
   const params = new URLSearchParams();
   params.set("page", String(query.page));
   params.set("limit", String(query.limit));
+  if (query.type) {
+    params.set("type", query.type);
+  }
 
   if (query.searchName) {
     params.set("searchName", query.searchName);
@@ -726,10 +730,11 @@ export function parseMultimediaListQueryFromSearchParams(
 ): MediaListQuery {
   const normalizedLimit = parsePositiveInteger(searchParams.get("limit")) ?? DEFAULT_LIMIT;
   const page = parsePositiveInteger(searchParams.get("page"));
+  const typeParam = searchParams.get("type") ?? searchParams.get("mediaType");
 
   return normalizeQuery({
     q: searchParams.get("q") ?? searchParams.get("searchName") ?? undefined,
-    mediaType: parseMediaType(searchParams.get("mediaType")),
+    mediaType: parseMediaType(typeParam),
     cursor:
       searchParams.get("cursor") ??
       (page === undefined ? undefined : String((page - 1) * normalizedLimit)),
@@ -887,29 +892,37 @@ export async function searchMultimedia(
   const safeOffset = Number.isFinite(offset) && offset >= 0 ? Math.floor(offset) : 0;
   const page = Math.floor(safeOffset / query.limit) + 1;
 
-  if (!query.mediaType) {
-    try {
-      const backendMedia = getActiveBackendMedia(
-        await fetchMultimediaFromBackendWithQuery(locale, {
-          page,
-          limit: query.limit,
-          searchName: query.q,
-        }),
-      )
-        .sort(sortBackendMediaDescending)
-        .map((media) => toBackendMediaListItem(media));
-      const nextOffset = safeOffset + backendMedia.length;
-      const nextCursor = backendMedia.length < query.limit ? null : String(nextOffset);
+  try {
+    const backendMedia = getActiveBackendMedia(
+      await fetchMultimediaFromBackendWithQuery(locale, {
+        page,
+        limit: query.limit,
+        type: query.mediaType,
+        searchName: query.q,
+      }),
+    )
+      .filter((media) => {
+        if (!query.mediaType) {
+          return true;
+        }
 
-      return {
-        items: backendMedia,
-        total: nextOffset,
-        nextCursor,
-        appliedFilters: buildAppliedFilters(query),
-      };
-    } catch {
-      // Fall through to existing backend and seed fallback paths.
-    }
+        return toMediaType(media.mediaType) === query.mediaType;
+      })
+      .sort(sortBackendMediaDescending)
+      .map((media) => toBackendMediaListItem(media));
+    const nextOffset = safeOffset + backendMedia.length;
+    const hasNextPage = backendMedia.length >= query.limit;
+    const nextCursor = hasNextPage ? String(nextOffset) : null;
+    const total = hasNextPage ? nextOffset + 1 : nextOffset;
+
+    return {
+      items: backendMedia,
+      total,
+      nextCursor,
+      appliedFilters: buildAppliedFilters(query),
+    };
+  } catch {
+    // Fall through to existing backend and seed fallback paths.
   }
 
   try {

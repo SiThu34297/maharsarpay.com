@@ -9,10 +9,14 @@ export type CreateOrderItemPayload = {
 };
 
 export type CreateOrderPayload = {
-  userId: string;
+  userId?: string;
   items: CreateOrderItemPayload[];
   customerPhone: string;
   customerName: string;
+  customerEmail?: string;
+  province: string;
+  city: string;
+  township?: string;
   shippingAddress: string;
   recaptchaToken: string;
   note?: string;
@@ -74,18 +78,23 @@ async function parseJson(response: Response): Promise<unknown> {
 }
 
 export async function createBookOrder(
-  authToken: string,
+  authToken: string | null | undefined,
   payload: CreateOrderPayload,
 ): Promise<CreateOrderResult> {
   try {
+    const requestHeaders: HeadersInit = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    };
+
+    if (authToken) {
+      requestHeaders.Authorization = `Bearer ${authToken}`;
+    }
+
     const response = await fetch(`${BOOK_API_BASE_URL}${ORDERS_ENDPOINT}`, {
       method: "POST",
       cache: "no-store",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${authToken}`,
-      },
+      headers: requestHeaders,
       body: JSON.stringify(payload),
     });
 

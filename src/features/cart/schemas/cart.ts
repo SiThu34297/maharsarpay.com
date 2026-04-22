@@ -4,6 +4,7 @@ export type AddToCartPayload = {
   cartProductId: string;
   title: string;
   author: string;
+  authorId?: string;
   price: number;
   salePrice?: number | null;
   originalPrice?: number | null;

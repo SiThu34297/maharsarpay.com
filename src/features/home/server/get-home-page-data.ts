@@ -148,10 +148,14 @@ async function getHomeBooks(locale: Locale): Promise<BookItem[]> {
 
 async function getHomeMediaItems(locale: Locale): Promise<MediaItem[]> {
   try {
-    const response = await searchMultimedia(locale, { limit: 500 });
+    const [photoResponse, blogResponse] = await Promise.all([
+      searchMultimedia(locale, { mediaType: "photo", limit: 4 }),
+      searchMultimedia(locale, { mediaType: "video", limit: 4 }),
+    ]);
+    const typedItems = [...photoResponse.items, ...blogResponse.items];
 
-    if (response.items.length > 0) {
-      return pickRandomItems(response.items, 4).map((item) => ({
+    if (typedItems.length > 0) {
+      return typedItems.map((item) => ({
         id: item.id,
         slug: item.slug,
         mediaType: item.mediaType,
@@ -165,7 +169,14 @@ async function getHomeMediaItems(locale: Locale): Promise<MediaItem[]> {
     // Fall through to static fallback if backend is unavailable.
   }
 
-  return pickRandomItems(mediaItemsByLocale[locale], 4);
+  const fallbackPhoto = mediaItemsByLocale[locale]
+    .filter((item) => item.mediaType === "photo")
+    .slice(0, 4);
+  const fallbackBlog = mediaItemsByLocale[locale]
+    .filter((item) => item.mediaType === "video")
+    .slice(0, 4);
+
+  return [...fallbackPhoto, ...fallbackBlog];
 }
 
 const mediaItemsByLocale: Record<Locale, MediaItem[]> = {

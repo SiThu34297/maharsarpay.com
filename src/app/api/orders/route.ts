@@ -7,6 +7,10 @@ type OrderRequestBody = {
   items?: unknown;
   customerPhone?: unknown;
   customerName?: unknown;
+  customerEmail?: unknown;
+  province?: unknown;
+  city?: unknown;
+  township?: unknown;
   shippingAddress?: unknown;
   note?: unknown;
   recaptchaToken?: unknown;
@@ -74,16 +78,6 @@ function toOrderItems(input: unknown): CreateOrderItemPayload[] {
 export async function POST(request: NextRequest) {
   const session = await auth();
 
-  if (!session?.user?.id || !session.user.authToken) {
-    return NextResponse.json(
-      {
-        error: true,
-        message: "Unauthorized",
-      },
-      { status: 401 },
-    );
-  }
-
   let body: OrderRequestBody;
 
   try {
@@ -99,11 +93,15 @@ export async function POST(request: NextRequest) {
   }
 
   const items = toOrderItems(body.items);
-  const customerName = toOptionalString(body.customerName) ?? toOptionalString(session.user.name);
+  const customerName = toOptionalString(body.customerName) ?? toOptionalString(session?.user?.name);
   const customerPhone =
-    toOptionalString(body.customerPhone) ?? toOptionalString(session.user.phoneNumber);
-  const shippingAddress =
-    toOptionalString(body.shippingAddress) ?? toOptionalString(session.user.address);
+    toOptionalString(body.customerPhone) ?? toOptionalString(session?.user?.phoneNumber);
+  const customerEmail =
+    toOptionalString(body.customerEmail) ?? toOptionalString(session?.user?.email);
+  const province = toOptionalString(body.province);
+  const city = toOptionalString(body.city);
+  const township = toOptionalString(body.township);
+  const shippingAddress = toOptionalString(body.shippingAddress);
   const note = toOptionalString(body.note) ?? undefined;
   const recaptchaToken = toOptionalString(body.recaptchaToken);
 
@@ -118,7 +116,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (!items.length || !customerName || !customerPhone || !shippingAddress) {
+  if (!items.length || !customerName || !customerPhone || !province || !city || !shippingAddress) {
     return NextResponse.json(
       {
         error: true,
@@ -128,11 +126,15 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const orderResult = await createBookOrder(session.user.authToken, {
-    userId: session.user.id,
+  const orderResult = await createBookOrder(session?.user?.authToken, {
+    userId: session?.user?.id,
     items,
     customerPhone,
     customerName,
+    customerEmail: customerEmail ?? undefined,
+    province,
+    city,
+    township: township ?? undefined,
     shippingAddress,
     note,
     recaptchaToken,

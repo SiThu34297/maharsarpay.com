@@ -22,6 +22,7 @@ export function HomeAddToCartButton({
         cartProductId: book.cartProductId,
         title: book.title,
         author: book.author,
+        authorId: book.authorId,
         price: book.price,
         salePrice: book.salePrice,
         originalPrice: book.originalPrice,

@@ -488,12 +488,12 @@ h6 {
 }
 
 .book-detail-status-in {
-  color: var(--color-brand);
+  color: #157347;
   font-weight: 600;
 }
 
 .book-detail-status-out {
-  color: var(--color-secondary);
+  color: #b42318;
   font-weight: 600;
 }
 
@@ -1227,7 +1227,7 @@ h6 {
 .book-detail-related-grid {
   margin-top: 14px;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(1, minmax(0, 1fr));
   gap: 12px;
 }
 

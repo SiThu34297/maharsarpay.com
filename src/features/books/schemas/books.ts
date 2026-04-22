@@ -20,6 +20,7 @@ export type BackendBookRecord = {
   reviewLink: string | null;
   bookReleaseDate: string | null;
   status: number | null;
+  outOfStock: number | null;
   authors: BackendBookAuthor[];
   categories: BackendBookCategory[];
   bookImageFront: string | null;

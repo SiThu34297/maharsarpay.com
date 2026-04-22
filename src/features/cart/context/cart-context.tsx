@@ -74,6 +74,10 @@ function toOptionalPrice(value: unknown): number | null {
   return isSafeNumber(value) ? value : null;
 }
 
+function toOptionalString(value: unknown): string | undefined {
+  return isNonEmptyString(value) ? value : undefined;
+}
+
 function toCartLineItem(input: unknown): CartLineItem | null {
   if (!input || typeof input !== "object") {
     return null;
@@ -117,6 +121,7 @@ function toCartLineItem(input: unknown): CartLineItem | null {
     cartProductId: candidate.cartProductId,
     title: candidate.title,
     author: candidate.author,
+    authorId: toOptionalString(candidate.authorId),
     price: candidate.price,
     salePrice: toOptionalPrice(candidate.salePrice),
     originalPrice: toOptionalPrice(candidate.originalPrice),

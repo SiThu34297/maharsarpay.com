@@ -12,6 +12,7 @@ type AddToCartButtonProps = Readonly<{
   addLabel: string;
   addedLabel: string;
   className?: string;
+  disabled?: boolean;
 }>;
 
 const ADDED_FEEDBACK_DURATION_MS = 1300;
@@ -35,7 +36,13 @@ function ShoppingCartIcon() {
   );
 }
 
-export function AddToCartButton({ item, addLabel, addedLabel, className }: AddToCartButtonProps) {
+export function AddToCartButton({
+  item,
+  addLabel,
+  addedLabel,
+  className,
+  disabled = false,
+}: AddToCartButtonProps) {
   const { addItem } = useCart();
   const [isAdded, setIsAdded] = useState(false);
   const timeoutRef = useRef<number | null>(null);
@@ -49,6 +56,10 @@ export function AddToCartButton({ item, addLabel, addedLabel, className }: AddTo
   }, []);
 
   function handleClick() {
+    if (disabled) {
+      return;
+    }
+
     addItem(item);
     setIsAdded(true);
 
@@ -67,7 +78,8 @@ export function AddToCartButton({ item, addLabel, addedLabel, className }: AddTo
       type="button"
       aria-label={isAdded ? addedLabel : addLabel}
       title={isAdded ? addedLabel : addLabel}
-      className={className}
+      className={`${className ?? ""} disabled:cursor-not-allowed disabled:opacity-55`}
+      disabled={disabled}
       onClick={handleClick}
     >
       {isAdded ? <CheckIcon className="h-4 w-4" /> : <ShoppingCartIcon />}

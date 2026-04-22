@@ -1,33 +1,43 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useCallback, useMemo, useState, useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
-import { CameraIcon, Cross2Icon, MagnifyingGlassIcon, PlayIcon } from "@radix-ui/react-icons";
+import {
+  CameraIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  Cross2Icon,
+  MagnifyingGlassIcon,
+  PlayIcon,
+} from "@radix-ui/react-icons";
 
 import type {
-  MediaListQuery,
   MediaListResponse,
   MediaType,
+  MultimediaPageData,
 } from "@/features/multimedia/schemas/multimedia";
 import type { Dictionary, Locale } from "@/lib/i18n";
 
 type MultimediaListClientProps = Readonly<{
   copy: Dictionary["multimediaList"];
   locale: Locale;
-  initialResponse: MediaListResponse;
-  initialQuery: MediaListQuery;
+  initialPhotoResponse: MediaListResponse;
+  initialBlogResponse: MediaListResponse;
+  initialQuery: MultimediaPageData["initialQuery"];
 }>;
 
 type ActiveFilterChip = {
-  key: "q" | "mediaType";
+  key: "q";
   label: string;
 };
 
-const SKELETON_COUNT = 4;
+type MediaSection = "photo" | "blog";
+
 const MULTIMEDIA_DISPLAY_LOCALE: Locale = "en";
+const PAGINATION_SLOT_COUNT = 8;
 const EN_MONTHS = [
   "Jan",
   "Feb",
@@ -56,19 +66,27 @@ function replaceResultCount(template: string, count: number, locale: Locale) {
   return template.replace("{count}", countText);
 }
 
-function buildBaseParams(query: MediaListQuery) {
+function buildBaseParams(query: MultimediaPageData["initialQuery"]) {
   const params = new URLSearchParams();
 
   if (query.q) {
     params.set("q", query.q);
   }
-  if (query.mediaType) {
-    params.set("mediaType", query.mediaType);
-  }
 
   params.set("limit", String(query.limit));
+  params.set("photoPage", String(Math.max(1, query.photoPage)));
+  params.set("blogPage", String(Math.max(1, query.blogPage)));
 
   return params;
+}
+
+function buildPageSlots(currentPage: number, totalPages: number) {
+  const start = Math.floor((currentPage - 1) / PAGINATION_SLOT_COUNT) * PAGINATION_SLOT_COUNT + 1;
+
+  return Array.from({ length: PAGINATION_SLOT_COUNT }, (_, index) => {
+    const page = start + index;
+    return page <= totalPages ? page : null;
+  });
 }
 
 function formatDate(locale: Locale, value: string) {
@@ -93,67 +111,153 @@ function getMediaTypeLabel(copy: Dictionary["multimediaList"], mediaType: MediaT
   return mediaType === "video" ? "Blog" : "Photo Essay";
 }
 
+function getTotalPages(response: MediaListResponse, currentPage: number, limit: number) {
+  const calculated = Math.ceil(response.total / limit);
+  const knownPage = Number.isFinite(calculated) && calculated > 0 ? calculated : 1;
+
+  if (response.nextCursor) {
+    return Math.max(knownPage, currentPage + 1);
+  }
+
+  return Math.max(knownPage, currentPage);
+}
+
+function SectionPagination({
+  label,
+  currentPage,
+  totalPages,
+  hasPrevPage,
+  hasNextPage,
+  pageSlots,
+  isPending,
+  onPageChange,
+}: {
+  label: string;
+  currentPage: number;
+  totalPages: number;
+  hasPrevPage: boolean;
+  hasNextPage: boolean;
+  pageSlots: Array<number | null>;
+  isPending: boolean;
+  onPageChange: (page: number) => void;
+}) {
+  return (
+    <section className="py-2">
+      <div className="mb-2 text-center">
+        <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--color-text-muted)]">
+          {label}: Page {currentPage} of {totalPages}
+        </p>
+      </div>
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        <button
+          type="button"
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={!hasPrevPage || isPending}
+          className="inline-flex h-10 min-w-24 items-center justify-center gap-1.5 rounded-md border border-[#d9d9df] bg-[#f4f4f5] px-3 text-lg font-medium text-[#42424a] transition hover:bg-[#ececef] disabled:cursor-not-allowed disabled:opacity-45"
+        >
+          <ChevronLeftIcon className="h-4 w-4" />
+          <span>Prev</span>
+        </button>
+        {pageSlots.map((page, index) => {
+          if (page === null) {
+            return (
+              <div
+                key={`slot-${index}`}
+                className="h-10 w-12 rounded-md border border-dashed border-[#d9d9df] bg-[#f4f4f5]"
+                aria-hidden
+              />
+            );
+          }
+
+          const isActive = page === currentPage;
+
+          return (
+            <button
+              key={`page-${page}`}
+              type="button"
+              onClick={() => onPageChange(page)}
+              disabled={isPending || isActive}
+              aria-current={isActive ? "page" : undefined}
+              className={`h-10 w-12 rounded-md border text-lg font-medium transition ${
+                isActive
+                  ? "border-black bg-black text-white"
+                  : "border-[#d9d9df] bg-[#f4f4f5] text-[#42424a] hover:bg-[#ececef]"
+              } disabled:cursor-not-allowed disabled:opacity-80`}
+            >
+              {page}
+            </button>
+          );
+        })}
+        <button
+          type="button"
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={!hasNextPage || isPending}
+          className="inline-flex h-10 min-w-24 items-center justify-center gap-1.5 rounded-md border border-[#d9d9df] bg-[#f4f4f5] px-3 text-lg font-medium text-[#42424a] transition hover:bg-[#ececef] disabled:cursor-not-allowed disabled:opacity-45"
+        >
+          <span>Next</span>
+          <ChevronRightIcon className="h-4 w-4" />
+        </button>
+      </div>
+    </section>
+  );
+}
+
 export function MultimediaListClient({
   copy,
   locale,
-  initialResponse,
+  initialPhotoResponse,
+  initialBlogResponse,
   initialQuery,
 }: MultimediaListClientProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
 
-  const [items, setItems] = useState(initialResponse.items);
-  const [nextCursor, setNextCursor] = useState(initialResponse.nextCursor);
-  const [isFetchingMore, setIsFetchingMore] = useState(false);
-  const [loadMoreError, setLoadMoreError] = useState(false);
-  const [searchInput, setSearchInput] = useState(initialQuery.q ?? "");
+  const [searchInputDraft, setSearchInputDraft] = useState<string | null>(null);
+  const searchInput = searchInputDraft ?? initialQuery.q ?? "";
 
-  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const photoItems = initialPhotoResponse.items;
+  const blogItems = initialBlogResponse.items;
+  const totalCount = initialPhotoResponse.total + initialBlogResponse.total;
 
-  const queryKey = useMemo(
-    () =>
-      JSON.stringify({
-        q: initialQuery.q,
-        mediaType: initialQuery.mediaType,
-        limit: initialQuery.limit,
-      }),
-    [initialQuery.limit, initialQuery.mediaType, initialQuery.q],
+  const photoTotalPages = useMemo(
+    () => getTotalPages(initialPhotoResponse, initialQuery.photoPage, initialQuery.limit),
+    [initialPhotoResponse, initialQuery.limit, initialQuery.photoPage],
+  );
+  const blogTotalPages = useMemo(
+    () => getTotalPages(initialBlogResponse, initialQuery.blogPage, initialQuery.limit),
+    [initialBlogResponse, initialQuery.blogPage, initialQuery.limit],
   );
 
-  useEffect(() => {
-    setItems(initialResponse.items);
-    setNextCursor(initialResponse.nextCursor);
-    setLoadMoreError(false);
-    setSearchInput(initialQuery.q ?? "");
-  }, [initialQuery, initialResponse.items, initialResponse.nextCursor, queryKey]);
+  const photoPageSlots = useMemo(
+    () => buildPageSlots(initialQuery.photoPage, photoTotalPages),
+    [initialQuery.photoPage, photoTotalPages],
+  );
+  const blogPageSlots = useMemo(
+    () => buildPageSlots(initialQuery.blogPage, blogTotalPages),
+    [blogTotalPages, initialQuery.blogPage],
+  );
 
   const activeFilterChips = useMemo<ActiveFilterChip[]>(() => {
-    const chips: ActiveFilterChip[] = [];
-
-    if (initialQuery.q) {
-      chips.push({ key: "q", label: initialQuery.q });
+    if (!initialQuery.q) {
+      return [];
     }
 
-    if (initialQuery.mediaType) {
-      chips.push({
-        key: "mediaType",
-        label: `${copy.mediaTypeLabel}: ${getMediaTypeLabel(copy, initialQuery.mediaType)}`,
-      });
-    }
-
-    return chips;
-  }, [copy, initialQuery.mediaType, initialQuery.q]);
+    return [{ key: "q", label: initialQuery.q }];
+  }, [initialQuery.q]);
 
   const hasAnyFilter = activeFilterChips.length > 0;
-  const photoItems = useMemo(() => items.filter((item) => item.mediaType === "photo"), [items]);
-  const videoItems = useMemo(() => items.filter((item) => item.mediaType === "video"), [items]);
+  const hasPrevPhotoPage = initialQuery.photoPage > 1;
+  const hasNextPhotoPage =
+    Boolean(initialPhotoResponse.nextCursor) || initialQuery.photoPage < photoTotalPages;
+  const hasPrevBlogPage = initialQuery.blogPage > 1;
+  const hasNextBlogPage =
+    Boolean(initialBlogResponse.nextCursor) || initialQuery.blogPage < blogTotalPages;
 
   const pushQuery = useCallback(
     (updateFn: (params: URLSearchParams) => void) => {
       const params = buildBaseParams(initialQuery);
       updateFn(params);
-      params.delete("cursor");
 
       const queryString = params.toString();
       const href = queryString ? `${pathname}?${queryString}` : pathname;
@@ -165,118 +269,46 @@ export function MultimediaListClient({
     [initialQuery, pathname, router],
   );
 
-  const loadMore = useCallback(async () => {
-    if (!nextCursor || isFetchingMore) {
-      return;
-    }
+  const gotoPage = useCallback(
+    (section: MediaSection, page: number) => {
+      setSearchInputDraft(null);
 
-    setIsFetchingMore(true);
-    setLoadMoreError(false);
-
-    try {
-      const params = new URLSearchParams();
-      params.set("limit", String(initialQuery.limit));
-
-      const nextOffset = Number(nextCursor);
-      const page =
-        Number.isFinite(nextOffset) && nextOffset >= 0
-          ? Math.floor(nextOffset / initialQuery.limit) + 1
-          : 1;
-      params.set("page", String(page));
-
-      if (initialQuery.q) {
-        params.set("searchName", initialQuery.q);
-      }
-
-      if (initialQuery.mediaType) {
-        params.set("mediaType", initialQuery.mediaType);
-      }
-
-      params.set("lang", locale);
-
-      const response = await fetch(`/api/media?${params.toString()}`, {
-        method: "GET",
-        cache: "no-store",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to load more media");
-      }
-
-      const payload = (await response.json()) as MediaListResponse;
-
-      setItems((currentItems) => {
-        const existingIds = new Set(currentItems.map((item) => item.id));
-        const nextItems = [...currentItems];
-
-        for (const item of payload.items) {
-          if (!existingIds.has(item.id)) {
-            existingIds.add(item.id);
-            nextItems.push(item);
-          }
-        }
-
-        return nextItems;
-      });
-
-      setNextCursor(payload.nextCursor);
-    } catch {
-      setLoadMoreError(true);
-    } finally {
-      setIsFetchingMore(false);
-    }
-  }, [initialQuery, isFetchingMore, locale, nextCursor]);
-
-  useEffect(() => {
-    if (!nextCursor || isFetchingMore || isPending) {
-      return;
-    }
-
-    const sentinel = sentinelRef.current;
-
-    if (!sentinel) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const [entry] = entries;
-
-        if (entry?.isIntersecting) {
-          void loadMore();
-        }
-      },
-      {
-        rootMargin: "220px",
-      },
-    );
-
-    observer.observe(sentinel);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [isFetchingMore, isPending, loadMore, nextCursor, queryKey]);
-
-  const clearAllFilters = useCallback(() => {
-    pushQuery((params) => {
-      params.delete("q");
-      params.delete("mediaType");
-    });
-  }, [pushQuery]);
-
-  const removeFilter = useCallback(
-    (key: "q" | "mediaType") => {
       pushQuery((params) => {
-        params.delete(key);
+        if (section === "photo") {
+          params.set("photoPage", String(Math.max(1, page)));
+          return;
+        }
+
+        params.set("blogPage", String(Math.max(1, page)));
       });
     },
     [pushQuery],
   );
 
+  const clearAllFilters = useCallback(() => {
+    setSearchInputDraft(null);
+
+    pushQuery((params) => {
+      params.delete("q");
+      params.set("photoPage", "1");
+      params.set("blogPage", "1");
+    });
+  }, [pushQuery]);
+
+  const removeFilter = useCallback(() => {
+    setSearchInputDraft(null);
+
+    pushQuery((params) => {
+      params.delete("q");
+      params.set("photoPage", "1");
+      params.set("blogPage", "1");
+    });
+  }, [pushQuery]);
+
   const onSearchSubmit = useCallback(
     (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
+      setSearchInputDraft(null);
 
       pushQuery((params) => {
         if (searchInput.trim()) {
@@ -284,6 +316,9 @@ export function MultimediaListClient({
         } else {
           params.delete("q");
         }
+
+        params.set("photoPage", "1");
+        params.set("blogPage", "1");
       });
     },
     [pushQuery, searchInput],
@@ -309,7 +344,7 @@ export function MultimediaListClient({
               <input
                 type="search"
                 value={searchInput}
-                onChange={(event) => setSearchInput(event.target.value)}
+                onChange={(event) => setSearchInputDraft(event.target.value)}
                 placeholder={copy.searchPlaceholder}
                 className="min-w-0 flex-1 bg-transparent text-sm text-[var(--color-text-main)] outline-none placeholder:text-[var(--color-text-muted)] focus-visible:outline-none"
                 aria-label={copy.searchPlaceholder}
@@ -326,11 +361,7 @@ export function MultimediaListClient({
 
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-[var(--color-text-muted)]">
-            {replaceResultCount(
-              copy.showingResults,
-              initialResponse.total,
-              MULTIMEDIA_DISPLAY_LOCALE,
-            )}
+            {replaceResultCount(copy.showingResults, totalCount, MULTIMEDIA_DISPLAY_LOCALE)}
           </p>
 
           {hasAnyFilter ? (
@@ -351,7 +382,7 @@ export function MultimediaListClient({
                 key={`${chip.key}-${chip.label}`}
                 type="button"
                 className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-white px-3 py-1.5 text-xs font-medium text-[var(--color-text-main)]"
-                onClick={() => removeFilter(chip.key)}
+                onClick={removeFilter}
                 aria-label={`${copy.removeFilterLabel}: ${chip.label}`}
               >
                 <span>{chip.label}</span>
@@ -361,157 +392,148 @@ export function MultimediaListClient({
           </div>
         ) : null}
 
-        <div>
-          {items.length > 0 ? (
-            <div className="space-y-8 md:space-y-10">
+        {photoItems.length > 0 || blogItems.length > 0 ? (
+          <div className="space-y-8 md:space-y-10">
+            <section>
+              <h2 className="mb-4 text-2xl text-[var(--color-text-main)] md:text-3xl">
+                Photo Essay
+              </h2>
               {photoItems.length > 0 ? (
-                <section>
-                  <h2 className="mb-4 text-2xl text-[var(--color-text-main)] md:text-3xl">
-                    Photo Essay
-                  </h2>
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-5 lg:grid-cols-3 xl:grid-cols-4">
-                    {photoItems.map((item) => (
-                      <article key={item.id} className="multimedia-list-card">
-                        <div className="relative overflow-hidden rounded-xl">
-                          <Link href={`/${locale}/multimedia/${item.slug}?from=multimedia`}>
-                            <Image
-                              src={item.imageSrc}
-                              alt={item.imageAlt}
-                              width={420}
-                              height={265}
-                              className="h-[210px] w-full object-cover sm:h-[230px]"
-                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-                            />
-                          </Link>
-                          <span
-                            className="media-type-pill media-type-pill-photo"
-                            aria-label={getMediaTypeLabel(copy, item.mediaType)}
-                          >
-                            <CameraIcon />
-                            <span>{getMediaTypeLabel(copy, item.mediaType)}</span>
-                          </span>
-                        </div>
-
-                        <h3 className="mt-3 text-lg font-semibold text-[var(--color-text-main)] sm:text-xl">
-                          <Link href={`/${locale}/multimedia/${item.slug}?from=multimedia`}>
-                            {item.title}
-                          </Link>
-                        </h3>
-                        <p className="mt-2 text-sm leading-relaxed text-[var(--color-text-muted)]">
-                          {item.description}
-                        </p>
-                        <p className="mt-3 text-xs font-semibold uppercase tracking-[0.06em] text-[var(--color-brand)]">
-                          {copy.byLabel} {item.creator}
-                        </p>
-                        <p className="mt-1 text-xs text-[var(--color-text-muted)]">
-                          {copy.publishedOnLabel}{" "}
-                          {formatDate(MULTIMEDIA_DISPLAY_LOCALE, item.publishedAt)}
-                        </p>
-                      </article>
-                    ))}
-                  </div>
-                </section>
-              ) : null}
-
-              {videoItems.length > 0 ? (
-                <section>
-                  <h2 className="mb-4 text-2xl text-[var(--color-text-main)] md:text-3xl">Blog</h2>
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-5 lg:grid-cols-3 xl:grid-cols-4">
-                    {videoItems.map((item) => (
-                      <article key={item.id} className="multimedia-list-card">
-                        <div className="relative overflow-hidden rounded-xl">
-                          <Link href={`/${locale}/multimedia/${item.slug}?from=multimedia`}>
-                            <Image
-                              src={item.imageSrc}
-                              alt={item.imageAlt}
-                              width={420}
-                              height={265}
-                              className="h-[210px] w-full object-cover sm:h-[230px]"
-                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-                            />
-                          </Link>
-                          <span
-                            className="media-type-pill media-type-pill-video"
-                            aria-label={getMediaTypeLabel(copy, item.mediaType)}
-                          >
-                            <PlayIcon />
-                            <span>{getMediaTypeLabel(copy, item.mediaType)}</span>
-                          </span>
-                        </div>
-
-                        <h3 className="mt-3 text-lg font-semibold text-[var(--color-text-main)] sm:text-xl">
-                          <Link href={`/${locale}/multimedia/${item.slug}?from=multimedia`}>
-                            {item.title}
-                          </Link>
-                        </h3>
-                        <p className="mt-2 text-sm leading-relaxed text-[var(--color-text-muted)]">
-                          {item.description}
-                        </p>
-                        <p className="mt-3 text-xs font-semibold uppercase tracking-[0.06em] text-[var(--color-brand)]">
-                          {copy.byLabel} {item.creator}
-                        </p>
-                        <p className="mt-1 text-xs text-[var(--color-text-muted)]">
-                          {copy.publishedOnLabel}{" "}
-                          {formatDate(MULTIMEDIA_DISPLAY_LOCALE, item.publishedAt)}
-                        </p>
-                      </article>
-                    ))}
-                  </div>
-                </section>
-              ) : null}
-
-              {isFetchingMore ? (
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-5 lg:grid-cols-3 xl:grid-cols-4">
-                  {Array.from({ length: SKELETON_COUNT }, (_, index) => (
-                    <article
-                      key={`skeleton-${index}`}
-                      className="multimedia-list-card animate-pulse"
-                    >
-                      <div className="h-[210px] rounded-xl bg-[var(--color-brand-subtle)] sm:h-[230px]" />
-                      <div className="mt-3 h-4 w-4/5 rounded bg-[var(--color-brand-subtle)]" />
-                      <div className="mt-2 h-3 w-2/3 rounded bg-[var(--color-brand-subtle)]" />
-                      <div className="mt-3 h-3 w-1/2 rounded bg-[var(--color-brand-subtle)]" />
+                  {photoItems.map((item) => (
+                    <article key={item.id} className="multimedia-list-card">
+                      <div className="relative overflow-hidden rounded-xl">
+                        <Link href={`/${locale}/multimedia/${item.slug}?from=multimedia`}>
+                          <Image
+                            src={item.imageSrc}
+                            alt={item.imageAlt}
+                            width={420}
+                            height={265}
+                            className="h-[210px] w-full object-cover sm:h-[230px]"
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                          />
+                        </Link>
+                        <span
+                          className="media-type-pill media-type-pill-photo"
+                          aria-label={getMediaTypeLabel(copy, item.mediaType)}
+                        >
+                          <CameraIcon />
+                          <span>{getMediaTypeLabel(copy, item.mediaType)}</span>
+                        </span>
+                      </div>
+
+                      <h3 className="mt-3 text-lg font-semibold text-[var(--color-text-main)] sm:text-xl">
+                        <Link href={`/${locale}/multimedia/${item.slug}?from=multimedia`}>
+                          {item.title}
+                        </Link>
+                      </h3>
+                      <p className="mt-2 text-sm leading-relaxed text-[var(--color-text-muted)]">
+                        {item.description}
+                      </p>
+                      <p className="mt-3 text-xs font-semibold uppercase tracking-[0.06em] text-[var(--color-brand)]">
+                        {copy.byLabel} {item.creator}
+                      </p>
+                      <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+                        {copy.publishedOnLabel}{" "}
+                        {formatDate(MULTIMEDIA_DISPLAY_LOCALE, item.publishedAt)}
+                      </p>
                     </article>
                   ))}
                 </div>
-              ) : null}
-            </div>
-          ) : (
-            <div className="rounded-2xl border border-dashed border-[var(--color-border)] bg-white p-8 text-center">
-              <h2 className="text-xl text-[var(--color-text-main)]">{copy.noMediaFound}</h2>
-              <p className="mt-2 text-sm text-[var(--color-text-muted)]">
-                {copy.tryDifferentFilters}
-              </p>
-              <Link
-                href={`/${locale}`}
-                className="mt-5 inline-flex rounded-full border border-[var(--color-border)] px-5 py-2 text-sm font-semibold text-[var(--color-text-main)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand)]"
-              >
-                {copy.browseHome}
-              </Link>
-            </div>
-          )}
+              ) : (
+                <p className="text-sm text-[var(--color-text-muted)]">{copy.noMediaFound}</p>
+              )}
 
-          {loadMoreError ? (
-            <div className="mt-6 rounded-xl border border-[var(--color-accent)]/35 bg-[var(--color-accent-soft)] p-4 text-sm text-[var(--color-text-main)]">
-              <p>{copy.loadMoreError}</p>
-              <button
-                type="button"
-                className="mt-3 rounded-full bg-[var(--color-accent)] px-4 py-1.5 text-xs font-semibold text-white"
-                onClick={() => void loadMore()}
-              >
-                {copy.retry}
-              </button>
-            </div>
-          ) : null}
+              <div className="mt-5">
+                <SectionPagination
+                  label="Photo Essay"
+                  currentPage={initialQuery.photoPage}
+                  totalPages={photoTotalPages}
+                  hasPrevPage={hasPrevPhotoPage}
+                  hasNextPage={hasNextPhotoPage}
+                  pageSlots={photoPageSlots}
+                  isPending={isPending}
+                  onPageChange={(page) => gotoPage("photo", page)}
+                />
+              </div>
+            </section>
 
-          {isFetchingMore ? (
-            <p className="mt-5 text-center text-sm text-[var(--color-text-muted)]">
-              {copy.loadingMore}
+            <section>
+              <h2 className="mb-4 text-2xl text-[var(--color-text-main)] md:text-3xl">Blog</h2>
+              {blogItems.length > 0 ? (
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-5 lg:grid-cols-3 xl:grid-cols-4">
+                  {blogItems.map((item) => (
+                    <article key={item.id} className="multimedia-list-card">
+                      <div className="relative overflow-hidden rounded-xl">
+                        <Link href={`/${locale}/multimedia/${item.slug}?from=multimedia`}>
+                          <Image
+                            src={item.imageSrc}
+                            alt={item.imageAlt}
+                            width={420}
+                            height={265}
+                            className="h-[210px] w-full object-cover sm:h-[230px]"
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                          />
+                        </Link>
+                        <span
+                          className="media-type-pill media-type-pill-video"
+                          aria-label={getMediaTypeLabel(copy, item.mediaType)}
+                        >
+                          <PlayIcon />
+                          <span>{getMediaTypeLabel(copy, item.mediaType)}</span>
+                        </span>
+                      </div>
+
+                      <h3 className="mt-3 text-lg font-semibold text-[var(--color-text-main)] sm:text-xl">
+                        <Link href={`/${locale}/multimedia/${item.slug}?from=multimedia`}>
+                          {item.title}
+                        </Link>
+                      </h3>
+                      <p className="mt-2 text-sm leading-relaxed text-[var(--color-text-muted)]">
+                        {item.description}
+                      </p>
+                      <p className="mt-3 text-xs font-semibold uppercase tracking-[0.06em] text-[var(--color-brand)]">
+                        {copy.byLabel} {item.creator}
+                      </p>
+                      <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+                        {copy.publishedOnLabel}{" "}
+                        {formatDate(MULTIMEDIA_DISPLAY_LOCALE, item.publishedAt)}
+                      </p>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-[var(--color-text-muted)]">{copy.noMediaFound}</p>
+              )}
+
+              <div className="mt-5">
+                <SectionPagination
+                  label="Blog"
+                  currentPage={initialQuery.blogPage}
+                  totalPages={blogTotalPages}
+                  hasPrevPage={hasPrevBlogPage}
+                  hasNextPage={hasNextBlogPage}
+                  pageSlots={blogPageSlots}
+                  isPending={isPending}
+                  onPageChange={(page) => gotoPage("blog", page)}
+                />
+              </div>
+            </section>
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-[var(--color-border)] bg-white p-8 text-center">
+            <h2 className="text-xl text-[var(--color-text-main)]">{copy.noMediaFound}</h2>
+            <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+              {copy.tryDifferentFilters}
             </p>
-          ) : null}
-
-          <div ref={sentinelRef} className="h-4" aria-hidden />
-        </div>
+            <Link
+              href={`/${locale}`}
+              className="mt-5 inline-flex rounded-full border border-[var(--color-border)] px-5 py-2 text-sm font-semibold text-[var(--color-text-main)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand)]"
+            >
+              {copy.browseHome}
+            </Link>
+          </div>
+        )}
       </div>
 
       {isPending ? (

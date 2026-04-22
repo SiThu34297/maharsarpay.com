@@ -243,6 +243,19 @@ export type Dictionary = {
     checkoutDescription: string;
     customerNameLabel: string;
     customerPhoneLabel: string;
+    customerEmailLabel: string;
+    provinceLabel: string;
+    provincePlaceholder: string;
+    cityLabel: string;
+    cityPlaceholder: string;
+    townshipLabel: string;
+    townshipPlaceholder: string;
+    selectProvinceFirst: string;
+    selectCityFirst: string;
+    loadingProvincesText: string;
+    loadingCitiesText: string;
+    loadingTownshipsText: string;
+    addressLabel: string;
     shippingAddressLabel: string;
     noteLabel: string;
     notePlaceholder: string;
@@ -254,7 +267,9 @@ export type Dictionary = {
     loginRequiredMessage: string;
     loginToOrderButton: string;
     orderErrorCaptcha: string;
+    orderErrorRequiredFields: string;
     orderErrorFallback: string;
+    orderSuccessMessage: string;
   };
   loginPage: {
     metaTitle: string;

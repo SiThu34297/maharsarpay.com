@@ -319,6 +319,18 @@ function toInteger(value: number | null | undefined, fallback = 0) {
   return Math.max(0, Math.round(toSafeNumber(value, fallback)));
 }
 
+function resolveBackendInStock(book: BackendBookRecord): boolean {
+  if (book.outOfStock === 0) {
+    return true;
+  }
+
+  if (book.outOfStock === 1) {
+    return false;
+  }
+
+  return toInteger(book.units) > 0 && toInteger(book.status) === 1;
+}
+
 function getPrimaryAuthor(book: BackendBookRecord) {
   return getBookAuthors(book)[0];
 }
@@ -539,7 +551,7 @@ function toBackendBookDetail(locale: Locale, book: BackendBookRecord): BookDetai
     language: locale === "my" ? "မြန်မာဘာသာ" : "Myanmar",
     format: normalizeWhitespace(book.size || "") || (locale === "my" ? "မသတ်မှတ်" : "Unspecified"),
     isbn: normalizeWhitespace(book.serial || "") || book.id,
-    inStock: toInteger(book.units) > 0 && toInteger(book.status) === 1,
+    inStock: resolveBackendInStock(book),
     galleryImages: uniqueGallerySources.length
       ? uniqueGallerySources.map((src) => ({
           src,

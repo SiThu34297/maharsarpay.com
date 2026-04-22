@@ -43,7 +43,8 @@ export async function MultimediaPage({ copy, locale, data }: MultimediaPageProps
         <MultimediaListClient
           copy={copy.multimediaList}
           locale={locale}
-          initialResponse={data.initialResponse}
+          initialPhotoResponse={data.initialPhotoResponse}
+          initialBlogResponse={data.initialBlogResponse}
           initialQuery={data.initialQuery}
         />
       </main>

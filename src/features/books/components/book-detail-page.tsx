@@ -328,7 +328,7 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
                 </div>
 
                 <div className="book-detail-spec-row">
-                  <span className="book-detail-spec-label">Price</span>
+                  <span className="book-detail-spec-label">တန်ဖိုး</span>
                   <span className="book-detail-spec-value book-detail-spec-price">
                     {formatPrice(locale, pricing.salePrice)}
                   </span>
@@ -359,6 +359,7 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
                     cartProductId: book.cartProductId,
                     title: book.title,
                     author: displayAuthor,
+                    authorId: book.authorId,
                     price: book.price,
                     salePrice: book.salePrice,
                     originalPrice: book.originalPrice,
@@ -366,8 +367,9 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
                     coverImageSrc: book.coverImageSrc,
                     coverImageAlt: book.coverImageAlt,
                   }}
-                  addLabel={copy.booksList.addToCart}
+                  addLabel={book.inStock ? copy.booksList.addToCart : copy.bookDetail.outOfStock}
                   addedLabel={copy.booksList.addedToCart}
+                  disabled={!book.inStock}
                   className="book-detail-add-to-cart"
                 />
               </div>
