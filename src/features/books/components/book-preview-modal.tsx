@@ -68,7 +68,7 @@ type BookPreviewModalProps = Readonly<{
   openPreviewLabel: string;
   downloadPreviewLabel: string;
   closePreviewLabel: string;
-  triggerVariant?: "section" | "inline";
+  triggerVariant?: "section" | "inline" | "inlineLink";
 }>;
 
 export function BookPreviewModal({
@@ -234,33 +234,42 @@ export function BookPreviewModal({
     };
   }, []);
 
-  const triggerButton = (
-    <button
-      type="button"
-      className={`book-detail-preview-open-button ${
-        triggerVariant === "inline" ? "book-detail-preview-open-button-inline" : ""
-      }`}
-      onClick={openReader}
-    >
-      <svg
-        className="book-detail-preview-open-button-icon"
-        viewBox="0 0 24 24"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden
+  const triggerButton =
+    triggerVariant === "inlineLink" ? (
+      <button
+        type="button"
+        className="book-detail-spec-link book-detail-spec-link-button"
+        onClick={openReader}
       >
-        <path
-          d="M1.5 12C3.4 8.3 7.2 6 12 6C16.8 6 20.6 8.3 22.5 12C20.6 15.7 16.8 18 12 18C7.2 18 3.4 15.7 1.5 12Z"
-          stroke="currentColor"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.6" />
-      </svg>
-      <span>{previewCtaLabel}</span>
-    </button>
-  );
+        {previewCtaLabel}
+      </button>
+    ) : (
+      <button
+        type="button"
+        className={`book-detail-preview-open-button ${
+          triggerVariant === "inline" ? "book-detail-preview-open-button-inline" : ""
+        }`}
+        onClick={openReader}
+      >
+        <svg
+          className="book-detail-preview-open-button-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden
+        >
+          <path
+            d="M1.5 12C3.4 8.3 7.2 6 12 6C16.8 6 20.6 8.3 22.5 12C20.6 15.7 16.8 18 12 18C7.2 18 3.4 15.7 1.5 12Z"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.6" />
+        </svg>
+        <span>{previewCtaLabel}</span>
+      </button>
+    );
 
   return (
     <>

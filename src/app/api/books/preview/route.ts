@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const BOOK_API_BASE_URL = process.env.BOOK_API_BASE_URL ?? "https://bookapi.sabahna.com";
-const DEFAULT_BOOK_PREVIEW_HOSTS = ["sabahnapublishers.sgp1.cdn.digitaloceanspaces.com"];
+const DEFAULT_BOOK_PREVIEW_HOSTS = [
+  "sabahnapublishers.sgp1.cdn.digitaloceanspaces.com",
+  "maharsarpay.s3.ap-southeast-1.amazonaws.com",
+];
 
 type AllowedPreviewHosts = {
   exactHosts: Set<string>;

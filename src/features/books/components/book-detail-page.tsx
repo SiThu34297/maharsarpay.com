@@ -11,6 +11,7 @@ import { AddToCartButton } from "@/features/cart";
 import type { BookDetailPageData } from "@/features/books/schemas/books";
 import type { Dictionary, Locale } from "@/lib/i18n";
 import { BookDetailImagePreview } from "./book-detail-image-preview";
+import { BookPreviewModal } from "./book-preview-modal";
 
 type BookDetailPageProps = Readonly<{
   copy: Dictionary;
@@ -297,15 +298,17 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
                 <div className="book-detail-spec-row">
                   <span className="book-detail-spec-label">{copy.bookDetail.previewCtaLabel}</span>
                   <span className="book-detail-spec-value">
-                    {hasPreview ? (
-                      <a
-                        href={previewPdfSrc ?? "#"}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="book-detail-spec-link"
-                      >
-                        View PDF
-                      </a>
+                    {hasPreview && previewPdfSrc ? (
+                      <BookPreviewModal
+                        title={book.title}
+                        pdfSrc={previewPdfSrc}
+                        previewTitle={copy.bookDetail.previewTitle}
+                        previewCtaLabel="View PDF"
+                        openPreviewLabel={copy.bookDetail.openPreviewLabel}
+                        downloadPreviewLabel={copy.bookDetail.downloadPreviewLabel}
+                        closePreviewLabel={copy.bookDetail.closePreviewLabel}
+                        triggerVariant="inlineLink"
+                      />
                     ) : (
                       "-"
                     )}

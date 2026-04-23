@@ -472,6 +472,13 @@ h6 {
   text-decoration: underline;
 }
 
+.book-detail-spec-link-button {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
 .book-detail-spec-price {
   color: #5f6368;
 }
