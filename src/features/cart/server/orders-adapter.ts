@@ -8,15 +8,20 @@ export type CreateOrderItemPayload = {
   qty: number;
 };
 
+export type CreateOrderLocationPayload = {
+  id: string;
+  name: string;
+};
+
 export type CreateOrderPayload = {
   userId?: string;
   items: CreateOrderItemPayload[];
   customerPhone: string;
   customerName: string;
   customerEmail?: string;
-  province: string;
-  city: string;
-  township?: string;
+  province: CreateOrderLocationPayload;
+  city: CreateOrderLocationPayload;
+  township?: CreateOrderLocationPayload;
   shippingAddress: string;
   recaptchaToken: string;
   note?: string;

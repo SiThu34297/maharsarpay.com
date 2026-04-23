@@ -296,6 +296,25 @@ export function CartPageClient({ copy, locale, initialSessionUser }: CartPageCli
       const selectedProvince = provinces.find((province) => province.id === provinceId) ?? null;
       const selectedCity = cities.find((city) => city.id === cityId) ?? null;
       const selectedTownship = townships.find((township) => township.id === townshipId) ?? null;
+      const items = state.items
+        .map((item) => {
+          const bookId = toBookRouteParam(item.cartProductId);
+
+          if (!bookId) {
+            return null;
+          }
+
+          return {
+            bookId,
+            qty: item.quantity,
+          };
+        })
+        .filter((item): item is { bookId: string; qty: number } => Boolean(item));
+
+      if (!selectedProvince || !selectedCity || !items.length) {
+        setOrderError(copy.orderErrorRequiredFields);
+        return;
+      }
 
       const response = await fetch("/api/orders", {
         method: "POST",
@@ -303,26 +322,27 @@ export function CartPageClient({ copy, locale, initialSessionUser }: CartPageCli
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          customerName,
-          customerPhone,
-          customerEmail,
-          province: selectedProvince?.name ?? "",
-          city: selectedCity?.name ?? "",
-          township: selectedTownship?.name ?? "",
-          shippingAddress: [
-            address,
-            selectedTownship?.name,
-            selectedCity?.name,
-            selectedProvince?.name,
-          ]
-            .filter(Boolean)
-            .join(", "),
-          note,
+          customerName: customerName.trim(),
+          customerPhone: customerPhone.trim(),
+          customerEmail: customerEmail.trim(),
+          province: {
+            id: selectedProvince.id,
+            name: selectedProvince.name,
+          },
+          city: {
+            id: selectedCity.id,
+            name: selectedCity.name,
+          },
+          township: selectedTownship
+            ? {
+                id: selectedTownship.id,
+                name: selectedTownship.name,
+              }
+            : undefined,
+          shippingAddress: address.trim(),
+          note: note.trim(),
           recaptchaToken,
-          items: state.items.map((item) => ({
-            cartProductId: item.cartProductId,
-            qty: item.quantity,
-          })),
+          items,
         }),
       });
 

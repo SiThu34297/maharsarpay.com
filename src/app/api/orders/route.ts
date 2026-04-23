@@ -16,6 +16,11 @@ type OrderRequestBody = {
   recaptchaToken?: unknown;
 };
 
+type OrderLocationPayload = {
+  id: string;
+  name: string;
+};
+
 function toOptionalString(value: unknown): string | null {
   if (typeof value !== "string") {
     return null;
@@ -23,6 +28,37 @@ function toOptionalString(value: unknown): string | null {
 
   const normalized = value.trim();
   return normalized.length > 0 ? normalized : null;
+}
+
+function toOrderLocation(value: unknown): OrderLocationPayload | null {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const candidate = value as {
+    id?: unknown;
+    name?: unknown;
+  };
+
+  const id = toOptionalString(candidate.id);
+  const name = toOptionalString(candidate.name);
+
+  if (!id || !name) {
+    return null;
+  }
+
+  return { id, name };
+}
+
+function toOrderLocationOrLegacyString(value: unknown): OrderLocationPayload | null {
+  const location = toOrderLocation(value);
+
+  if (location) {
+    return location;
+  }
+
+  const legacyValue = toOptionalString(value);
+  return legacyValue ? { id: legacyValue, name: legacyValue } : null;
 }
 
 function toBookId(cartProductId: string): string {
@@ -98,9 +134,9 @@ export async function POST(request: NextRequest) {
     toOptionalString(body.customerPhone) ?? toOptionalString(session?.user?.phoneNumber);
   const customerEmail =
     toOptionalString(body.customerEmail) ?? toOptionalString(session?.user?.email);
-  const province = toOptionalString(body.province);
-  const city = toOptionalString(body.city);
-  const township = toOptionalString(body.township);
+  const province = toOrderLocationOrLegacyString(body.province);
+  const city = toOrderLocationOrLegacyString(body.city);
+  const township = toOrderLocationOrLegacyString(body.township);
   const shippingAddress = toOptionalString(body.shippingAddress);
   const note = toOptionalString(body.note) ?? undefined;
   const recaptchaToken = toOptionalString(body.recaptchaToken);
