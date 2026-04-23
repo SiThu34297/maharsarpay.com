@@ -10,6 +10,9 @@ export const isGoogleProviderEnabled = Boolean(
 );
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  // Requests come through a reverse proxy in production (e.g. nginx -> localhost),
+  // so Auth.js must trust forwarded host headers.
+  trustHost: true,
   session: {
     strategy: "jwt",
   },
