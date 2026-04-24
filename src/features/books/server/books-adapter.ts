@@ -307,6 +307,57 @@ function normalizeSearchValue(value: string) {
   return normalizeWhitespace(value).toLowerCase();
 }
 
+function toBookSlugSegment(value: string): string {
+  return value.trim().toLowerCase().replace(/\s+/g, "");
+}
+
+function getBookPrimaryAuthorName(book: Pick<BookListItem, "author" | "authors">): string {
+  const firstAuthorName = book.authors
+    .map((author) => author.name.trim())
+    .find((name) => name.length > 0);
+
+  if (firstAuthorName) {
+    return firstAuthorName;
+  }
+
+  return book.author;
+}
+
+export function buildBookDetailSlug(
+  book: Pick<BookListItem, "id" | "title" | "author" | "authors">,
+): string {
+  const titleSlug = toBookSlugSegment(book.title) || "book";
+  const authorSlug = toBookSlugSegment(getBookPrimaryAuthorName(book)) || "author";
+  const normalizedId = book.id.trim();
+
+  return `${titleSlug}-${authorSlug}-${normalizedId}`;
+}
+
+function matchesBookDetailSlug(
+  book: Pick<BookListItem, "id" | "slug" | "title" | "author" | "authors">,
+  normalizedSlug: string,
+) {
+  const normalizedBookId = normalizeSlug(book.id);
+
+  if (normalizeSlug(book.slug) === normalizedSlug) {
+    return true;
+  }
+
+  if (normalizeSlug(buildBookDetailSlug(book)) === normalizedSlug) {
+    return true;
+  }
+
+  if (normalizedBookId === normalizedSlug) {
+    return true;
+  }
+
+  if (normalizedSlug.endsWith(`-${normalizedBookId}`)) {
+    return true;
+  }
+
+  return false;
+}
+
 function toSafeNumber(value: number | null | undefined, fallback = 0) {
   if (typeof value !== "number" || !Number.isFinite(value)) {
     return fallback;
@@ -503,7 +554,7 @@ function toBackendBookListItem(book: BackendBookRecord): BookListItem {
   const title = normalizeWhitespace(book.bookTitle || "Untitled Book");
   const pricing = resolveBackendBookPricing(book);
 
-  return {
+  const baseBook: BookListItem = {
     id: book.id,
     slug: book.id,
     cartProductId: `book:${book.id}`,
@@ -524,6 +575,11 @@ function toBackendBookListItem(book: BackendBookRecord): BookListItem {
     coverImageSrc: resolveBackendBookCoverImage(book),
     coverImageAlt: `${title} cover`,
     previewPdfSrc: resolveBackendBookPreviewPdfSrc(book.preview),
+  };
+
+  return {
+    ...baseBook,
+    slug: buildBookDetailSlug(baseBook),
   };
 }
 
@@ -756,7 +812,7 @@ function toUrlSearchParams(raw: RawSearchParams): URLSearchParams {
 }
 
 function toLocalizedBook(locale: Locale, book: SeedBook): BookListItem {
-  return {
+  const baseBook: BookListItem = {
     id: book.id,
     slug: book.slug,
     cartProductId: book.cartProductId,
@@ -787,6 +843,11 @@ function toLocalizedBook(locale: Locale, book: SeedBook): BookListItem {
     coverImageSrc: book.coverImageSrc,
     coverImageAlt: book.coverImageAlt[locale],
     previewPdfSrc: null,
+  };
+
+  return {
+    ...baseBook,
+    slug: buildBookDetailSlug(baseBook),
   };
 }
 
@@ -910,20 +971,28 @@ export async function getBookFilterOptions(locale: Locale): Promise<BookFilterOp
 
 export async function getBookBySlug(locale: Locale, slug: string): Promise<BookDetail | null> {
   const normalizedSlug = normalizeSlug(slug);
+
   try {
     const backendBooks = await fetchBooksFromBackend(locale);
-    const backendBook = getActiveBackendBooks(backendBooks).find(
-      (book) => normalizeSlug(book.id) === normalizedSlug,
-    );
+    const backendBook = getActiveBackendBooks(backendBooks)
+      .map((book) => toBackendBookDetail(locale, book))
+      .find((book) => matchesBookDetailSlug(book, normalizedSlug));
 
     if (backendBook) {
-      return toBackendBookDetail(locale, backendBook);
+      return backendBook;
     }
   } catch {
     // Fall through to seed fallback.
   }
 
-  const fallbackBook = seedBooks.find((seedBook) => seedBook.slug === normalizedSlug);
+  const fallbackBook = seedBooks.find((seedBook) => {
+    if (normalizeSlug(seedBook.slug) === normalizedSlug) {
+      return true;
+    }
+
+    const localizedBook = toLocalizedBook(locale, seedBook);
+    return matchesBookDetailSlug(localizedBook, normalizedSlug);
+  });
 
   if (!fallbackBook) {
     return null;

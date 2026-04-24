@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 
 import { Cross2Icon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 
+import { buildAuthorDetailSlug } from "@/features/authors/lib/author-slug";
 import type {
   BookFilterOptions,
   BookListQuery,
@@ -408,7 +409,10 @@ export function BooksListClient({
                       {authorLinks.map((author, index) => (
                         <span key={author.id}>
                           <Link
-                            href={`/${locale}/authors/${encodeURIComponent(author.id)}?from=books`}
+                            href={`/${locale}/authors/${buildAuthorDetailSlug({
+                              id: author.id,
+                              name: author.name,
+                            })}?from=books`}
                             className="transition hover:text-[var(--color-brand)]"
                           >
                             {author.name}

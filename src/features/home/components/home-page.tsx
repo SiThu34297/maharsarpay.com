@@ -8,7 +8,9 @@ import {
   MarketingSiteHeader,
   getMarketingNavigation,
 } from "@/components/layout/marketing";
+import { buildAuthorDetailSlug } from "@/features/authors/lib/author-slug";
 import { getBookFilterOptions } from "@/features/books";
+import { buildMultimediaDetailSlug } from "@/features/multimedia/lib/multimedia-slug";
 import { HomeHeroSlider } from "@/features/home/components/home-hero-slider";
 import { getHomePageData } from "@/features/home/server/get-home-page-data";
 import type { Dictionary, Locale } from "@/lib/i18n";
@@ -226,7 +228,10 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                       {authorLinks.map((author, index) => (
                         <span key={author.id}>
                           <Link
-                            href={`/${locale}/authors/${encodeURIComponent(author.id)}?from=home`}
+                            href={`/${locale}/authors/${buildAuthorDetailSlug({
+                              id: author.id,
+                              name: author.name,
+                            })}?from=home`}
                             className="transition hover:text-[var(--color-brand)]"
                           >
                             {author.name}
@@ -301,7 +306,10 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                     {authorLinks.map((author, index) => (
                       <span key={author.id}>
                         <Link
-                          href={`/${locale}/authors/${encodeURIComponent(author.id)}?from=home`}
+                          href={`/${locale}/authors/${buildAuthorDetailSlug({
+                            id: author.id,
+                            name: author.name,
+                          })}?from=home`}
                           className="transition hover:text-[var(--color-brand)]"
                         >
                           {author.name}
@@ -340,7 +348,10 @@ export async function HomePage({ copy, locale }: HomePageProps) {
             <ul className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4">
               {data.authors.map((author) => (
                 <li key={author.id} className="home-card min-w-[200px] snap-start text-center">
-                  <Link href={`/${locale}/authors/${author.slug}?from=home`} className="block">
+                  <Link
+                    href={`/${locale}/authors/${buildAuthorDetailSlug(author)}?from=home`}
+                    className="block"
+                  >
                     <Image
                       src={author.imageSrc}
                       alt={author.imageAlt}
@@ -351,7 +362,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                   </Link>
                   <h3 className="mt-4 text-lg">
                     <Link
-                      href={`/${locale}/authors/${author.slug}?from=home`}
+                      href={`/${locale}/authors/${buildAuthorDetailSlug(author)}?from=home`}
                       className="hover:text-[var(--color-brand)]"
                     >
                       {author.name}
@@ -378,7 +389,10 @@ export async function HomePage({ copy, locale }: HomePageProps) {
           <div className="hidden gap-5 md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
             {data.authors.map((author) => (
               <article key={author.id} className="home-card text-center">
-                <Link href={`/${locale}/authors/${author.slug}?from=home`} className="block">
+                <Link
+                  href={`/${locale}/authors/${buildAuthorDetailSlug(author)}?from=home`}
+                  className="block"
+                >
                   <Image
                     src={author.imageSrc}
                     alt={author.imageAlt}
@@ -389,7 +403,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                 </Link>
                 <h3 className="mt-4 text-lg">
                   <Link
-                    href={`/${locale}/authors/${author.slug}?from=home`}
+                    href={`/${locale}/authors/${buildAuthorDetailSlug(author)}?from=home`}
                     className="hover:text-[var(--color-brand)]"
                   >
                     {author.name}
@@ -420,7 +434,9 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                     {photoMediaItems.map((item) => (
                       <li key={item.id} className="home-card min-w-[250px] snap-start">
                         <div className="relative">
-                          <Link href={`/${locale}/multimedia/${item.slug}?from=home`}>
+                          <Link
+                            href={`/${locale}/multimedia/${buildMultimediaDetailSlug(item)}?from=home`}
+                          >
                             <Image
                               src={item.imageSrc}
                               alt={item.imageAlt}
@@ -439,7 +455,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                         </div>
                         <h4 className="mt-4 text-lg">
                           <Link
-                            href={`/${locale}/multimedia/${item.slug}?from=home`}
+                            href={`/${locale}/multimedia/${buildMultimediaDetailSlug(item)}?from=home`}
                             className="hover:text-[var(--color-brand)]"
                           >
                             {item.title}
@@ -457,7 +473,9 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                   {photoMediaItems.map((item) => (
                     <article key={item.id} className="home-card">
                       <div className="relative">
-                        <Link href={`/${locale}/multimedia/${item.slug}?from=home`}>
+                        <Link
+                          href={`/${locale}/multimedia/${buildMultimediaDetailSlug(item)}?from=home`}
+                        >
                           <Image
                             src={item.imageSrc}
                             alt={item.imageAlt}
@@ -476,7 +494,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                       </div>
                       <h4 className="mt-4 text-xl">
                         <Link
-                          href={`/${locale}/multimedia/${item.slug}?from=home`}
+                          href={`/${locale}/multimedia/${buildMultimediaDetailSlug(item)}?from=home`}
                           className="hover:text-[var(--color-brand)]"
                         >
                           {item.title}
@@ -499,7 +517,9 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                     {videoMediaItems.map((item) => (
                       <li key={item.id} className="home-card min-w-[250px] snap-start">
                         <div className="relative">
-                          <Link href={`/${locale}/multimedia/${item.slug}?from=home`}>
+                          <Link
+                            href={`/${locale}/multimedia/${buildMultimediaDetailSlug(item)}?from=home`}
+                          >
                             <Image
                               src={item.imageSrc}
                               alt={item.imageAlt}
@@ -518,7 +538,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                         </div>
                         <h4 className="mt-4 text-lg">
                           <Link
-                            href={`/${locale}/multimedia/${item.slug}?from=home`}
+                            href={`/${locale}/multimedia/${buildMultimediaDetailSlug(item)}?from=home`}
                             className="hover:text-[var(--color-brand)]"
                           >
                             {item.title}
@@ -542,7 +562,9 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                   {videoMediaItems.map((item) => (
                     <article key={item.id} className="home-card">
                       <div className="relative">
-                        <Link href={`/${locale}/multimedia/${item.slug}?from=home`}>
+                        <Link
+                          href={`/${locale}/multimedia/${buildMultimediaDetailSlug(item)}?from=home`}
+                        >
                           <Image
                             src={item.imageSrc}
                             alt={item.imageAlt}
@@ -561,7 +583,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                       </div>
                       <h4 className="mt-4 text-xl">
                         <Link
-                          href={`/${locale}/multimedia/${item.slug}?from=home`}
+                          href={`/${locale}/multimedia/${buildMultimediaDetailSlug(item)}?from=home`}
                           className="hover:text-[var(--color-brand)]"
                         >
                           {item.title}

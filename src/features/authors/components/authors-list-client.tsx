@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+import { buildAuthorDetailSlug } from "@/features/authors/lib/author-slug";
 import type { AuthorListQuery, AuthorListResponse } from "@/features/authors/schemas/authors";
 import type { Dictionary, Locale } from "@/lib/i18n";
 
@@ -166,32 +167,39 @@ export function AuthorsListClient({
         <div>
           {items.length > 0 ? (
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-3 xl:grid-cols-4">
-              {items.map((author) => (
-                <article key={author.id} className="book-list-card">
-                  <Link
-                    href={`/${locale}/authors/${author.slug}?from=authors`}
-                    className="relative block overflow-hidden rounded-xl"
-                  >
-                    <Image
-                      src={author.imageSrc}
-                      alt={author.imageAlt}
-                      width={360}
-                      height={420}
-                      className="h-[220px] w-full object-cover"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-                    />
-                  </Link>
+              {items.map((author) => {
+                const authorDetailSlug = buildAuthorDetailSlug({
+                  id: author.id,
+                  name: author.name,
+                });
 
-                  <h2 className="mt-3 text-lg font-semibold text-[var(--color-text-main)]">
-                    <Link href={`/${locale}/authors/${author.slug}?from=authors`}>
-                      {author.name}
+                return (
+                  <article key={author.id} className="book-list-card">
+                    <Link
+                      href={`/${locale}/authors/${authorDetailSlug}?from=authors`}
+                      className="relative block overflow-hidden rounded-xl"
+                    >
+                      <Image
+                        src={author.imageSrc}
+                        alt={author.imageAlt}
+                        width={360}
+                        height={420}
+                        className="h-[220px] w-full object-cover"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                      />
                     </Link>
-                  </h2>
-                  <p className="mt-1 text-xs font-semibold text-[var(--color-brand)]">
-                    {replaceAuthorBookCount(copy.bookCountTemplate, author.bookCount, locale)}
-                  </p>
-                </article>
-              ))}
+
+                    <h2 className="mt-3 text-lg font-semibold text-[var(--color-text-main)]">
+                      <Link href={`/${locale}/authors/${authorDetailSlug}?from=authors`}>
+                        {author.name}
+                      </Link>
+                    </h2>
+                    <p className="mt-1 text-xs font-semibold text-[var(--color-brand)]">
+                      {replaceAuthorBookCount(copy.bookCountTemplate, author.bookCount, locale)}
+                    </p>
+                  </article>
+                );
+              })}
 
               {isFetchingMore
                 ? Array.from({ length: SKELETON_COUNT }, (_, index) => (

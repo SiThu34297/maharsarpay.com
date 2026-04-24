@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { BookDetailPage, getBookBySlug, getBookDetailPageData } from "@/features/books";
+import {
+  BookDetailPage,
+  buildBookDetailSlug,
+  getBookBySlug,
+  getBookDetailPageData,
+} from "@/features/books";
 import { getWebsiteMetadataContent } from "@/features/page-info";
 import { siteConfig } from "@/lib/constants/site";
 import { getDictionary, hasLocale } from "@/lib/i18n";
@@ -26,11 +31,12 @@ export async function generateMetadata({ params }: BookDetailRoutePageProps): Pr
     getBookBySlug(lang, slug),
     getWebsiteMetadataContent(lang),
   ]);
+  const canonicalSlug = book ? buildBookDetailSlug(book) : slug;
 
   if (!book) {
     return buildRouteMetadata({
       lang,
-      pathname: `/books/${slug}`,
+      pathname: `/books/${canonicalSlug}`,
       title: metadataContent.siteTitle,
       description: metadataContent.siteDescription,
       ogImage: metadataContent.ogImage,
@@ -40,7 +46,7 @@ export async function generateMetadata({ params }: BookDetailRoutePageProps): Pr
 
   return buildRouteMetadata({
     lang,
-    pathname: `/books/${slug}`,
+    pathname: `/books/${canonicalSlug}`,
     title: `${book.title} | ${metadataContent.siteTitle}`,
     description: book.description || metadataContent.siteDescription,
     ogImage: metadataContent.ogImage,
@@ -53,7 +59,8 @@ export default async function BookDetailRoutePage({
   searchParams,
 }: BookDetailRoutePageProps) {
   const { lang, slug } = await params;
-  const sourceParam = (await searchParams).from;
+  const resolvedSearchParams = await searchParams;
+  const sourceParam = resolvedSearchParams.from;
   const sourceValue = Array.isArray(sourceParam) ? sourceParam[0] : sourceParam;
   const breadcrumbSource = sourceValue === "home" ? "home" : "books";
 

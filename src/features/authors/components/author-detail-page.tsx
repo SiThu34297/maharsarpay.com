@@ -7,6 +7,7 @@ import {
   MarketingSiteHeader,
   getMarketingNavigation,
 } from "@/components/layout/marketing";
+import { buildAuthorDetailSlug } from "@/features/authors/lib/author-slug";
 import type { AuthorDetailPageData } from "@/features/authors/schemas/authors";
 import type { Dictionary, Locale } from "@/lib/i18n";
 
@@ -262,7 +263,9 @@ export function AuthorDetailPage({ copy, locale, data, breadcrumbSource }: Autho
               <div className="author-detail-related-grid">
                 {relatedAuthors.map((relatedAuthor) => (
                   <article key={relatedAuthor.id} className="author-detail-related-card">
-                    <Link href={`/${locale}/authors/${relatedAuthor.slug}?from=authors`}>
+                    <Link
+                      href={`/${locale}/authors/${buildAuthorDetailSlug(relatedAuthor)}?from=authors`}
+                    >
                       <Image
                         src={relatedAuthor.imageSrc}
                         alt={relatedAuthor.imageAlt}
@@ -273,7 +276,9 @@ export function AuthorDetailPage({ copy, locale, data, breadcrumbSource }: Autho
                       />
                     </Link>
                     <h3 className="author-detail-related-name">
-                      <Link href={`/${locale}/authors/${relatedAuthor.slug}?from=authors`}>
+                      <Link
+                        href={`/${locale}/authors/${buildAuthorDetailSlug(relatedAuthor)}?from=authors`}
+                      >
                         {relatedAuthor.name}
                       </Link>
                     </h3>

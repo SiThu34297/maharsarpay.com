@@ -1,4 +1,8 @@
 import type { Locale } from "@/lib/i18n";
+import {
+  buildAuthorDetailSlug,
+  normalizeAuthorDetailSlug,
+} from "@/features/authors/lib/author-slug";
 
 import type {
   AppliedAuthorFilters,
@@ -308,11 +312,7 @@ function normalizeQuery(query: Partial<AuthorListQuery>): AuthorListQuery {
 }
 
 function normalizeSlug(value: string) {
-  try {
-    return decodeURIComponent(value).trim().toLowerCase();
-  } catch {
-    return value.trim().toLowerCase();
-  }
+  return normalizeAuthorDetailSlug(value);
 }
 
 function normalizeSearchText(value: string) {
@@ -337,9 +337,14 @@ function formatBackendImageAlt(locale: Locale, name: string) {
 }
 
 function toAuthorListItem(author: RuntimeAuthor): AuthorListItem {
+  const canonicalSlug = buildAuthorDetailSlug({
+    id: author.id,
+    name: author.name,
+  });
+
   return {
     id: author.id,
-    slug: author.slug,
+    slug: canonicalSlug,
     name: author.name,
     imageSrc: author.imageSrc,
     imageAlt: author.imageAlt,
@@ -573,10 +578,28 @@ export function normalizeAuthorListQuery(query: Partial<AuthorListQuery>): Autho
 export async function getAuthorBySlug(locale: Locale, slug: string): Promise<AuthorDetail | null> {
   const normalizedSlug = normalizeSlug(slug);
   const authors = await getRuntimeAuthors(locale);
-  const author = authors.find(
-    (item) =>
-      normalizeSlug(item.slug) === normalizedSlug || normalizeSlug(item.id) === normalizedSlug,
-  );
+  const author = authors.find((item) => {
+    const canonicalSlug = normalizeSlug(
+      buildAuthorDetailSlug({
+        id: item.id,
+        name: item.name,
+      }),
+    );
+
+    if (canonicalSlug === normalizedSlug) {
+      return true;
+    }
+
+    if (normalizeSlug(item.slug) === normalizedSlug) {
+      return true;
+    }
+
+    if (normalizeSlug(item.id) === normalizedSlug) {
+      return true;
+    }
+
+    return normalizedSlug.endsWith(`-${normalizeSlug(item.id)}`);
+  });
 
   if (!author) {
     return null;

@@ -1,5 +1,6 @@
 export { AuthorsPage } from "./components/authors-page";
 export { AuthorDetailPage } from "./components/author-detail-page";
+export { buildAuthorDetailSlug } from "./lib/author-slug";
 export {
   getAuthorBySlug,
   getRelatedAuthors,

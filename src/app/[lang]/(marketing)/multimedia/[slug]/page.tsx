@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import {
   MultimediaDetailPage,
+  buildMultimediaDetailSlug,
   getMediaBySlug,
   getMultimediaDetailPageData,
 } from "@/features/multimedia";
@@ -32,11 +33,12 @@ export async function generateMetadata({
     getMediaBySlug(lang, slug),
     getWebsiteMetadataContent(lang),
   ]);
+  const canonicalSlug = media ? buildMultimediaDetailSlug(media) : slug;
 
   if (!media) {
     return buildRouteMetadata({
       lang,
-      pathname: `/multimedia/${slug}`,
+      pathname: `/multimedia/${canonicalSlug}`,
       title: metadataContent.siteTitle,
       description: metadataContent.siteDescription,
       ogImage: metadataContent.ogImage,
@@ -46,7 +48,7 @@ export async function generateMetadata({
 
   return buildRouteMetadata({
     lang,
-    pathname: `/multimedia/${slug}`,
+    pathname: `/multimedia/${canonicalSlug}`,
     title: `${media.title} | ${metadataContent.siteTitle}`,
     description: media.description || metadataContent.siteDescription,
     ogImage: metadataContent.ogImage,

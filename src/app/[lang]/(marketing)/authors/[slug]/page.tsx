@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { AuthorDetailPage, getAuthorBySlug, getAuthorDetailPageData } from "@/features/authors";
+import {
+  AuthorDetailPage,
+  buildAuthorDetailSlug,
+  getAuthorBySlug,
+  getAuthorDetailPageData,
+} from "@/features/authors";
 import { getWebsiteMetadataContent } from "@/features/page-info";
 import { siteConfig } from "@/lib/constants/site";
 import { getDictionary, hasLocale } from "@/lib/i18n";
@@ -26,11 +31,12 @@ export async function generateMetadata({ params }: AuthorDetailRoutePageProps): 
     getAuthorBySlug(lang, slug),
     getWebsiteMetadataContent(lang),
   ]);
+  const canonicalSlug = author ? buildAuthorDetailSlug(author) : slug;
 
   if (!author) {
     return buildRouteMetadata({
       lang,
-      pathname: `/authors/${slug}`,
+      pathname: `/authors/${canonicalSlug}`,
       title: metadataContent.siteTitle,
       description: metadataContent.siteDescription,
       ogImage: metadataContent.ogImage,
@@ -40,7 +46,7 @@ export async function generateMetadata({ params }: AuthorDetailRoutePageProps): 
 
   return buildRouteMetadata({
     lang,
-    pathname: `/authors/${slug}`,
+    pathname: `/authors/${canonicalSlug}`,
     title: `${author.name} | ${metadataContent.siteTitle}`,
     description: author.shortBio || metadataContent.siteDescription,
     ogImage: metadataContent.ogImage,

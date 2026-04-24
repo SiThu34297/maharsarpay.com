@@ -7,6 +7,7 @@ import {
   MarketingSiteHeader,
   getMarketingNavigation,
 } from "@/components/layout/marketing";
+import { buildAuthorDetailSlug } from "@/features/authors/lib/author-slug";
 import { AddToCartButton } from "@/features/cart";
 import type { BookDetailPageData } from "@/features/books/schemas/books";
 import type { Dictionary, Locale } from "@/lib/i18n";
@@ -268,7 +269,10 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
                         <span key={`${author.id}:${author.name}`}>
                           {hasAuthorDetail ? (
                             <Link
-                              href={`/${locale}/authors/${encodeURIComponent(author.id)}`}
+                              href={`/${locale}/authors/${buildAuthorDetailSlug({
+                                id: author.id,
+                                name: author.name,
+                              })}`}
                               className="book-detail-spec-link"
                             >
                               {author.name}

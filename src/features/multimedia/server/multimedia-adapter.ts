@@ -1,5 +1,9 @@
 import { getBooksByAuthor, searchBooks } from "@/features/books/server/books-adapter";
 import type { BookListItem } from "@/features/books/schemas/books";
+import {
+  buildMultimediaDetailSlug,
+  normalizeMultimediaDetailSlug,
+} from "@/features/multimedia/lib/multimedia-slug";
 import type { Locale } from "@/lib/i18n";
 
 import type {
@@ -364,7 +368,7 @@ function makeSlugPart(value: string) {
   return normalized;
 }
 
-function buildBackendMediaSlug(media: BackendMultimediaRecord) {
+function buildLegacyBackendMediaSlug(media: BackendMultimediaRecord) {
   const titlePart = makeSlugPart(media.title || "");
   const idPart =
     media.id
@@ -484,10 +488,11 @@ function resolveBackendNarrative(media: BackendMultimediaRecord, title: string) 
 function toBackendMediaListItem(media: BackendMultimediaRecord): MediaListItem {
   const title = normalizeWhitespace(media.title || "") || "Untitled Multimedia";
   const narrative = resolveBackendNarrative(media, title);
+  const id = media.id;
 
   return {
-    id: media.id,
-    slug: buildBackendMediaSlug(media),
+    id,
+    slug: buildMultimediaDetailSlug({ id, title }),
     title,
     description: narrative.description,
     creator: DEFAULT_MEDIA_CREATOR,
@@ -682,10 +687,13 @@ function toUrlSearchParams(raw: RawSearchParams): URLSearchParams {
 }
 
 function toLocalizedMediaListItem(locale: Locale, item: SeedMedia): MediaListItem {
+  const title = item.title[locale];
+  const id = item.id;
+
   return {
-    id: item.id,
-    slug: item.slug,
-    title: item.title[locale],
+    id,
+    slug: buildMultimediaDetailSlug({ id, title }),
+    title,
     description: item.description[locale],
     creator: item.creator[locale],
     mediaType: item.mediaType,
@@ -722,7 +730,7 @@ function buildAppliedFilters(query: MediaListQuery): AppliedMediaFilters {
 }
 
 function normalizeSlug(value: string) {
-  return value.trim().toLowerCase();
+  return normalizeMultimediaDetailSlug(value);
 }
 
 export function parseMultimediaListQueryFromSearchParams(
@@ -756,9 +764,19 @@ export async function getMediaBySlug(locale: Locale, slug: string): Promise<Medi
   try {
     const backendMedia = getActiveBackendMedia(await fetchMultimediaFromBackend(locale));
     const matchedMedia = backendMedia.find((media) => {
+      const title = normalizeWhitespace(media.title || "") || "Untitled Multimedia";
+      const canonicalSlug = normalizeSlug(
+        buildMultimediaDetailSlug({
+          id: media.id,
+          title,
+        }),
+      );
+
       return (
+        canonicalSlug === normalizedSlug ||
         normalizeSlug(media.id) === normalizedSlug ||
-        normalizeSlug(buildBackendMediaSlug(media)) === normalizedSlug
+        normalizeSlug(buildLegacyBackendMediaSlug(media)) === normalizedSlug ||
+        normalizedSlug.endsWith(`-${normalizeSlug(media.id)}`)
       );
     });
 
@@ -769,9 +787,22 @@ export async function getMediaBySlug(locale: Locale, slug: string): Promise<Medi
     // Fall through to seed fallback.
   }
 
-  const media = seedMediaItems.find(
-    (seedMedia) => normalizeSlug(seedMedia.slug) === normalizedSlug,
-  );
+  const media = seedMediaItems.find((seedMedia) => {
+    const localizedTitle = seedMedia.title[locale];
+    const canonicalSlug = normalizeSlug(
+      buildMultimediaDetailSlug({
+        id: seedMedia.id,
+        title: localizedTitle,
+      }),
+    );
+
+    return (
+      canonicalSlug === normalizedSlug ||
+      normalizeSlug(seedMedia.slug) === normalizedSlug ||
+      normalizeSlug(seedMedia.id) === normalizedSlug ||
+      normalizedSlug.endsWith(`-${normalizeSlug(seedMedia.id)}`)
+    );
+  });
 
   if (!media) {
     return null;

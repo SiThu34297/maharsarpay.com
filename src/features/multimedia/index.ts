@@ -1,5 +1,6 @@
 export { MultimediaPage } from "./components/multimedia-page";
 export { MultimediaDetailPage } from "./components/multimedia-detail-page";
+export { buildMultimediaDetailSlug } from "./lib/multimedia-slug";
 export {
   getMediaBySlug,
   getMediaRelatedBooks,
