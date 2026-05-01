@@ -213,7 +213,7 @@ async function fetchBookReviewsFromBackend(
   query: {
     page: number;
     limit: number;
-    searchName?: string;
+    q?: string;
     bookId?: string;
   },
 ): Promise<BackendBookReviewRecord[]> {
@@ -221,8 +221,11 @@ async function fetchBookReviewsFromBackend(
   params.set("page", String(query.page));
   params.set("limit", String(query.limit));
 
-  if (query.searchName) {
-    params.set("searchName", query.searchName);
+  if (query.q) {
+    // Send generic query for backend-side matching (author/reviewer/book name).
+    params.set("q", query.q);
+    // Keep legacy key for backward compatibility with older backend handlers.
+    params.set("searchName", query.q);
   }
 
   if (query.bookId) {
@@ -311,7 +314,7 @@ export async function searchBookReviews(
     const records = await fetchBookReviewsFromBackend(locale, {
       page,
       limit: query.limit,
-      searchName: query.q,
+      q: query.q,
       bookId: query.bookId,
     });
 

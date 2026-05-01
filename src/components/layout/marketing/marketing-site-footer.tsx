@@ -69,6 +69,7 @@ export async function MarketingSiteFooter({ copy, navigation }: MarketingSiteFoo
   const locale = resolveLocaleFromNavigation(navigation);
   const footerContent = await getWebsiteFooterContent(locale);
   const privacyPolicyHref = `/${locale}/privacy-policy`;
+  const subscribeHref = `/${locale}/subscribe`;
 
   return (
     <footer id="contact" className="border-t border-(--color-border) bg-white">
@@ -110,6 +111,11 @@ export async function MarketingSiteFooter({ copy, navigation }: MarketingSiteFoo
                   className="footer-link"
                 >
                   {copy.footer.supportContact}
+                </Link>
+              </li>
+              <li>
+                <Link href={subscribeHref} className="footer-link">
+                  {copy.footer.supportSubscribe}
                 </Link>
               </li>
             </ul>

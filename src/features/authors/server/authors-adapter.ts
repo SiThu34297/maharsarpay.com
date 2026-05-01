@@ -21,12 +21,6 @@ const BOOK_API_BASE_URL = process.env.BOOK_API_BASE_URL ?? "https://bookapi.saba
 
 type RawSearchParams = Record<string, string | string[] | undefined>;
 
-type BackendAuthorsListRequestQuery = {
-  page: number;
-  limit: number;
-  searchName?: string;
-};
-
 type LocalizedValue = {
   en: string;
   my: string;
@@ -431,12 +425,6 @@ function toBackendAuthorSlugTuples(authors: BackendAuthorRecord[]) {
   });
 }
 
-function sortAuthorsByCreatedAt(authors: RuntimeAuthor[]) {
-  return [...authors].sort(
-    (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
-  );
-}
-
 function toFallbackRuntimeAuthors(locale: Locale) {
   return seedAuthors.map((author) => toFallbackRuntimeAuthor(locale, author));
 }
@@ -472,57 +460,14 @@ async function fetchRuntimeAuthorsFromBackend(locale: Locale): Promise<RuntimeAu
   );
 }
 
-async function fetchRuntimeAuthorsFromBackendWithQuery(
-  locale: Locale,
-  query: BackendAuthorsListRequestQuery,
-): Promise<RuntimeAuthor[]> {
-  const params = new URLSearchParams();
-  params.set("page", String(query.page));
-  params.set("limit", String(query.limit));
-
-  if (query.searchName) {
-    params.set("searchName", query.searchName);
-  }
-
-  const response = await fetch(`${BOOK_API_BASE_URL}${AUTHORS_ENDPOINT}?${params.toString()}`, {
-    method: "GET",
-    cache: "no-store",
-    headers: {
-      Accept: "application/json",
-      "Accept-Language": locale,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Authors API request failed with status ${response.status}`);
-  }
-
-  const payload = (await response.json()) as Partial<BackendAuthorsResponse>;
-
-  if (payload.error || payload.authorized === false) {
-    throw new Error(payload.message || "Authors API returned an error");
-  }
-
-  if (!Array.isArray(payload.data)) {
-    throw new TypeError("Authors API returned an invalid response payload");
-  }
-
-  const activeAuthors = payload.data.filter((author) => author.status === 1);
-
-  return toBackendAuthorSlugTuples(activeAuthors).map(({ author, slug }, index) =>
-    toBackendRuntimeAuthor(locale, author, slug, index),
-  );
-}
-
 async function getRuntimeAuthors(locale: Locale) {
   try {
-    const backendAuthors = await fetchRuntimeAuthorsFromBackend(locale);
-    return sortAuthorsByCreatedAt(backendAuthors);
+    return await fetchRuntimeAuthorsFromBackend(locale);
   } catch {
     // Fallback to local seed data if backend is unavailable.
   }
 
-  return sortAuthorsByCreatedAt(toFallbackRuntimeAuthors(locale));
+  return toFallbackRuntimeAuthors(locale);
 }
 
 function toUrlSearchParams(raw: RawSearchParams): URLSearchParams {
@@ -636,29 +581,6 @@ export async function searchAuthors(
   const query = normalizeQuery(queryInput);
   const offset = Number(query.cursor ?? "0");
   const safeOffset = Number.isFinite(offset) && offset >= 0 ? Math.floor(offset) : 0;
-  const page = Math.floor(safeOffset / query.limit) + 1;
-
-  try {
-    const backendAuthors = await fetchRuntimeAuthorsFromBackendWithQuery(locale, {
-      page,
-      limit: query.limit,
-      searchName: query.q,
-    });
-
-    const items = backendAuthors.map((author) => toAuthorListItem(author));
-    const nextOffset = safeOffset + items.length;
-    const nextCursor = items.length < query.limit ? null : String(nextOffset);
-
-    return {
-      items,
-      total: nextOffset,
-      nextCursor,
-      appliedFilters: buildAppliedFilters(query),
-    };
-  } catch {
-    // Fall back to local seed search when backend is unavailable.
-  }
-
   const keyword = query.q ? normalizeSearchText(query.q) : undefined;
   const authors = await getRuntimeAuthors(locale);
   const filtered = authors.filter((author) => {

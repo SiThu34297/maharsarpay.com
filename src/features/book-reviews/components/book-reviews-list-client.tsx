@@ -365,12 +365,9 @@ export function BookReviewsListClient({
 
         <div>
           {items.length > 0 ? (
-            <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 xl:grid-cols-4">
               {items.map((item) => {
                 const detailHref = `/${locale}/book-reviews/${item.id}`;
-                const bookHref = item.book.id
-                  ? `/${locale}/books/${item.book.id}?from=books`
-                  : `/${locale}/books`;
 
                 return (
                   <article
@@ -394,35 +391,21 @@ export function BookReviewsListClient({
                       </div>
                     </div>
 
-                    <div className="mt-4 flex gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-soft)] p-3">
-                      <Link
-                        href={bookHref}
-                        prefetch={false}
-                        className="relative block h-20 w-14 shrink-0 overflow-hidden rounded-md"
-                      >
+                    <h2 className="mt-4 line-clamp-2 text-base font-semibold text-[var(--color-text-main)]">
+                      {item.book.title}
+                    </h2>
+
+                    {item.reviewImageSrc ? (
+                      <div className="mt-3 overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-soft)]">
                         <Image
-                          src={item.book.coverImageSrc}
-                          alt={item.book.coverImageAlt}
-                          width={112}
-                          height={160}
-                          className="h-full w-full object-cover"
+                          src={item.reviewImageSrc}
+                          alt={`${item.reviewerName} review image`}
+                          width={800}
+                          height={450}
+                          className="h-44 w-full object-cover"
                         />
-                      </Link>
-                      <div className="min-w-0">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--color-text-muted)]">
-                          {copy.reviewedBookLabel}
-                        </p>
-                        <h2 className="mt-1 line-clamp-2 text-sm font-semibold text-[var(--color-text-main)] sm:text-base">
-                          <Link
-                            href={bookHref}
-                            prefetch={false}
-                            className="hover:text-[var(--color-brand)]"
-                          >
-                            {item.book.title}
-                          </Link>
-                        </h2>
                       </div>
-                    </div>
+                    ) : null}
 
                     <p className="my-4 line-clamp-4 min-h-[5.6rem] text-sm leading-relaxed text-[var(--color-text-main)]">
                       {item.excerpt}

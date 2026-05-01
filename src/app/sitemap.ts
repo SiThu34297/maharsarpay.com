@@ -11,6 +11,7 @@ const publicRoutes = [
   "/multimedia",
   "/book-reviews",
   "/contact",
+  "/subscribe",
   "/privacy-policy",
 ];
 

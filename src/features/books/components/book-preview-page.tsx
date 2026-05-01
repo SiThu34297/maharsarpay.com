@@ -74,7 +74,7 @@ export function BookPreviewPage({ copy, locale, books, filterOptions }: BookPrev
                     />
                   </Link>
 
-                  <h2 className="book-list-title mt-5 text-center text-[1.05rem] text-[var(--color-text-main)] sm:text-lg">
+                  <h2 className="book-list-title mt-1.5 text-center text-base font-semibold text-[var(--color-text-main)] sm:text-[1.05rem]">
                     <Link
                       href={`/${locale}/books/${book.slug}?from=books`}
                       className="hover:text-[var(--color-brand)]"
@@ -82,11 +82,11 @@ export function BookPreviewPage({ copy, locale, books, filterOptions }: BookPrev
                       {book.title}
                     </Link>
                   </h2>
-                  <p className="mt-1 min-h-[1.25rem] line-clamp-1 px-4 text-center text-sm text-[var(--color-text-muted)]">
+                  <p className="-mt-0.5 min-h-[1.25rem] line-clamp-1 px-4 text-center text-sm text-[var(--color-text-muted)]">
                     {book.author}
                   </p>
 
-                  <div className="book-preview-card-actions mt-auto px-4 pb-4 pt-4">
+                  <div className="book-preview-card-actions mt-1 px-4 pb-2 pt-2">
                     <BookPreviewModal
                       title={book.title}
                       pdfSrc={book.previewPdfSrc}

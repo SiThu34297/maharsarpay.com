@@ -142,13 +142,13 @@ export function BookReviewDetailPage({ copy, locale, data }: BookReviewDetailPag
           </nav>
 
           <section className="mt-5 rounded-2xl border border-[var(--color-border)] bg-white p-5 shadow-[var(--shadow-soft)] md:p-7">
-            <div className="flex flex-wrap items-center gap-4">
-              <span className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-brand-subtle)] text-base font-semibold text-[var(--color-brand)]">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-brand-subtle)] text-sm font-semibold text-[var(--color-brand)]">
                 {getInitial(review.reviewerName)}
               </span>
 
               <div>
-                <h1 className="text-2xl font-semibold text-[var(--color-text-main)] md:text-3xl">
+                <h1 className="text-xl font-semibold text-[var(--color-text-main)] md:text-2xl">
                   {copy.bookReviewDetail.reviewByLabel} {review.reviewerName}
                 </h1>
                 <p className="mt-2 text-sm text-[var(--color-text-muted)]">
@@ -159,56 +159,23 @@ export function BookReviewDetailPage({ copy, locale, data }: BookReviewDetailPag
               </div>
             </div>
 
+            <h2 className="mt-6 text-lg font-semibold text-[var(--color-text-main)]">
+              <Link href={bookHref} prefetch={false} className="hover:text-[var(--color-brand)]">
+                {review.book.title}
+              </Link>
+            </h2>
+
             {review.reviewImageSrc ? (
-              <div className="mt-6 mx-auto max-w-5xl overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-soft)] p-2">
+              <div className="mt-4 mx-auto max-w-4xl overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-soft)] p-2">
                 <Image
                   src={review.reviewImageSrc}
                   alt={`${review.reviewerName} review image`}
-                  width={960}
-                  height={540}
-                  className="max-h-[78vh] w-full object-contain"
+                  width={840}
+                  height={472}
+                  className="max-h-[62vh] w-full object-contain"
                 />
               </div>
             ) : null}
-
-            <div className="mt-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-soft)] p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--color-text-muted)]">
-                {copy.bookReviewDetail.reviewedBookLabel}
-              </p>
-              <div className="mt-2 flex gap-3">
-                <Link
-                  href={bookHref}
-                  prefetch={false}
-                  className="relative block h-24 w-16 shrink-0 overflow-hidden rounded-md"
-                >
-                  <Image
-                    src={review.book.coverImageSrc}
-                    alt={review.book.coverImageAlt}
-                    width={128}
-                    height={192}
-                    className="h-full w-full object-cover"
-                  />
-                </Link>
-                <div className="min-w-0">
-                  <h2 className="text-lg font-semibold text-[var(--color-text-main)]">
-                    <Link
-                      href={bookHref}
-                      prefetch={false}
-                      className="hover:text-[var(--color-brand)]"
-                    >
-                      {review.book.title}
-                    </Link>
-                  </h2>
-                  <Link
-                    href={bookHref}
-                    prefetch={false}
-                    className="mt-3 inline-flex rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text-main)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand)]"
-                  >
-                    {copy.bookReviewDetail.openBookLabel}
-                  </Link>
-                </div>
-              </div>
-            </div>
 
             <article
               className="rich-text-content prose prose-sm mt-6 max-w-none text-[var(--color-text-main)] prose-a:text-[var(--color-brand)] prose-strong:text-[var(--color-text-main)]"

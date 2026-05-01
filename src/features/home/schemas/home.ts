@@ -9,8 +9,8 @@ export const homeHeroBannerDesignSpec = {
     height: 900,
   },
   mobile: {
-    width: 1080,
-    height: 1800,
+    width: 1000,
+    height: 1200,
   },
 } as const;
 

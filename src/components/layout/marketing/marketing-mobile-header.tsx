@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { ChevronDownIcon, Cross2Icon, HamburgerMenuIcon, PersonIcon } from "@radix-ui/react-icons";
+import { ChevronDownIcon, Cross2Icon, HamburgerMenuIcon } from "@radix-ui/react-icons";
 
 import type { Dictionary, Locale } from "@/lib/i18n";
 
@@ -22,11 +22,6 @@ type MarketingMobileHeaderProps = Readonly<{
   activeNavId: MarketingNavId;
   bookCategoryLinks: BookCategoryLink[];
   logoSrc: string;
-  accountState: {
-    isLoggedIn: boolean;
-    imageSrc: string | null;
-    initials: string;
-  };
 }>;
 
 export function MarketingMobileHeader({
@@ -36,12 +31,7 @@ export function MarketingMobileHeader({
   activeNavId,
   bookCategoryLinks,
   logoSrc,
-  accountState,
 }: MarketingMobileHeaderProps) {
-  const profilePath = `/${locale}/profile`;
-  const accountHref = accountState.isLoggedIn
-    ? profilePath
-    : `/${locale}/login?next=${encodeURIComponent(profilePath)}`;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isBooksDropdownOpen, setIsBooksDropdownOpen] = useState(activeNavId === "books");
   const mobileMenuId = "marketing-mobile-navigation";
@@ -131,24 +121,11 @@ export function MarketingMobileHeader({
           />
         </Link>
 
-        <Link href={accountHref} className="icon-button" aria-label={copy.header.accountLabel}>
-          {accountState.isLoggedIn ? (
-            accountState.imageSrc ? (
-              <Image
-                src={accountState.imageSrc}
-                alt={copy.header.accountLabel}
-                width={36}
-                height={36}
-                className="h-9 w-9 rounded-full object-cover"
-              />
-            ) : (
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-brand-subtle)] text-xs font-semibold text-[var(--color-brand)]">
-                {accountState.initials}
-              </span>
-            )
-          ) : (
-            <PersonIcon />
-          )}
+        <Link
+          href={`/${locale}/subscribe`}
+          className="inline-flex items-center rounded-full bg-[var(--color-brand)] px-3 py-1.5 text-xs font-semibold text-white transition hover:opacity-90"
+        >
+          {copy.header.subscribeLabel}
         </Link>
       </div>
 

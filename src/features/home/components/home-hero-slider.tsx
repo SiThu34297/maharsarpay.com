@@ -83,7 +83,7 @@ export function HomeHeroSlider({ slides, previousLabel, nextLabel }: HomeHeroSli
   }
 
   return (
-    <section className="relative h-[68svh] min-h-[500px] w-full overflow-hidden bg-black sm:h-[64svh] md:h-[64svh] md:min-h-[460px] lg:h-[72svh] xl:h-[78svh]">
+    <section className="relative aspect-[5/6] w-full overflow-hidden bg-black md:aspect-auto md:h-[64svh] md:min-h-[460px] lg:mx-auto lg:h-[400px] lg:min-h-[400px] lg:max-w-[1500px]">
       {slides.map((slide, index) => {
         const isActive = index === safeActiveIndex;
         const imageSrc = isDesktopOrTablet ? slide.imageDesktopSrc : slide.imageMobileSrc;
@@ -195,7 +195,7 @@ export function HomeHeroSlider({ slides, previousLabel, nextLabel }: HomeHeroSli
           </div>
         </div>
       ) : null}
-      <div className="pointer-events-none absolute inset-x-0 bottom-16 z-10 p-6 text-white md:bottom-20 md:p-10 lg:p-14">
+      <div className="pointer-events-none absolute inset-x-0 bottom-12 z-10 p-6 text-white md:bottom-16 md:p-10 lg:bottom-12 lg:p-14">
         <h1
           key={activeSlide.id}
           className="max-w-4xl text-2xl leading-tight transition-all duration-500 lg:text-3xl"

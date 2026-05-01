@@ -21,12 +21,6 @@ const BACKEND_FALLBACK_COVER_SRC = "/images/home/real/books/book-1.jpg";
 
 type RawSearchParams = Record<string, string | string[] | undefined>;
 
-type BackendBooksListRequestQuery = {
-  page: number;
-  limit: number;
-  searchName?: string;
-};
-
 type LocalizedValue = {
   en: string;
   my: string;
@@ -495,8 +489,8 @@ function resolveBackendBookPricing(book: BackendBookRecord) {
 
 function resolveBackendBookCoverImage(book: BackendBookRecord) {
   return (
-    book.coverImage?.trim() ||
     book.bookImageFront?.trim() ||
+    book.coverImage?.trim() ||
     book.bookImageBack?.trim() ||
     BACKEND_FALLBACK_COVER_SRC
   );
@@ -523,27 +517,6 @@ function resolveBackendBookPreviewPdfSrc(preview: string | null | undefined) {
   } catch {
     return null;
   }
-}
-
-function resolveBackendBookReleaseTimestamp(book: BackendBookRecord) {
-  const time = Date.parse(book.bookReleaseDate ?? "");
-
-  if (Number.isFinite(time)) {
-    return time;
-  }
-
-  return 0;
-}
-
-function sortBackendBooksDescending(left: BackendBookRecord, right: BackendBookRecord) {
-  const timestampDiff =
-    resolveBackendBookReleaseTimestamp(right) - resolveBackendBookReleaseTimestamp(left);
-
-  if (timestampDiff !== 0) {
-    return timestampDiff;
-  }
-
-  return left.id.localeCompare(right.id);
 }
 
 function toBackendBookListItem(book: BackendBookRecord): BookListItem {
@@ -674,46 +647,6 @@ function matchesBackendAuthor(
 
 async function fetchBooksFromBackend(locale: Locale): Promise<BackendBookRecord[]> {
   const response = await fetch(`${BOOK_API_BASE_URL}${BOOKS_ENDPOINT}`, {
-    method: "GET",
-    cache: "no-store",
-    headers: {
-      Accept: "application/json",
-      "Accept-Language": locale,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Books API request failed with status ${response.status}`);
-  }
-
-  const payload = (await response.json()) as Partial<BackendBooksResponse>;
-
-  if (payload.error) {
-    throw new Error(payload.message || "Books API returned an error");
-  }
-
-  if (!Array.isArray(payload.data)) {
-    throw new TypeError("Books API returned an invalid response payload");
-  }
-
-  return payload.data.filter((item): item is BackendBookRecord => {
-    return Boolean(item && typeof item === "object" && typeof item.id === "string");
-  });
-}
-
-async function fetchBooksFromBackendWithQuery(
-  locale: Locale,
-  query: BackendBooksListRequestQuery,
-): Promise<BackendBookRecord[]> {
-  const params = new URLSearchParams();
-  params.set("page", String(query.page));
-  params.set("limit", String(query.limit));
-
-  if (query.searchName) {
-    params.set("searchName", query.searchName);
-  }
-
-  const response = await fetch(`${BOOK_API_BASE_URL}${BOOKS_ENDPOINT}?${params.toString()}`, {
     method: "GET",
     cache: "no-store",
     headers: {
@@ -942,9 +875,10 @@ export async function getBookFilterOptions(locale: Locale): Promise<BookFilterOp
       backendCategoryMap.set(label, label);
     }
 
-    const backendCategoryOptions = [...backendCategoryMap.entries()]
-      .map(([value, label]) => ({ value, label }))
-      .sort((left, right) => left.label.localeCompare(right.label));
+    const backendCategoryOptions = [...backendCategoryMap.entries()].map(([value, label]) => ({
+      value,
+      label,
+    }));
 
     if (backendCategoryOptions.length > 0) {
       return {
@@ -962,9 +896,7 @@ export async function getBookFilterOptions(locale: Locale): Promise<BookFilterOp
     categoriesMap.set(book.categoryId, book.category);
   }
 
-  const categories = [...categoriesMap.entries()]
-    .map(([value, label]) => ({ value, label }))
-    .sort((left, right) => left.label.localeCompare(right.label));
+  const categories = [...categoriesMap.entries()].map(([value, label]) => ({ value, label }));
 
   return { categories };
 }
@@ -1016,7 +948,6 @@ export async function getBooksByAuthor(
     const backendBooks = await fetchBooksFromBackend(locale);
     return getActiveBackendBooks(backendBooks)
       .filter((book) => matchesBackendAuthor(book, authorId, normalizedAuthorName))
-      .sort(sortBackendBooksDescending)
       .slice(0, safeLimit)
       .map((book) => toBackendBookListItem(book));
   } catch {
@@ -1037,7 +968,6 @@ export async function getBooksByAuthor(
 
       return candidateNames.includes(normalizedAuthorName);
     })
-    .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime())
     .slice(0, safeLimit)
     .map((seedBook) => toLocalizedBook(locale, seedBook));
 }
@@ -1064,7 +994,6 @@ export async function getRelatedBooks(
           return categoryCandidates.includes(normalizedCategoryId);
         });
       })
-      .sort(sortBackendBooksDescending)
       .map((book) => toBackendBookListItem(book));
 
     if (sameCategory.length >= safeLimit) {
@@ -1074,7 +1003,6 @@ export async function getRelatedBooks(
     const excludedIds = new Set([currentBook.id, ...sameCategory.map((book) => book.id)]);
     const fallbackBooks = backendBooks
       .filter((book) => !excludedIds.has(book.id))
-      .sort(sortBackendBooksDescending)
       .map((book) => toBackendBookListItem(book));
 
     return [...sameCategory, ...fallbackBooks].slice(0, safeLimit);
@@ -1087,7 +1015,6 @@ export async function getRelatedBooks(
       (seedBook) =>
         seedBook.id !== currentBook.id && seedBook.categoryId === currentBook.categoryId,
     )
-    .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime())
     .map((seedBook) => toLocalizedBook(locale, seedBook));
 
   if (sameCategoryFallback.length >= safeLimit) {
@@ -1098,7 +1025,6 @@ export async function getRelatedBooks(
 
   const fallbackBooks = seedBooks
     .filter((seedBook) => !excludedIds.has(seedBook.id))
-    .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime())
     .map((seedBook) => toLocalizedBook(locale, seedBook));
 
   return [...sameCategoryFallback, ...fallbackBooks].slice(0, safeLimit);
@@ -1112,31 +1038,6 @@ export async function searchBooks(
   const keyword = query.q?.toLowerCase();
   const offset = Number(query.cursor ?? "0");
   const safeOffset = Number.isFinite(offset) && offset >= 0 ? Math.floor(offset) : 0;
-  const page = Math.floor(safeOffset / query.limit) + 1;
-
-  if (!query.category) {
-    try {
-      const backendBooks = getActiveBackendBooks(
-        await fetchBooksFromBackendWithQuery(locale, {
-          page,
-          limit: query.limit,
-          searchName: query.q,
-        }),
-      );
-      const items = backendBooks.map((book) => toBackendBookListItem(book));
-      const nextOffset = safeOffset + items.length;
-      const nextCursor = items.length < query.limit ? null : String(nextOffset);
-
-      return {
-        items,
-        total: nextOffset,
-        nextCursor,
-        appliedFilters: buildAppliedFilters(query),
-      };
-    } catch {
-      // Fall through to existing backend and seed fallback paths.
-    }
-  }
 
   try {
     const backendBooks = getActiveBackendBooks(await fetchBooksFromBackend(locale));
@@ -1152,15 +1053,14 @@ export async function searchBooks(
       return matchesBackendBookKeyword(book, keyword);
     });
 
-    const sortedBooks = [...filteredBooks].sort(sortBackendBooksDescending);
-    const pageItems = sortedBooks.slice(safeOffset, safeOffset + query.limit);
+    const pageItems = filteredBooks.slice(safeOffset, safeOffset + query.limit);
     const items = pageItems.map((book) => toBackendBookListItem(book));
     const nextOffset = safeOffset + items.length;
-    const nextCursor = nextOffset < sortedBooks.length ? String(nextOffset) : null;
+    const nextCursor = nextOffset < filteredBooks.length ? String(nextOffset) : null;
 
     return {
       items,
-      total: sortedBooks.length,
+      total: filteredBooks.length,
       nextCursor,
       appliedFilters: buildAppliedFilters(query),
     };
@@ -1182,18 +1082,14 @@ export async function searchBooks(
     return haystack.includes(keyword);
   });
 
-  const sorted = [...filtered].sort(
-    (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
-  );
-
-  const pageItems = sorted.slice(safeOffset, safeOffset + query.limit);
+  const pageItems = filtered.slice(safeOffset, safeOffset + query.limit);
   const items = pageItems.map((book) => toLocalizedBook(locale, book));
   const nextOffset = safeOffset + items.length;
-  const nextCursor = nextOffset < sorted.length ? String(nextOffset) : null;
+  const nextCursor = nextOffset < filtered.length ? String(nextOffset) : null;
 
   return {
     items,
-    total: sorted.length,
+    total: filtered.length,
     nextCursor,
     appliedFilters: buildAppliedFilters(query),
   };

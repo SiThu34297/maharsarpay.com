@@ -166,7 +166,7 @@ export function AuthorsListClient({
 
         <div>
           {items.length > 0 ? (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4 lg:grid-cols-3 xl:grid-cols-6">
               {items.map((author) => {
                 const authorDetailSlug = buildAuthorDetailSlug({
                   id: author.id,
@@ -174,18 +174,18 @@ export function AuthorsListClient({
                 });
 
                 return (
-                  <article key={author.id} className="book-list-card">
+                  <article key={author.id} className="book-list-card rounded-none">
                     <Link
                       href={`/${locale}/authors/${authorDetailSlug}?from=authors`}
-                      className="relative block overflow-hidden rounded-xl"
+                      className="relative block overflow-hidden rounded-none"
                     >
                       <Image
                         src={author.imageSrc}
                         alt={author.imageAlt}
-                        width={360}
-                        height={420}
-                        className="h-[220px] w-full object-cover"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                        width={192}
+                        height={192}
+                        className="mx-auto h-[192px] w-[192px] object-cover"
+                        sizes="192px"
                       />
                     </Link>
 
@@ -203,8 +203,11 @@ export function AuthorsListClient({
 
               {isFetchingMore
                 ? Array.from({ length: SKELETON_COUNT }, (_, index) => (
-                    <article key={`skeleton-${index}`} className="book-list-card animate-pulse">
-                      <div className="h-[220px] rounded-xl bg-[var(--color-brand-subtle)]" />
+                    <article
+                      key={`skeleton-${index}`}
+                      className="book-list-card rounded-none animate-pulse"
+                    >
+                      <div className="mx-auto h-[192px] w-[192px] rounded-none bg-[var(--color-brand-subtle)]" />
                       <div className="mt-3 h-4 w-2/3 rounded bg-[var(--color-brand-subtle)]" />
                     </article>
                   ))

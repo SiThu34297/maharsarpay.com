@@ -1,9 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-
-import { PersonIcon } from "@radix-ui/react-icons";
-
-import { auth } from "@/auth";
 import { CartFloatingButton } from "@/features/cart";
 import { getWebsiteBranding } from "@/features/page-info";
 import type { Dictionary, Locale } from "@/lib/i18n";
@@ -24,44 +20,6 @@ type MarketingSiteHeaderProps = Readonly<{
   bookCategoryLinks?: BookCategoryLink[];
 }>;
 
-type AccountButtonState = {
-  isLoggedIn: boolean;
-  imageSrc: string | null;
-  initials: string;
-};
-
-function toOptionalString(value: string | null | undefined): string | null {
-  if (typeof value !== "string") {
-    return null;
-  }
-
-  const normalized = value.trim();
-  return normalized.length > 0 ? normalized : null;
-}
-
-function getInitials(name: string | null, email: string | null): string {
-  if (name) {
-    const parts = name.split(/\s+/).filter(Boolean);
-    const initials = parts
-      .map((part) => Array.from(part)[0]?.toLocaleUpperCase() ?? "")
-      .join("")
-      .slice(0, 2);
-
-    if (initials) {
-      return initials;
-    }
-  }
-
-  if (email) {
-    const firstChar = Array.from(email)[0]?.toLocaleUpperCase();
-    if (firstChar) {
-      return firstChar;
-    }
-  }
-
-  return "U";
-}
-
 export async function MarketingSiteHeader({
   copy,
   locale,
@@ -70,18 +28,7 @@ export async function MarketingSiteHeader({
   bookCategoryLinks = [],
 }: MarketingSiteHeaderProps) {
   const homePath = `/${locale}`;
-  const profilePath = `/${locale}/profile`;
-  const loginWithNextPath = `/${locale}/login?next=${encodeURIComponent(profilePath)}`;
-  const session = await auth();
   const branding = await getWebsiteBranding(locale);
-  const accountState: AccountButtonState = {
-    isLoggedIn: Boolean(session?.user?.id),
-    imageSrc: toOptionalString(session?.user?.image),
-    initials: getInitials(
-      toOptionalString(session?.user?.name),
-      toOptionalString(session?.user?.email),
-    ),
-  };
   const categoriesItem = navigation.find((item) => item.id === "categories");
   const effectiveBookCategoryLinks =
     bookCategoryLinks.length > 0
@@ -95,8 +42,6 @@ export async function MarketingSiteHeader({
           ]
         : [];
   const primaryNavigation = navigation.filter((item) => item.id !== "categories");
-  const accountHref = accountState.isLoggedIn ? profilePath : loginWithNextPath;
-
   return (
     <>
       <header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-card-bg)]/95 backdrop-blur-md">
@@ -133,7 +78,7 @@ export async function MarketingSiteHeader({
                         {getNavigationLabel(copy.navigation, item.id)}
                       </Link>
                       <div className="pointer-events-none absolute left-0 top-full z-40 pt-2 opacity-0 transition group-hover:pointer-events-auto group-hover:opacity-100">
-                        <div className="min-w-[220px] rounded-xl border border-[var(--color-border)] bg-[var(--color-card-bg)] p-2 shadow-[var(--shadow-soft)]">
+                        <div className="min-w-[280px] rounded-xl border border-[var(--color-border)] bg-[var(--color-card-bg)] p-2 shadow-[var(--shadow-soft)]">
                           {effectiveBookCategoryLinks.map((categoryLink) => (
                             <Link
                               key={`desktop-book-category-${categoryLink.href}`}
@@ -167,24 +112,11 @@ export async function MarketingSiteHeader({
           </nav>
 
           <div className="flex shrink-0 items-center justify-end gap-2 lg:gap-3">
-            <Link href={accountHref} className="icon-button" aria-label={copy.header.accountLabel}>
-              {accountState.isLoggedIn ? (
-                accountState.imageSrc ? (
-                  <Image
-                    src={accountState.imageSrc}
-                    alt={copy.header.accountLabel}
-                    width={36}
-                    height={36}
-                    className="h-9 w-9 rounded-full object-cover"
-                  />
-                ) : (
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-brand-subtle)] text-xs font-semibold text-[var(--color-brand)]">
-                    {accountState.initials}
-                  </span>
-                )
-              ) : (
-                <PersonIcon />
-              )}
+            <Link
+              href={`/${locale}/subscribe`}
+              className="inline-flex items-center rounded-full bg-[var(--color-brand)] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+            >
+              {copy.header.subscribeLabel}
             </Link>
           </div>
         </div>
@@ -195,7 +127,6 @@ export async function MarketingSiteHeader({
           navigation={navigation}
           activeNavId={activeNavId}
           bookCategoryLinks={effectiveBookCategoryLinks}
-          accountState={accountState}
           logoSrc={branding.logoSrc}
         />
       </header>

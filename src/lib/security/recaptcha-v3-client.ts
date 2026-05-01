@@ -156,7 +156,9 @@ export async function preloadRecaptcha() {
   setBadgeVisibility(activeRecaptchaContexts > 0);
 }
 
-export async function getRecaptchaToken(action: "login" | "register" | "place_order") {
+export async function getRecaptchaToken(
+  action: "login" | "register" | "place_order" | "subscribe",
+) {
   if (!isRecaptchaConfigured()) {
     throw new Error("Missing NEXT_PUBLIC_RECAPTCHA_SITE_KEY.");
   }

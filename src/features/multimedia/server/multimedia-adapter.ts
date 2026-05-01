@@ -29,13 +29,6 @@ const MEDIA_TYPES = new Set<MediaType>(["video", "photo"]);
 
 type RawSearchParams = Record<string, string | string[] | undefined>;
 
-type BackendMultimediaListRequestQuery = {
-  page: number;
-  limit: number;
-  type?: MediaType;
-  searchName?: string;
-};
-
 type LocalizedValue = {
   en: string;
   my: string;
@@ -342,21 +335,6 @@ function resolveBackendPublishedAt(media: BackendMultimediaRecord) {
   return new Date(0).toISOString();
 }
 
-function resolveBackendPublishedTimestamp(media: BackendMultimediaRecord) {
-  return Date.parse(resolveBackendPublishedAt(media));
-}
-
-function sortBackendMediaDescending(left: BackendMultimediaRecord, right: BackendMultimediaRecord) {
-  const timestampDiff =
-    resolveBackendPublishedTimestamp(right) - resolveBackendPublishedTimestamp(left);
-
-  if (timestampDiff !== 0) {
-    return timestampDiff;
-  }
-
-  return left.id.localeCompare(right.id);
-}
-
 function makeSlugPart(value: string) {
   const normalized = value
     .normalize("NFKD")
@@ -531,49 +509,6 @@ function toBackendMediaDetail(media: BackendMultimediaRecord): MediaDetail {
 
 async function fetchMultimediaFromBackend(locale: Locale): Promise<BackendMultimediaRecord[]> {
   const response = await fetch(`${BOOK_API_BASE_URL}${MULTIMEDIA_ENDPOINT}`, {
-    method: "GET",
-    cache: "no-store",
-    headers: {
-      Accept: "application/json",
-      "Accept-Language": locale,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Multimedia API request failed with status ${response.status}`);
-  }
-
-  const payload = (await response.json()) as Partial<BackendMultimediaResponse>;
-
-  if (payload.error) {
-    throw new Error(payload.message || "Multimedia API returned an error");
-  }
-
-  if (!Array.isArray(payload.data)) {
-    throw new TypeError("Multimedia API returned an invalid response payload");
-  }
-
-  return payload.data.filter((item): item is BackendMultimediaRecord => {
-    return Boolean(item && typeof item === "object" && typeof item.id === "string");
-  });
-}
-
-async function fetchMultimediaFromBackendWithQuery(
-  locale: Locale,
-  query: BackendMultimediaListRequestQuery,
-): Promise<BackendMultimediaRecord[]> {
-  const params = new URLSearchParams();
-  params.set("page", String(query.page));
-  params.set("limit", String(query.limit));
-  if (query.type) {
-    params.set("type", query.type);
-  }
-
-  if (query.searchName) {
-    params.set("searchName", query.searchName);
-  }
-
-  const response = await fetch(`${BOOK_API_BASE_URL}${MULTIMEDIA_ENDPOINT}?${params.toString()}`, {
     method: "GET",
     cache: "no-store",
     headers: {
@@ -825,7 +760,6 @@ export async function getRelatedMedia(
         (media) =>
           media.id !== currentMedia.id && toMediaType(media.mediaType) === currentMedia.mediaType,
       )
-      .sort(sortBackendMediaDescending)
       .map((media) => toBackendMediaListItem(media));
 
     if (sameType.length >= safeLimit) {
@@ -835,7 +769,6 @@ export async function getRelatedMedia(
     const excludedIds = new Set([currentMedia.id, ...sameType.map((media) => media.id)]);
     const fallbackMedia = backendMedia
       .filter((media) => !excludedIds.has(media.id))
-      .sort(sortBackendMediaDescending)
       .map((media) => toBackendMediaListItem(media));
 
     const merged = [...sameType, ...fallbackMedia].slice(0, safeLimit);
@@ -852,9 +785,6 @@ export async function getRelatedMedia(
       (seedMedia) =>
         seedMedia.id !== currentMedia.id && seedMedia.mediaType === currentMedia.mediaType,
     )
-    .sort(
-      (left, right) => new Date(right.publishedAt).getTime() - new Date(left.publishedAt).getTime(),
-    )
     .map((seedMedia) => toLocalizedMediaListItem(locale, seedMedia));
 
   if (sameType.length >= safeLimit) {
@@ -864,9 +794,6 @@ export async function getRelatedMedia(
   const excludedIds = new Set([currentMedia.id, ...sameType.map((media) => media.id)]);
   const fallbackMedia = seedMediaItems
     .filter((seedMedia) => !excludedIds.has(seedMedia.id))
-    .sort(
-      (left, right) => new Date(right.publishedAt).getTime() - new Date(left.publishedAt).getTime(),
-    )
     .map((seedMedia) => toLocalizedMediaListItem(locale, seedMedia));
 
   return [...sameType, ...fallbackMedia].slice(0, safeLimit);
@@ -921,40 +848,6 @@ export async function searchMultimedia(
   const keyword = query.q?.toLowerCase();
   const offset = Number(query.cursor ?? "0");
   const safeOffset = Number.isFinite(offset) && offset >= 0 ? Math.floor(offset) : 0;
-  const page = Math.floor(safeOffset / query.limit) + 1;
-
-  try {
-    const backendMedia = getActiveBackendMedia(
-      await fetchMultimediaFromBackendWithQuery(locale, {
-        page,
-        limit: query.limit,
-        type: query.mediaType,
-        searchName: query.q,
-      }),
-    )
-      .filter((media) => {
-        if (!query.mediaType) {
-          return true;
-        }
-
-        return toMediaType(media.mediaType) === query.mediaType;
-      })
-      .sort(sortBackendMediaDescending)
-      .map((media) => toBackendMediaListItem(media));
-    const nextOffset = safeOffset + backendMedia.length;
-    const hasNextPage = backendMedia.length >= query.limit;
-    const nextCursor = hasNextPage ? String(nextOffset) : null;
-    const total = hasNextPage ? nextOffset + 1 : nextOffset;
-
-    return {
-      items: backendMedia,
-      total,
-      nextCursor,
-      appliedFilters: buildAppliedFilters(query),
-    };
-  } catch {
-    // Fall through to existing backend and seed fallback paths.
-  }
 
   try {
     const backendMedia = getActiveBackendMedia(await fetchMultimediaFromBackend(locale));
@@ -970,16 +863,14 @@ export async function searchMultimedia(
       return matchesBackendMediaKeyword(media, keyword);
     });
 
-    const sorted = [...filtered].sort(sortBackendMediaDescending);
-
-    const pageItems = sorted.slice(safeOffset, safeOffset + query.limit);
+    const pageItems = filtered.slice(safeOffset, safeOffset + query.limit);
     const items = pageItems.map((media) => toBackendMediaListItem(media));
     const nextOffset = safeOffset + items.length;
-    const nextCursor = nextOffset < sorted.length ? String(nextOffset) : null;
+    const nextCursor = nextOffset < filtered.length ? String(nextOffset) : null;
 
     return {
       items,
-      total: sorted.length,
+      total: filtered.length,
       nextCursor,
       appliedFilters: buildAppliedFilters(query),
     };
@@ -1001,18 +892,14 @@ export async function searchMultimedia(
     return haystack.includes(keyword);
   });
 
-  const sorted = [...filtered].sort(
-    (left, right) => new Date(right.publishedAt).getTime() - new Date(left.publishedAt).getTime(),
-  );
-
-  const pageItems = sorted.slice(safeOffset, safeOffset + query.limit);
+  const pageItems = filtered.slice(safeOffset, safeOffset + query.limit);
   const items = pageItems.map((item) => toLocalizedMediaListItem(locale, item));
   const nextOffset = safeOffset + items.length;
-  const nextCursor = nextOffset < sorted.length ? String(nextOffset) : null;
+  const nextCursor = nextOffset < filtered.length ? String(nextOffset) : null;
 
   return {
     items,
-    total: sorted.length,
+    total: filtered.length,
     nextCursor,
     appliedFilters: buildAppliedFilters(query),
   };

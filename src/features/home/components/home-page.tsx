@@ -216,7 +216,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                         </span>
                       ) : null}
                     </Link>
-                    <h3 className="book-list-title mt-5 text-center text-[1.05rem] leading-snug sm:text-lg">
+                    <h3 className="book-list-title mt-1.5 text-center text-base font-semibold leading-snug text-[var(--color-text-main)] sm:text-[1.05rem]">
                       <Link
                         href={`/${locale}/books/${book.slug}?from=home`}
                         className="line-clamp-2 hover:text-[var(--color-brand)]"
@@ -224,7 +224,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                         {book.title}
                       </Link>
                     </h3>
-                    <p className="mt-1 min-h-[1.25rem] line-clamp-1 px-4 text-center text-sm text-[var(--color-text-muted)]">
+                    <p className="-mt-0.5 min-h-[1.25rem] line-clamp-1 px-4 text-center text-sm text-[var(--color-text-muted)]">
                       {authorLinks.map((author, index) => (
                         <span key={author.id}>
                           <Link
@@ -242,15 +242,15 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                         </span>
                       ))}
                     </p>
-                    <div className="mt-3 flex flex-col items-center justify-center gap-1 pb-5">
+                    <div className="mt-1 flex items-center justify-center gap-2 pb-2">
+                      <p className="text-[1.15rem] font-semibold leading-none text-[var(--color-brand)] sm:text-[1.3rem]">
+                        {formatPrice(locale, pricing.salePrice)}
+                      </p>
                       {pricing.originalPrice ? (
                         <p className="text-xs text-[var(--color-text-muted)] line-through">
                           {formatPrice(locale, pricing.originalPrice)}
                         </p>
                       ) : null}
-                      <p className="text-[1.15rem] font-semibold leading-none text-[var(--color-brand)] sm:text-[1.3rem]">
-                        {formatPrice(locale, pricing.salePrice)}
-                      </p>
                     </div>
                   </li>
                 );
@@ -294,7 +294,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                       </span>
                     ) : null}
                   </Link>
-                  <h3 className="book-list-title mt-5 text-center text-[1.05rem] leading-snug sm:text-lg">
+                  <h3 className="book-list-title mt-1.5 text-center text-base font-semibold leading-snug text-[var(--color-text-main)] sm:text-[1.05rem]">
                     <Link
                       href={`/${locale}/books/${book.slug}?from=home`}
                       className="hover:text-[var(--color-brand)]"
@@ -302,7 +302,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                       {book.title}
                     </Link>
                   </h3>
-                  <p className="mt-1 min-h-[1.25rem] line-clamp-1 px-4 text-center text-sm text-[var(--color-text-muted)]">
+                  <p className="-mt-0.5 min-h-[1.25rem] line-clamp-1 px-4 text-center text-sm text-[var(--color-text-muted)]">
                     {authorLinks.map((author, index) => (
                       <span key={author.id}>
                         <Link
@@ -320,15 +320,15 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                       </span>
                     ))}
                   </p>
-                  <div className="mt-3 flex flex-col items-center justify-center gap-1 pb-5">
+                  <div className="mt-1 flex items-center justify-center gap-2 pb-2">
+                    <p className="text-[1.15rem] font-semibold leading-none text-[var(--color-brand)] sm:text-[1.3rem]">
+                      {formatPrice(locale, pricing.salePrice)}
+                    </p>
                     {pricing.originalPrice ? (
                       <p className="text-xs text-[var(--color-text-muted)] line-through">
                         {formatPrice(locale, pricing.originalPrice)}
                       </p>
                     ) : null}
-                    <p className="text-[1.15rem] font-semibold leading-none text-[var(--color-brand)] sm:text-[1.3rem]">
-                      {formatPrice(locale, pricing.salePrice)}
-                    </p>
                   </div>
                 </article>
               );

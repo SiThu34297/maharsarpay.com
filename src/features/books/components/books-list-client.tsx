@@ -397,7 +397,7 @@ export function BooksListClient({
                       ) : null}
                     </Link>
 
-                    <h3 className="book-list-title mt-5 text-center text-[1.05rem] text-[var(--color-text-main)] sm:text-lg">
+                    <h3 className="book-list-title mt-1.5 text-center text-base font-semibold text-[var(--color-text-main)] sm:text-[1.05rem]">
                       <Link
                         href={`/${locale}/books/${book.slug}?from=books`}
                         className="hover:text-[var(--color-brand)]"
@@ -405,7 +405,7 @@ export function BooksListClient({
                         {book.title}
                       </Link>
                     </h3>
-                    <p className="mt-1 line-clamp-1 text-center text-sm text-[var(--color-text-muted)]">
+                    <p className="-mt-0.5 line-clamp-1 text-center text-sm text-[var(--color-text-muted)]">
                       {authorLinks.map((author, index) => (
                         <span key={author.id}>
                           <Link
@@ -424,15 +424,15 @@ export function BooksListClient({
                       ))}
                     </p>
 
-                    <div className="mt-3 flex flex-col items-center justify-center gap-1 pb-5">
+                    <div className="mt-1 flex items-center justify-center gap-2 pb-2">
+                      <p className="text-[1.15rem] font-semibold leading-none text-[var(--color-brand)] sm:text-[1.3rem]">
+                        {formatPrice(locale, pricing.salePrice)}
+                      </p>
                       {pricing.originalPrice ? (
                         <p className="text-xs text-[var(--color-text-muted)] line-through">
                           {formatPrice(locale, pricing.originalPrice)}
                         </p>
                       ) : null}
-                      <p className="text-[1.15rem] font-semibold leading-none text-[var(--color-brand)] sm:text-[1.3rem]">
-                        {formatPrice(locale, pricing.salePrice)}
-                      </p>
                     </div>
                   </article>
                 );
@@ -445,9 +445,9 @@ export function BooksListClient({
                       className="book-list-card book-list-card-clean animate-pulse"
                     >
                       <div className="h-[300px] bg-[var(--color-brand-subtle)] sm:h-[330px] lg:h-[360px]" />
-                      <div className="mx-auto mt-5 h-4 w-4/5 rounded bg-[var(--color-brand-subtle)]" />
-                      <div className="mx-auto mt-2 h-3 w-2/3 rounded bg-[var(--color-brand-subtle)]" />
-                      <div className="mx-auto mt-4 h-8 w-28 rounded bg-[var(--color-brand-subtle)]" />
+                      <div className="mx-auto mt-1.5 h-4 w-4/5 rounded bg-[var(--color-brand-subtle)]" />
+                      <div className="mx-auto mt-1 h-3 w-2/3 rounded bg-[var(--color-brand-subtle)]" />
+                      <div className="mx-auto mt-1.5 h-8 w-28 rounded bg-[var(--color-brand-subtle)]" />
                     </article>
                   ))
                 : null}

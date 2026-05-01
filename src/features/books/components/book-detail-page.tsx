@@ -330,11 +330,6 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
                 </div>
 
                 <div className="book-detail-spec-row">
-                  <span className="book-detail-spec-label">{copy.bookDetail.languageLabel}</span>
-                  <span className="book-detail-spec-value">{book.language}</span>
-                </div>
-
-                <div className="book-detail-spec-row">
                   <span className="book-detail-spec-label">တန်ဖိုး</span>
                   <span className="book-detail-spec-value book-detail-spec-price">
                     {formatPrice(locale, pricing.salePrice)}
@@ -488,23 +483,23 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
                           </span>
                         ) : null}
                       </Link>
-                      <h3 className="book-list-title mt-5 text-center text-[1.05rem] leading-snug sm:text-lg">
+                      <h3 className="book-list-title mt-1.5 text-center text-base font-semibold leading-snug text-[var(--color-text-main)] sm:text-[1.05rem]">
                         <Link href={`/${locale}/books/${relatedBook.slug}${detailHrefSuffix}`}>
                           {relatedBook.title}
                         </Link>
                       </h3>
-                      <p className="mt-1 min-h-[1.25rem] line-clamp-1 px-4 text-center text-sm text-[var(--color-text-muted)]">
+                      <p className="-mt-0.5 min-h-[1.25rem] line-clamp-1 px-4 text-center text-sm text-[var(--color-text-muted)]">
                         {displayRelatedAuthor}
                       </p>
-                      <div className="mt-3 flex flex-col items-center justify-center gap-1 pb-5">
+                      <div className="mt-1 flex items-center justify-center gap-2 pb-2">
+                        <p className="text-[1.15rem] font-semibold leading-none text-[var(--color-brand)] sm:text-[1.3rem]">
+                          {formatPrice(locale, relatedPricing.salePrice)}
+                        </p>
                         {relatedPricing.originalPrice ? (
                           <p className="text-xs text-[var(--color-text-muted)] line-through">
                             {formatPrice(locale, relatedPricing.originalPrice)}
                           </p>
                         ) : null}
-                        <p className="text-[1.15rem] font-semibold leading-none text-[var(--color-brand)] sm:text-[1.3rem]">
-                          {formatPrice(locale, relatedPricing.salePrice)}
-                        </p>
                       </div>
                     </article>
                   );

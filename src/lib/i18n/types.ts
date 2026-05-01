@@ -9,6 +9,7 @@ export type Dictionary = {
     desktopNavigationLabel: string;
     searchLabel: string;
     accountLabel: string;
+    subscribeLabel: string;
     wishlistLabel: string;
     cartLabel: string;
     menuLabel: string;
@@ -227,6 +228,21 @@ export type Dictionary = {
     socialDescription: string;
     mapTitle: string;
     mapDescription: string;
+    subscriptionTitle: string;
+    subscriptionDescription: string;
+    authorsLabel: string;
+    authorsPlaceholder: string;
+    nameLabel: string;
+    namePlaceholder: string;
+    phoneLabel: string;
+    phonePlaceholder: string;
+    addressLabel: string;
+    addressPlaceholder: string;
+    submitButton: string;
+    submittingButton: string;
+    requiredFieldsError: string;
+    unknownError: string;
+    successMessage: string;
   };
   cartPage: {
     title: string;
@@ -350,6 +366,7 @@ export type Dictionary = {
     supportPrivacy: string;
     supportHelp: string;
     supportContact: string;
+    supportSubscribe: string;
     contactTitle: string;
     address: string;
     phone: string;
