@@ -102,7 +102,7 @@ async function getHomeCategories(locale: Locale): Promise<CategoryItem[]> {
 
 async function getHomeAuthors(locale: Locale): Promise<AuthorItem[]> {
   const response = await searchAuthors(locale, { limit: 24 });
-  return pickRandomItems(response.items, 6);
+  return response.items.slice(0, 6);
 }
 
 function getBookAuthorText(
@@ -123,12 +123,13 @@ function getBookAuthorText(
 
 async function getHomeBooks(locale: Locale): Promise<BookItem[]> {
   const response = await searchBooks(locale, { limit: 24 });
-  const randomBooks = pickRandomItems(response.items, 8);
+  const orderedBooks = response.items.slice(0, 8);
 
-  return randomBooks.map((book) => ({
+  return orderedBooks.map((book) => ({
     id: book.id,
     slug: book.slug,
     cartProductId: book.cartProductId,
+    bookReleaseDate: book.bookReleaseDate ?? null,
     title: book.title,
     author: getBookAuthorText(book, locale),
     authorId: book.authorId,
@@ -148,14 +149,11 @@ async function getHomeBooks(locale: Locale): Promise<BookItem[]> {
 
 async function getHomeMediaItems(locale: Locale): Promise<MediaItem[]> {
   try {
-    const [photoResponse, blogResponse] = await Promise.all([
-      searchMultimedia(locale, { mediaType: "photo", limit: 4 }),
-      searchMultimedia(locale, { mediaType: "video", limit: 4 }),
-    ]);
-    const typedItems = [...photoResponse.items, ...blogResponse.items];
+    const response = await searchMultimedia(locale, { limit: 24 });
+    const orderedItems = response.items.slice(0, 8);
 
-    if (typedItems.length > 0) {
-      return typedItems.map((item) => ({
+    if (orderedItems.length > 0) {
+      return orderedItems.map((item) => ({
         id: item.id,
         slug: item.slug,
         mediaType: item.mediaType,

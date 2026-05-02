@@ -336,46 +336,6 @@ export function MultimediaDetailPage({
               ))}
             </div>
           </section>
-
-          <section className="multimedia-detail-related">
-            <div className="multimedia-detail-section-header">
-              <h2>{copy.multimediaDetail.relatedMediaTitle}</h2>
-              <Link href={`/${locale}/multimedia`} className="multimedia-detail-section-link">
-                {copy.multimediaDetail.viewAllMedia}
-              </Link>
-            </div>
-
-            {data.relatedMedia.length > 0 ? (
-              <div className="multimedia-detail-related-media-grid">
-                {data.relatedMedia.map((relatedMedia) => (
-                  <article key={relatedMedia.id} className="multimedia-detail-related-media-card">
-                    <Link href={`/${locale}/multimedia/${relatedMedia.slug}?from=multimedia`}>
-                      <Image
-                        src={relatedMedia.imageSrc}
-                        alt={relatedMedia.imageAlt}
-                        width={360}
-                        height={220}
-                        className="multimedia-detail-related-media-image"
-                        sizes="(max-width: 768px) 50vw, 25vw"
-                      />
-                    </Link>
-                    <h3>
-                      <Link href={`/${locale}/multimedia/${relatedMedia.slug}?from=multimedia`}>
-                        {relatedMedia.title}
-                      </Link>
-                    </h3>
-                    <p>{relatedMedia.description}</p>
-                  </article>
-                ))}
-              </div>
-            ) : (
-              <div className="multimedia-detail-empty">
-                <h3>{copy.multimediaDetail.noRelatedMediaTitle}</h3>
-                <p>{copy.multimediaDetail.noRelatedMediaDescription}</p>
-                <Link href={`/${locale}/multimedia`}>{copy.multimediaDetail.browseMedia}</Link>
-              </div>
-            )}
-          </section>
         </div>
       </main>
 

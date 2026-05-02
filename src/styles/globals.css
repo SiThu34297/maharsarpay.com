@@ -105,6 +105,10 @@ h6 {
   padding-block: clamp(var(--space-4), 7vw, var(--space-6));
 }
 
+.home-section-gap {
+  padding-block: clamp(var(--space-2), 3vw, var(--space-4));
+}
+
 .icon-button {
   display: inline-flex;
   height: 40px;
@@ -1791,7 +1795,7 @@ h6 {
 
 @media (min-width: 768px) {
   .author-detail-books-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 14px;
   }
 
@@ -2042,7 +2046,7 @@ h6 {
 }
 
 .multimedia-detail-masonry-photo {
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .multimedia-detail-masonry-video-frame {
@@ -2060,6 +2064,10 @@ h6 {
   width: 100%;
   height: 100%;
   border: 0;
+}
+
+.multimedia-detail-masonry-iframe {
+  object-fit: contain;
 }
 
 .multimedia-detail-content-surface {

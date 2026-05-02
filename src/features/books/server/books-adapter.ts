@@ -531,6 +531,7 @@ function toBackendBookListItem(book: BackendBookRecord): BookListItem {
     id: book.id,
     slug: book.id,
     cartProductId: `book:${book.id}`,
+    bookReleaseDate: book.bookReleaseDate,
     title,
     author: author.name,
     authorId: author.id,

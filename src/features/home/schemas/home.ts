@@ -45,6 +45,7 @@ export type BookItem = {
   id: string;
   slug: string;
   cartProductId: string;
+  bookReleaseDate?: string | null;
   title: string;
   author: string;
   authorId: string;

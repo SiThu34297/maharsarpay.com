@@ -9,6 +9,7 @@ import {
   getMarketingNavigation,
 } from "@/components/layout/marketing";
 import { buildAuthorDetailSlug } from "@/features/authors/lib/author-slug";
+import { isNewBookByReleaseDate } from "@/features/books/lib/book-freshness";
 import { getBookFilterOptions } from "@/features/books";
 import { buildMultimediaDetailSlug } from "@/features/multimedia/lib/multimedia-slug";
 import { HomeHeroSlider } from "@/features/home/components/home-hero-slider";
@@ -167,7 +168,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
       />
 
       <main>
-        <section className="mb-8 w-full md:mb-12 lg:mb-16">
+        <section className="mb-4 w-full md:mb-6 lg:mb-8">
           <HomeHeroSlider
             slides={data.heroSlides}
             previousLabel={copy.hero.previousSlide}
@@ -175,7 +176,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
           />
         </section>
 
-        <section id="books" className="home-shell section-gap">
+        <section id="books" className="home-shell home-section-gap">
           <SectionHeading
             title={copy.bestsellers.title}
             description={copy.bestsellers.description}
@@ -189,6 +190,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                 const pricing = getDiscountPricing(book);
                 const hasDiscount =
                   Boolean(pricing.originalPrice) && (pricing.discountAmount ?? 0) > 0;
+                const isNew = isNewBookByReleaseDate(book.bookReleaseDate);
                 const authorLinks =
                   book.authors.length > 0
                     ? book.authors
@@ -213,6 +215,11 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                       {hasDiscount ? (
                         <span className="absolute right-0 top-0 z-10 rounded-bl-md bg-[var(--color-secondary)] px-3 py-1 text-[11px] font-semibold text-white">
                           -{formatPrice(locale, pricing.discountAmount ?? 0)}
+                        </span>
+                      ) : null}
+                      {isNew ? (
+                        <span className="absolute left-0 top-0 z-10 rounded-br-md bg-[var(--color-brand)] px-3 py-1 text-[11px] font-semibold text-white">
+                          {locale === "my" ? "အသစ်" : "New"}
                         </span>
                       ) : null}
                     </Link>
@@ -269,6 +276,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
               const pricing = getDiscountPricing(book);
               const hasDiscount =
                 Boolean(pricing.originalPrice) && (pricing.discountAmount ?? 0) > 0;
+              const isNew = isNewBookByReleaseDate(book.bookReleaseDate);
               const authorLinks =
                 book.authors.length > 0 ? book.authors : [{ id: book.authorId, name: book.author }];
 
@@ -291,6 +299,11 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                     {hasDiscount ? (
                       <span className="absolute right-0 top-0 z-10 rounded-bl-md bg-[var(--color-secondary)] px-3 py-1 text-[11px] font-semibold text-white">
                         -{formatPrice(locale, pricing.discountAmount ?? 0)}
+                      </span>
+                    ) : null}
+                    {isNew ? (
+                      <span className="absolute left-0 top-0 z-10 rounded-br-md bg-[var(--color-brand)] px-3 py-1 text-[11px] font-semibold text-white">
+                        {locale === "my" ? "အသစ်" : "New"}
                       </span>
                     ) : null}
                   </Link>
@@ -336,7 +349,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
           </div>
         </section>
 
-        <section id="authors" className="home-shell section-gap">
+        <section id="authors" className="home-shell home-section-gap">
           <SectionHeading
             title={copy.authors.title}
             description={copy.authors.description}
@@ -417,7 +430,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
           </div>
         </section>
 
-        <section id="media" className="home-shell section-gap">
+        <section id="media" className="home-shell home-section-gap">
           <SectionHeading
             title={copy.media.title}
             description={copy.media.description}

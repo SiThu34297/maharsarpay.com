@@ -8,6 +8,7 @@ import {
   getMarketingNavigation,
 } from "@/components/layout/marketing";
 import { buildAuthorDetailSlug } from "@/features/authors/lib/author-slug";
+import { isNewBookByReleaseDate } from "@/features/books/lib/book-freshness";
 import { AddToCartButton } from "@/features/cart";
 import type { BookDetailPageData } from "@/features/books/schemas/books";
 import type { Dictionary, Locale } from "@/lib/i18n";
@@ -197,6 +198,7 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
   const book = data.book;
   const detailHrefSuffix = breadcrumbSource === "home" ? "?from=home" : "?from=books";
   const pricing = getDiscountPricing(book);
+  const isNewBook = isNewBookByReleaseDate(book.bookReleaseDate);
   const previewPdfSrc = getSafePdfUrl(book.previewPdfSrc);
   const viewAllBookReviewsHref = `/${locale}/book-reviews?bookId=${encodeURIComponent(book.id)}`;
   const bookDescriptionHtml = toSafeBookDescriptionHtml(book.description);
@@ -256,6 +258,11 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
             <BookDetailImagePreview title={book.title} images={book.galleryImages} />
 
             <div className="book-detail-content">
+              {isNewBook ? (
+                <span className="mb-2 inline-flex w-fit rounded-full bg-[var(--color-brand)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-white">
+                  {locale === "my" ? "အသစ်" : "New"}
+                </span>
+              ) : null}
               <h1 className="book-detail-title">{book.title}</h1>
               <div className="book-detail-spec-list" aria-label={copy.bookDetail.bookInfoLabel}>
                 <div className="book-detail-spec-row">
@@ -459,6 +466,7 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
                   const hasDiscount =
                     Boolean(relatedPricing.originalPrice) &&
                     (relatedPricing.discountAmount ?? 0) > 0;
+                  const isNewRelatedBook = isNewBookByReleaseDate(relatedBook.bookReleaseDate);
 
                   return (
                     <article
@@ -480,6 +488,11 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
                         {hasDiscount ? (
                           <span className="absolute right-0 top-0 z-10 rounded-bl-md bg-[var(--color-secondary)] px-3 py-1 text-[11px] font-semibold text-white">
                             -{formatPrice(locale, relatedPricing.discountAmount ?? 0)}
+                          </span>
+                        ) : null}
+                        {isNewRelatedBook ? (
+                          <span className="absolute left-0 top-0 z-10 rounded-br-md bg-[var(--color-brand)] px-3 py-1 text-[11px] font-semibold text-white">
+                            {locale === "my" ? "အသစ်" : "New"}
                           </span>
                         ) : null}
                       </Link>

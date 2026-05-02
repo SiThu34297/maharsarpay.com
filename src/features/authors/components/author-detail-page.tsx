@@ -8,6 +8,7 @@ import {
   getMarketingNavigation,
 } from "@/components/layout/marketing";
 import { buildAuthorDetailSlug } from "@/features/authors/lib/author-slug";
+import { isNewBookByReleaseDate } from "@/features/books/lib/book-freshness";
 import type { AuthorDetailPageData } from "@/features/authors/schemas/authors";
 import type { Dictionary, Locale } from "@/lib/i18n";
 
@@ -193,10 +194,11 @@ export function AuthorDetailPage({ copy, locale, data, breadcrumbSource }: Autho
 
             {data.authoredBooks.length > 0 ? (
               <div className="author-detail-books-grid">
-                {data.authoredBooks.map((book) => {
+                {data.authoredBooks.slice(0, 4).map((book) => {
                   const pricing = getDiscountPricing(book);
                   const hasDiscount =
                     Boolean(pricing.originalPrice) && (pricing.discountAmount ?? 0) > 0;
+                  const isNew = isNewBookByReleaseDate(book.bookReleaseDate);
 
                   return (
                     <article
@@ -218,6 +220,11 @@ export function AuthorDetailPage({ copy, locale, data, breadcrumbSource }: Autho
                         {hasDiscount ? (
                           <span className="absolute right-0 top-0 z-10 rounded-bl-md bg-[var(--color-secondary)] px-3 py-1 text-[11px] font-semibold text-white">
                             -{formatPrice(locale, pricing.discountAmount ?? 0)}
+                          </span>
+                        ) : null}
+                        {isNew ? (
+                          <span className="absolute left-0 top-0 z-10 rounded-br-md bg-[var(--color-brand)] px-3 py-1 text-[11px] font-semibold text-white">
+                            {locale === "my" ? "အသစ်" : "New"}
                           </span>
                         ) : null}
                       </Link>
