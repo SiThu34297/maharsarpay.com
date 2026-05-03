@@ -1,4 +1,4 @@
-const FIVE_MONTHS = 5;
+const ONE_WEEK_IN_DAYS = 7;
 
 export function isNewBookByReleaseDate(
   bookReleaseDate: string | null | undefined,
@@ -19,7 +19,7 @@ export function isNewBookByReleaseDate(
   }
 
   const threshold = new Date(now);
-  threshold.setMonth(threshold.getMonth() - FIVE_MONTHS);
+  threshold.setDate(threshold.getDate() - ONE_WEEK_IN_DAYS);
 
   return release.getTime() >= threshold.getTime();
 }

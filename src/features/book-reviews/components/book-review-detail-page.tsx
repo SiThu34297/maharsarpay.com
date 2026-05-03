@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import sanitizeHtml from "sanitize-html";
 
 import {
   MarketingSiteFooter,
@@ -30,23 +29,6 @@ const EN_MONTHS = [
   "Nov",
   "Dec",
 ];
-const REVIEW_ALLOWED_TAGS = [
-  "p",
-  "br",
-  "strong",
-  "em",
-  "b",
-  "i",
-  "u",
-  "ul",
-  "ol",
-  "li",
-  "blockquote",
-  "h3",
-  "h4",
-  "a",
-] as const;
-
 function toMyanmarDigits(value: string) {
   return value.replace(/\d/g, (digit) => String.fromCharCode(0x1040 + Number(digit)));
 }
@@ -74,27 +56,13 @@ function formatViews(locale: Locale, views: number) {
   return locale === "my" ? toMyanmarDigits(grouped) : grouped;
 }
 
-function getInitial(name: string) {
-  const firstChar = Array.from(name.trim())[0];
-  return firstChar ? firstChar.toLocaleUpperCase() : "R";
-}
-
-function toSafeReviewHtml(value: string, fallbackText: string) {
-  const sanitized = sanitizeHtml(value, {
-    allowedTags: [...REVIEW_ALLOWED_TAGS],
-    allowedAttributes: {
-      a: ["href", "target", "rel"],
-    },
-    allowedSchemes: ["http", "https", "mailto", "tel"],
-    allowedSchemesAppliedToAttributes: ["href"],
-    disallowedTagsMode: "discard",
-  }).trim();
-
-  if (sanitized) {
-    return sanitized;
-  }
-
-  return `<p>${sanitizeHtml(fallbackText, { allowedTags: [], allowedAttributes: {} })}</p>`;
+function escapeHtml(value: string) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 export function BookReviewDetailPage({ copy, locale, data }: BookReviewDetailPageProps) {
@@ -108,10 +76,8 @@ export function BookReviewDetailPage({ copy, locale, data }: BookReviewDetailPag
   const bookHref = review.book.id
     ? `/${locale}/books/${review.book.id}?from=books`
     : `/${locale}/books`;
-  const safeReviewHtml = toSafeReviewHtml(
-    review.contentsHtml,
-    review.excerpt || review.reviewerName,
-  );
+  const originalReviewHtml =
+    review.contentsHtml.trim() || `<p>${escapeHtml(review.excerpt || review.reviewerName)}</p>`;
 
   return (
     <div
@@ -142,21 +108,15 @@ export function BookReviewDetailPage({ copy, locale, data }: BookReviewDetailPag
           </nav>
 
           <section className="mt-5 rounded-2xl border border-[var(--color-border)] bg-white p-5 shadow-[var(--shadow-soft)] md:p-7">
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-brand-subtle)] text-sm font-semibold text-[var(--color-brand)]">
-                {getInitial(review.reviewerName)}
-              </span>
-
-              <div>
-                <h1 className="text-xl font-semibold text-[var(--color-text-main)] md:text-2xl">
-                  {copy.bookReviewDetail.reviewByLabel} {review.reviewerName}
-                </h1>
-                <p className="mt-2 text-sm text-[var(--color-text-muted)]">
-                  {copy.bookReviewDetail.publishedOnLabel} {formatDate(locale, review.createdAt)}
-                  {" • "}
-                  {copy.bookReviewDetail.viewsLabel} {formatViews(locale, review.viewCount)}
-                </p>
-              </div>
+            <div>
+              <h1 className="text-xl font-semibold text-[var(--color-text-main)] md:text-2xl">
+                {review.reviewerName}
+              </h1>
+              <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+                {copy.bookReviewDetail.publishedOnLabel} {formatDate(locale, review.createdAt)}
+                {" • "}
+                {copy.bookReviewDetail.viewsLabel} {formatViews(locale, review.viewCount)}
+              </p>
             </div>
 
             <h2 className="mt-6 text-lg font-semibold text-[var(--color-text-main)]">
@@ -166,31 +126,18 @@ export function BookReviewDetailPage({ copy, locale, data }: BookReviewDetailPag
             </h2>
 
             {review.reviewImageSrc ? (
-              <div className="mt-4 mx-auto max-w-4xl overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-soft)] p-2">
+              <div className="mt-4 mx-auto max-w-6xl overflow-hidden">
                 <Image
                   src={review.reviewImageSrc}
                   alt={`${review.reviewerName} review image`}
                   width={840}
                   height={472}
-                  className="max-h-[62vh] w-full object-contain"
+                  className="max-h-[75vh] w-full object-contain"
                 />
               </div>
             ) : null}
 
-            <article
-              className="rich-text-content prose prose-sm mt-6 max-w-none text-[var(--color-text-main)] prose-a:text-[var(--color-brand)] prose-strong:text-[var(--color-text-main)]"
-              dangerouslySetInnerHTML={{ __html: safeReviewHtml }}
-            />
-
-            <div className="mt-7">
-              <Link
-                href={`/${locale}/book-reviews`}
-                prefetch={false}
-                className="inline-flex rounded-full bg-[var(--color-button-secondary)] px-5 py-2 text-sm font-semibold text-white transition hover:brightness-95"
-              >
-                {copy.bookReviewDetail.backToReviews}
-              </Link>
-            </div>
+            <article className="mt-6" dangerouslySetInnerHTML={{ __html: originalReviewHtml }} />
           </section>
         </div>
       </main>

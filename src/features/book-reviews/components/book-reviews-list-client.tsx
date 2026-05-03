@@ -76,11 +76,6 @@ function formatDate(locale: Locale, value: string) {
   return `${EN_MONTHS[month - 1]} ${day}, ${year}`;
 }
 
-function getInitial(name: string) {
-  const firstChar = Array.from(name.trim())[0];
-  return firstChar ? firstChar.toLocaleUpperCase() : "R";
-}
-
 function buildBaseParams(query: BookReviewListQuery) {
   const params = new URLSearchParams();
 
@@ -109,6 +104,7 @@ export function BookReviewsListClient({
 
   const [items, setItems] = useState(initialResponse.items);
   const [nextCursor, setNextCursor] = useState(initialResponse.nextCursor);
+  const [totalCount, setTotalCount] = useState(initialResponse.total);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [loadMoreError, setLoadMoreError] = useState(false);
   const [searchInput, setSearchInput] = useState(initialQuery.q ?? "");
@@ -128,9 +124,16 @@ export function BookReviewsListClient({
   useEffect(() => {
     setItems(initialResponse.items);
     setNextCursor(initialResponse.nextCursor);
+    setTotalCount(initialResponse.total);
     setLoadMoreError(false);
     setSearchInput(initialQuery.q ?? "");
-  }, [initialQuery, initialResponse.items, initialResponse.nextCursor, queryKey]);
+  }, [
+    initialQuery,
+    initialResponse.items,
+    initialResponse.nextCursor,
+    initialResponse.total,
+    queryKey,
+  ]);
 
   const activeBookTitle = useMemo(() => {
     if (!initialQuery.bookId) {
@@ -220,6 +223,7 @@ export function BookReviewsListClient({
       });
 
       setNextCursor(payload.nextCursor);
+      setTotalCount((current) => Math.max(current, payload.total));
     } catch {
       setLoadMoreError(true);
     } finally {
@@ -289,7 +293,7 @@ export function BookReviewsListClient({
     [pushQuery, searchInput],
   );
 
-  const loadedCount = items.length;
+  const displayCount = Math.max(totalCount, items.length);
 
   return (
     <section className="section-gap">
@@ -332,7 +336,7 @@ export function BookReviewsListClient({
 
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-[var(--color-text-muted)]">
-            {replaceResultCount(copy.showingResults, loadedCount, locale)}
+            {replaceResultCount(copy.showingResults, displayCount, locale)}
           </p>
 
           {hasAnyFilter ? (
@@ -370,55 +374,40 @@ export function BookReviewsListClient({
                 const detailHref = `/${locale}/book-reviews/${item.id}`;
 
                 return (
-                  <article
-                    key={item.id}
-                    className="flex h-full flex-col rounded-2xl border border-[var(--color-border)] bg-white p-4 shadow-[var(--shadow-soft)]"
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[var(--color-brand-subtle)] text-sm font-semibold text-[var(--color-brand)]">
-                        {getInitial(item.reviewerName)}
-                      </span>
-
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs font-semibold uppercase tracking-[0.06em] text-[var(--color-brand)]">
-                          {copy.byLabel} {item.reviewerName}
+                  <Link key={item.id} href={detailHref} prefetch={false} className="block h-full">
+                    <article className="flex h-full flex-col rounded-2xl border border-[var(--color-border)] bg-white p-4 shadow-[var(--shadow-soft)] transition hover:border-[var(--color-brand)]">
+                      <div className="min-w-0">
+                        <p className="truncate text-xs font-semibold uppercase tracking-[0.06em] text-[var(--color-brand)]">
+                          {item.reviewerName}
                         </p>
-                        <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+                        <p className="mt-1 line-clamp-1 text-xs text-[var(--color-text-muted)]">
                           {copy.onLabel} {formatDate(locale, item.createdAt)}
                           {" • "}
                           {copy.viewsLabel} {formatCount(locale, item.viewCount)}
                         </p>
                       </div>
-                    </div>
 
-                    <h2 className="mt-4 line-clamp-2 text-base font-semibold text-[var(--color-text-main)]">
-                      {item.book.title}
-                    </h2>
+                      <h2 className="mt-4 truncate text-base font-semibold text-[var(--color-text-main)]">
+                        {item.book.title}
+                      </h2>
 
-                    {item.reviewImageSrc ? (
-                      <div className="mt-3 overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-soft)]">
-                        <Image
-                          src={item.reviewImageSrc}
-                          alt={`${item.reviewerName} review image`}
-                          width={800}
-                          height={450}
-                          className="h-44 w-full object-cover"
-                        />
-                      </div>
-                    ) : null}
+                      {item.reviewImageSrc ? (
+                        <div className="mt-3 overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-soft)]">
+                          <Image
+                            src={item.reviewImageSrc}
+                            alt={`${item.reviewerName} review image`}
+                            width={800}
+                            height={450}
+                            className="h-44 w-full object-cover"
+                          />
+                        </div>
+                      ) : null}
 
-                    <p className="my-4 line-clamp-4 min-h-[5.6rem] text-sm leading-relaxed text-[var(--color-text-main)]">
-                      {item.excerpt}
-                    </p>
-
-                    <Link
-                      href={detailHref}
-                      prefetch={false}
-                      className="mt-auto inline-flex items-center justify-center whitespace-nowrap text-center rounded-full bg-[var(--color-button-secondary)] px-4 py-2 text-xs font-semibold text-white transition hover:brightness-95"
-                    >
-                      {copy.readReviewLabel}
-                    </Link>
-                  </article>
+                      <p className="my-4 line-clamp-4 min-h-[5.6rem] text-sm leading-relaxed text-[var(--color-text-main)]">
+                        {item.excerpt}
+                      </p>
+                    </article>
+                  </Link>
                 );
               })}
 

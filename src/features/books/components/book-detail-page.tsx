@@ -138,11 +138,6 @@ function formatViews(locale: Locale, views: number) {
   return locale === "my" ? toMyanmarDigits(grouped) : grouped;
 }
 
-function getInitial(name: string) {
-  const firstChar = Array.from(name.trim())[0];
-  return firstChar ? firstChar.toLocaleUpperCase() : "R";
-}
-
 function getBookAuthorsText(
   book: {
     author: string;
@@ -410,37 +405,27 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
             {data.bookReviews.length > 0 ? (
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 {data.bookReviews.map((review) => (
-                  <article
+                  <Link
                     key={review.id}
-                    className="rounded-2xl border border-[var(--color-border)] bg-white p-4 shadow-[var(--shadow-soft)]"
+                    href={`/${locale}/book-reviews/${review.id}`}
+                    className="block h-full"
                   >
-                    <div className="flex items-start gap-3">
-                      <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[var(--color-brand-subtle)] text-sm font-semibold text-[var(--color-brand)]">
-                        {getInitial(review.reviewerName)}
-                      </span>
-
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold text-[var(--color-text-main)]">
+                    <article className="flex h-full flex-col rounded-2xl border border-[var(--color-border)] bg-white p-4 shadow-[var(--shadow-soft)] transition hover:border-[var(--color-brand)]">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-[var(--color-text-main)]">
                           {review.reviewerName}
                         </p>
-                        <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+                        <p className="mt-1 line-clamp-1 text-xs text-[var(--color-text-muted)]">
                           {formatDate(locale, review.createdAt)} {" • "}
                           {copy.bookReviewDetail.viewsLabel} {formatViews(locale, review.viewCount)}
                         </p>
                       </div>
-                    </div>
 
-                    <p className="mt-3 line-clamp-4 text-sm text-[var(--color-text-main)]">
-                      {review.excerpt}
-                    </p>
-
-                    <Link
-                      href={`/${locale}/book-reviews/${review.id}`}
-                      className="mt-3 inline-flex rounded-full bg-[var(--color-button-secondary)] px-4 py-2 text-xs font-semibold text-white transition hover:brightness-95"
-                    >
-                      {copy.bookReviewsList.readReviewLabel}
-                    </Link>
-                  </article>
+                      <p className="mt-3 line-clamp-4 text-sm text-[var(--color-text-main)]">
+                        {review.excerpt}
+                      </p>
+                    </article>
+                  </Link>
                 ))}
               </div>
             ) : (

@@ -23,6 +23,16 @@ export type BackendBookReviewsResponse = {
   authorized: boolean;
   message: string;
   data: BackendBookReviewRecord[];
+  total?: number;
+  totalCount?: number;
+  count?: number;
+  recordsTotal?: number;
+  pagination?: {
+    total?: number;
+  };
+  meta?: {
+    total?: number;
+  };
 };
 
 export type BackendBookReviewResponse = {

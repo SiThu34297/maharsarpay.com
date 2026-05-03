@@ -19,25 +19,38 @@ const BOOK_API_BASE_URL = process.env.BOOK_API_BASE_URL ?? "https://bookapi.saba
 const DEFAULT_LIMIT = 12;
 const MAX_LIMIT = 24;
 const FALLBACK_BOOK_COVER_SRC = "/images/home/real/books/book-1.jpg";
-const DEFAULT_ALLOWED_TAGS = [
-  "p",
-  "br",
-  "strong",
-  "em",
-  "b",
-  "i",
-  "u",
-  "ul",
-  "ol",
-  "li",
-  "blockquote",
-  "a",
-] as const;
-
 type RawSearchParams = Record<string, string | string[] | undefined>;
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
+}
+
+function parseTotalCount(value: unknown): number | null {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return null;
+  }
+
+  return Math.max(0, Math.floor(value));
+}
+
+function extractTotalCount(payload: Partial<BackendBookReviewsResponse>): number | null {
+  const candidateTotals: unknown[] = [
+    payload.total,
+    payload.totalCount,
+    payload.count,
+    payload.recordsTotal,
+    payload.pagination?.total,
+    payload.meta?.total,
+  ];
+
+  for (const candidate of candidateTotals) {
+    const parsed = parseTotalCount(candidate);
+    if (parsed !== null) {
+      return parsed;
+    }
+  }
+
+  return null;
 }
 
 function parseNumber(value: string | null): number | undefined {
@@ -80,18 +93,6 @@ function normalizeId(value: string) {
   } catch {
     return value.trim();
   }
-}
-
-function sanitizeReviewHtml(value: string | null | undefined): string {
-  return sanitizeHtml(value ?? "", {
-    allowedTags: [...DEFAULT_ALLOWED_TAGS],
-    allowedAttributes: {
-      a: ["href", "target", "rel"],
-    },
-    allowedSchemes: ["http", "https", "mailto", "tel"],
-    allowedSchemesAppliedToAttributes: ["href"],
-    disallowedTagsMode: "discard",
-  }).trim();
 }
 
 function stripHtmlToText(value: string | null | undefined): string {
@@ -157,8 +158,8 @@ function formatBookCoverAlt(locale: Locale, title: string) {
 function toBookReviewListItem(locale: Locale, review: BackendBookReviewRecord): BookReviewListItem {
   const reviewerName =
     normalizeWhitespace(review.name) || (locale === "my" ? "အမည်မဖော်ပြထားသူ" : "Anonymous");
-  const safeContentsHtml = sanitizeReviewHtml(review.contents);
-  const excerptSource = stripHtmlToText(safeContentsHtml) || reviewerName;
+  const originalContentsHtml = (review.contents ?? "").trim();
+  const excerptSource = stripHtmlToText(originalContentsHtml) || reviewerName;
   const bookTitle =
     normalizeWhitespace(review.book?.bookTitle) ||
     (locale === "my" ? "စာအုပ်အမည်မသိ" : "Untitled book");
@@ -168,7 +169,7 @@ function toBookReviewListItem(locale: Locale, review: BackendBookReviewRecord): 
     bookId: normalizeWhitespace(review.bookId) || review.book?.id || "",
     reviewerName,
     reviewImageSrc: toOptionalString(review.image),
-    contentsHtml: safeContentsHtml,
+    contentsHtml: originalContentsHtml,
     excerpt: truncateText(excerptSource, 220),
     viewCount: toSafeInteger(review.viewCount),
     createdAt: review.createdAt,
@@ -182,7 +183,10 @@ function toBookReviewListItem(locale: Locale, review: BackendBookReviewRecord): 
   };
 }
 
-function parseListPayload(payload: Partial<BackendBookReviewsResponse>): BackendBookReviewRecord[] {
+function parseListPayload(payload: Partial<BackendBookReviewsResponse>): {
+  records: BackendBookReviewRecord[];
+  totalCount: number | null;
+} {
   if (payload.error || payload.authorized === false) {
     throw new Error(payload.message || "Book reviews API returned an error");
   }
@@ -191,7 +195,10 @@ function parseListPayload(payload: Partial<BackendBookReviewsResponse>): Backend
     throw new TypeError("Book reviews API returned an invalid response payload");
   }
 
-  return payload.data;
+  return {
+    records: payload.data,
+    totalCount: extractTotalCount(payload),
+  };
 }
 
 function parseDetailPayload(
@@ -216,7 +223,10 @@ async function fetchBookReviewsFromBackend(
     q?: string;
     bookId?: string;
   },
-): Promise<BackendBookReviewRecord[]> {
+): Promise<{
+  records: BackendBookReviewRecord[];
+  totalCount: number | null;
+}> {
   const params = new URLSearchParams();
   params.set("page", String(query.page));
   params.set("limit", String(query.limit));
@@ -311,7 +321,7 @@ export async function searchBookReviews(
   const page = Math.floor(safeOffset / query.limit) + 1;
 
   try {
-    const records = await fetchBookReviewsFromBackend(locale, {
+    const { records, totalCount } = await fetchBookReviewsFromBackend(locale, {
       page,
       limit: query.limit,
       q: query.q,
@@ -320,11 +330,12 @@ export async function searchBookReviews(
 
     const items = records.map((record) => toBookReviewListItem(locale, record));
     const nextOffset = safeOffset + items.length;
-    const nextCursor = items.length < query.limit ? null : String(nextOffset);
+    const resolvedTotal = totalCount ?? nextOffset;
+    const nextCursor = nextOffset < resolvedTotal ? String(nextOffset) : null;
 
     return {
       items,
-      total: nextOffset,
+      total: resolvedTotal,
       nextCursor,
       appliedFilters: buildAppliedFilters(query),
     };
@@ -375,7 +386,7 @@ export async function getBookReviewsByBookId(
   const safeLimit = clamp(limit, 1, 24);
 
   try {
-    const records = await fetchBookReviewsFromBackend(locale, {
+    const { records } = await fetchBookReviewsFromBackend(locale, {
       page: 1,
       limit: safeLimit,
       bookId: normalizedBookId,
