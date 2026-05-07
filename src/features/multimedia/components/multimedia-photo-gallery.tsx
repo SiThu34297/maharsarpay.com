@@ -123,7 +123,15 @@ export function MultimediaPhotoGallery({ items }: MultimediaPhotoGalleryProps) {
             <button
               type="button"
               className="multimedia-photo-lightbox-nav multimedia-photo-lightbox-nav-prev"
-              onClick={() => setActiveIndex((activeIndex - 1 + total) % total)}
+              onClick={() =>
+                setActiveIndex((current) => {
+                  if (current === null) {
+                    return 0;
+                  }
+
+                  return (current - 1 + total) % total;
+                })
+              }
               aria-label="Previous image"
             >
               ‹
@@ -143,7 +151,15 @@ export function MultimediaPhotoGallery({ items }: MultimediaPhotoGalleryProps) {
             <button
               type="button"
               className="multimedia-photo-lightbox-nav multimedia-photo-lightbox-nav-next"
-              onClick={() => setActiveIndex((activeIndex + 1) % total)}
+              onClick={() =>
+                setActiveIndex((current) => {
+                  if (current === null) {
+                    return 0;
+                  }
+
+                  return (current + 1) % total;
+                })
+              }
               aria-label="Next image"
             >
               ›
