@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 
 import { CameraIcon, PlayIcon } from "@radix-ui/react-icons";
@@ -8,6 +7,7 @@ import {
   MarketingSiteHeader,
   getMarketingNavigation,
 } from "@/components/layout/marketing";
+import { MultimediaPhotoGallery } from "@/features/multimedia/components/multimedia-photo-gallery";
 import type { MultimediaDetailPageData, MediaType } from "@/features/multimedia/schemas/multimedia";
 import type { Dictionary, Locale } from "@/lib/i18n";
 
@@ -158,15 +158,6 @@ function buildMediaMasonryItems(media: MultimediaDetailPageData["media"]): Media
   ];
 }
 
-function getPhotoMasonryVariant(index: number, totalItems: number) {
-  if (totalItems === 1) {
-    return "photo-frame-featured";
-  }
-
-  const variants = ["photo-frame-standard", "photo-frame-tall", "photo-frame-wide"];
-  return variants[index % variants.length];
-}
-
 function getMasonryLayoutClass(totalItems: number) {
   if (totalItems <= 1) {
     return "multimedia-detail-masonry-single";
@@ -219,6 +210,7 @@ export function MultimediaDetailPage({
   const masonryCount = masonryItems.length;
   const masonryLayoutClass = getMasonryLayoutClass(masonryCount);
   const narrativeParagraphs = buildNarrativeParagraphs(media);
+  const richContentHtml = media.richContentHtml?.trim();
 
   return (
     <div
@@ -267,52 +259,55 @@ export function MultimediaDetailPage({
               className={`multimedia-detail-masonry ${masonryLayoutClass}`}
               aria-label={copy.multimediaDetail.mediaInfoLabel}
             >
-              {masonryItems.map((item, index) => (
-                <article
-                  key={item.id}
-                  className={`multimedia-detail-masonry-item ${
-                    masonryCount === 1 ? "multimedia-detail-masonry-item-featured" : ""
-                  }`}
-                >
-                  {item.kind === "photo" ? (
-                    <div
-                      className={`multimedia-detail-masonry-photo-frame ${getPhotoMasonryVariant(index, masonryCount)}`}
-                    >
-                      <Image
-                        src={item.src}
-                        alt={item.alt}
-                        fill
-                        className="multimedia-detail-masonry-photo"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
-                      />
-                    </div>
-                  ) : item.kind === "youtube" ? (
-                    <>
+              {media.mediaType === "photo" ? (
+                <MultimediaPhotoGallery
+                  items={masonryItems
+                    .filter(
+                      (item): item is Extract<MediaMasonryItem, { kind: "photo" }> =>
+                        item.kind === "photo",
+                    )
+                    .map((item) => ({
+                      id: item.id,
+                      src: item.src,
+                      alt: item.alt,
+                    }))}
+                />
+              ) : (
+                masonryItems.map((item) => (
+                  <article
+                    key={item.id}
+                    className={`multimedia-detail-masonry-item ${
+                      masonryCount === 1 ? "multimedia-detail-masonry-item-featured" : ""
+                    }`}
+                  >
+                    {item.kind === "youtube" ? (
+                      <>
+                        <div className="multimedia-detail-masonry-video-frame">
+                          <iframe
+                            src={item.src}
+                            title={item.label}
+                            loading="lazy"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowFullScreen
+                            className="multimedia-detail-masonry-iframe"
+                          />
+                        </div>
+                      </>
+                    ) : (
                       <div className="multimedia-detail-masonry-video-frame">
-                        <iframe
-                          src={item.src}
-                          title={item.label}
-                          loading="lazy"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                          allowFullScreen
-                          className="multimedia-detail-masonry-iframe"
-                        />
+                        <video
+                          controls
+                          preload="metadata"
+                          className="multimedia-detail-masonry-video"
+                          poster={media.imageSrc}
+                        >
+                          <source src={item.src} />
+                        </video>
                       </div>
-                    </>
-                  ) : (
-                    <div className="multimedia-detail-masonry-video-frame">
-                      <video
-                        controls
-                        preload="metadata"
-                        className="multimedia-detail-masonry-video"
-                        poster={media.imageSrc}
-                      >
-                        <source src={item.src} />
-                      </video>
-                    </div>
-                  )}
-                </article>
-              ))}
+                    )}
+                  </article>
+                ))
+              )}
             </div>
           </section>
 
@@ -331,9 +326,16 @@ export function MultimediaDetailPage({
 
             <div className="multimedia-detail-narrative">
               <h2>{copy.multimediaDetail.storyTitle}</h2>
-              {narrativeParagraphs.map((paragraph, index) => (
-                <p key={`${media.id}-narrative-${index}`}>{paragraph}</p>
-              ))}
+              {richContentHtml ? (
+                <div
+                  className="multimedia-detail-story-raw"
+                  dangerouslySetInnerHTML={{ __html: richContentHtml }}
+                />
+              ) : (
+                narrativeParagraphs.map((paragraph, index) => (
+                  <p key={`${media.id}-narrative-${index}`}>{paragraph}</p>
+                ))
+              )}
             </div>
           </section>
         </div>

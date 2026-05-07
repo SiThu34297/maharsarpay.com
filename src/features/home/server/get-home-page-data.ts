@@ -149,8 +149,11 @@ async function getHomeBooks(locale: Locale): Promise<BookItem[]> {
 
 async function getHomeMediaItems(locale: Locale): Promise<MediaItem[]> {
   try {
-    const response = await searchMultimedia(locale, { limit: 24 });
-    const orderedItems = response.items.slice(0, 8);
+    const [photoResponse, blogResponse] = await Promise.all([
+      searchMultimedia(locale, { mediaType: "photo", limit: 4 }),
+      searchMultimedia(locale, { mediaType: "video", limit: 4 }),
+    ]);
+    const orderedItems = [...photoResponse.items.slice(0, 4), ...blogResponse.items.slice(0, 4)];
 
     if (orderedItems.length > 0) {
       return orderedItems.map((item) => ({

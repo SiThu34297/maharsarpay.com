@@ -2025,6 +2025,13 @@ h6 {
   margin-bottom: 0;
 }
 
+.multimedia-detail-masonry-item-photo {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
 .multimedia-detail-masonry-photo-frame {
   position: relative;
 }
@@ -2047,6 +2054,15 @@ h6 {
 
 .multimedia-detail-masonry-photo {
   object-fit: contain;
+}
+
+.multimedia-detail-photo-trigger {
+  display: block;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: zoom-in;
 }
 
 .multimedia-detail-masonry-video-frame {
@@ -2116,7 +2132,7 @@ h6 {
 
 .multimedia-detail-title {
   margin: 0;
-  font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+  font-size: clamp(1.1rem, 2.1vw, 1.55rem);
   line-height: 1.1;
 }
 
@@ -2174,6 +2190,95 @@ h6 {
   font-size: 1rem;
   line-height: 1.86;
   color: var(--color-text-main);
+}
+
+.multimedia-detail-story-raw {
+  margin-top: 12px;
+}
+
+.multimedia-photo-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(10, 14, 20, 0.9);
+}
+
+.multimedia-photo-lightbox-inner {
+  position: relative;
+  width: min(1100px, 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.multimedia-photo-lightbox-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+}
+
+.multimedia-photo-lightbox-image {
+  object-fit: contain;
+}
+
+.multimedia-photo-lightbox-close {
+  position: absolute;
+  top: -12px;
+  right: -2px;
+  z-index: 2;
+  border: 0;
+  background: transparent;
+  color: #ffffff;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.multimedia-photo-lightbox-nav {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  transform: translateY(-50%);
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-size: 1.75rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.multimedia-photo-lightbox-nav-prev {
+  left: -56px;
+}
+
+.multimedia-photo-lightbox-nav-next {
+  right: -56px;
+}
+
+@media (max-width: 900px) {
+  .multimedia-photo-lightbox {
+    padding: 14px;
+  }
+
+  .multimedia-photo-lightbox-nav-prev {
+    left: 8px;
+  }
+
+  .multimedia-photo-lightbox-nav-next {
+    right: 8px;
+  }
+
+  .multimedia-photo-lightbox-close {
+    top: -6px;
+    right: 2px;
+  }
 }
 
 .multimedia-detail-info-grid {

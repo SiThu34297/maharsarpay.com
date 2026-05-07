@@ -1,5 +1,6 @@
 import { getBooksByAuthor, searchBooks } from "@/features/books/server/books-adapter";
 import type { BookListItem } from "@/features/books/schemas/books";
+import sanitizeHtml from "sanitize-html";
 import {
   buildMultimediaDetailSlug,
   normalizeMultimediaDetailSlug,
@@ -463,6 +464,45 @@ function resolveBackendNarrative(media: BackendMultimediaRecord, title: string) 
   };
 }
 
+function sanitizeMultimediaRichContent(value: string | null | undefined): string | undefined {
+  if (!value || !value.trim()) {
+    return undefined;
+  }
+
+  const sanitized = sanitizeHtml(value, {
+    allowedTags: sanitizeHtml.defaults.allowedTags.concat([
+      "img",
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h5",
+      "h6",
+      "span",
+      "div",
+      "figure",
+      "figcaption",
+      "iframe",
+      "table",
+      "thead",
+      "tbody",
+      "tr",
+      "th",
+      "td",
+    ]),
+    allowedAttributes: {
+      ...sanitizeHtml.defaults.allowedAttributes,
+      "*": ["class", "style", "id"],
+      a: ["href", "name", "target", "rel"],
+      img: ["src", "alt", "title", "width", "height"],
+      iframe: ["src", "title", "width", "height", "allow", "allowfullscreen", "frameborder"],
+    },
+    allowedIframeHostnames: ["www.youtube.com", "youtube.com", "player.vimeo.com"],
+  });
+
+  return sanitized.trim() || undefined;
+}
+
 function toBackendMediaListItem(media: BackendMultimediaRecord): MediaListItem {
   const title = normalizeWhitespace(media.title || "") || "Untitled Multimedia";
   const narrative = resolveBackendNarrative(media, title);
@@ -493,6 +533,7 @@ function toBackendMediaDetail(media: BackendMultimediaRecord): MediaDetail {
     ...base,
     lead: narrative.lead,
     storyParagraphs: narrative.storyParagraphs,
+    richContentHtml: sanitizeMultimediaRichContent(media.content),
     tags: [],
     durationLabel: undefined,
     photoCount: base.mediaType === "photo" ? gallerySources.length : undefined,
@@ -639,10 +680,17 @@ function toLocalizedMediaListItem(locale: Locale, item: SeedMedia): MediaListIte
 }
 
 function toLocalizedMediaDetail(locale: Locale, item: SeedMedia): MediaDetail {
+  const fallbackRichContentHtml = item.storyParagraphs
+    .map((paragraph) => paragraph[locale].trim())
+    .filter(Boolean)
+    .map((paragraph) => `<p>${paragraph}</p>`)
+    .join("");
+
   return {
     ...toLocalizedMediaListItem(locale, item),
     lead: item.lead[locale],
     storyParagraphs: item.storyParagraphs.map((paragraph) => paragraph[locale]),
+    richContentHtml: fallbackRichContentHtml || undefined,
     tags: item.tags.map((tag) => tag[locale]),
     durationLabel: item.durationLabel?.[locale],
     photoCount: item.photoCount,

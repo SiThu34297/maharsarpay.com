@@ -4,12 +4,23 @@ type MultimediaSlugInput = {
 };
 
 function toMultimediaSlugSegment(value: string): string {
-  return value.trim().replace(/\s+/g, "");
+  const normalized = value.normalize("NFKC").trim().replace(/\s+/g, " ");
+  return encodeURIComponent(normalized);
+}
+
+function toMultimediaIdSegment(value: string): string {
+  return value
+    .normalize("NFKC")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^\p{L}\p{M}\p{N}_-]+/gu, "")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 export function buildMultimediaDetailSlug(media: MultimediaSlugInput): string {
   const titleSegment = toMultimediaSlugSegment(media.title) || "media";
-  const idSegment = media.id.trim();
+  const idSegment = toMultimediaIdSegment(media.id) || "id";
 
   return `${titleSegment}-${idSegment}`;
 }

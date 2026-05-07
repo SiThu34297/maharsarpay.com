@@ -149,8 +149,10 @@ export async function HomePage({ copy, locale }: HomePageProps) {
     label: category.label,
     href: `/${locale}/books?category=${encodeURIComponent(category.value)}`,
   }));
-  const photoMediaItems = data.mediaItems.filter((item) => item.mediaType === "photo");
-  const videoMediaItems = data.mediaItems.filter((item) => item.mediaType === "video");
+  const photoMediaItems = data.mediaItems.filter((item) => item.mediaType === "photo").slice(0, 4);
+  const videoMediaItems = data.mediaItems.filter((item) => item.mediaType === "video").slice(0, 4);
+  const getMediaDetailHref = (item: (typeof data.mediaItems)[number]) =>
+    `/${locale}/multimedia/${item.slug || buildMultimediaDetailSlug(item)}?from=home`;
 
   return (
     <div
@@ -447,9 +449,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                     {photoMediaItems.map((item) => (
                       <li key={item.id} className="home-card min-w-[250px] snap-start">
                         <div className="relative">
-                          <Link
-                            href={`/${locale}/multimedia/${buildMultimediaDetailSlug(item)}?from=home`}
-                          >
+                          <Link href={getMediaDetailHref(item)}>
                             <Image
                               src={item.imageSrc}
                               alt={item.imageAlt}
@@ -468,7 +468,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                         </div>
                         <h4 className="mt-4 text-lg">
                           <Link
-                            href={`/${locale}/multimedia/${buildMultimediaDetailSlug(item)}?from=home`}
+                            href={getMediaDetailHref(item)}
                             className="hover:text-[var(--color-brand)]"
                           >
                             {item.title}
@@ -486,9 +486,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                   {photoMediaItems.map((item) => (
                     <article key={item.id} className="home-card">
                       <div className="relative">
-                        <Link
-                          href={`/${locale}/multimedia/${buildMultimediaDetailSlug(item)}?from=home`}
-                        >
+                        <Link href={getMediaDetailHref(item)}>
                           <Image
                             src={item.imageSrc}
                             alt={item.imageAlt}
@@ -507,7 +505,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                       </div>
                       <h4 className="mt-4 text-xl">
                         <Link
-                          href={`/${locale}/multimedia/${buildMultimediaDetailSlug(item)}?from=home`}
+                          href={getMediaDetailHref(item)}
                           className="hover:text-[var(--color-brand)]"
                         >
                           {item.title}
@@ -530,9 +528,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                     {videoMediaItems.map((item) => (
                       <li key={item.id} className="home-card min-w-[250px] snap-start">
                         <div className="relative">
-                          <Link
-                            href={`/${locale}/multimedia/${buildMultimediaDetailSlug(item)}?from=home`}
-                          >
+                          <Link href={getMediaDetailHref(item)}>
                             <Image
                               src={item.imageSrc}
                               alt={item.imageAlt}
@@ -551,7 +547,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                         </div>
                         <h4 className="mt-4 text-lg">
                           <Link
-                            href={`/${locale}/multimedia/${buildMultimediaDetailSlug(item)}?from=home`}
+                            href={getMediaDetailHref(item)}
                             className="hover:text-[var(--color-brand)]"
                           >
                             {item.title}
@@ -575,9 +571,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                   {videoMediaItems.map((item) => (
                     <article key={item.id} className="home-card">
                       <div className="relative">
-                        <Link
-                          href={`/${locale}/multimedia/${buildMultimediaDetailSlug(item)}?from=home`}
-                        >
+                        <Link href={getMediaDetailHref(item)}>
                           <Image
                             src={item.imageSrc}
                             alt={item.imageAlt}
@@ -596,7 +590,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                       </div>
                       <h4 className="mt-4 text-xl">
                         <Link
-                          href={`/${locale}/multimedia/${buildMultimediaDetailSlug(item)}?from=home`}
+                          href={getMediaDetailHref(item)}
                           className="hover:text-[var(--color-brand)]"
                         >
                           {item.title}

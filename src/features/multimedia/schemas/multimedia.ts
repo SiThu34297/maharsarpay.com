@@ -40,6 +40,7 @@ export type BackendMultimediaResponse = {
 export type MediaDetail = MediaListItem & {
   lead: string;
   storyParagraphs: string[];
+  richContentHtml?: string;
   tags: string[];
   durationLabel?: string;
   photoCount?: number;
