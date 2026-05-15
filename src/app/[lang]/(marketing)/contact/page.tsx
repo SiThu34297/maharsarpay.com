@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ContactPage, getContactPageData } from "@/features/contact";
+import { getHomeHeroSlidesFromBackend } from "@/features/home";
 import { getWebsiteMetadataContent } from "@/features/page-info";
 import { siteConfig } from "@/lib/constants/site";
 import { getDictionary, hasLocale } from "@/lib/i18n";
@@ -42,12 +43,16 @@ export default async function ContactRoutePage({ params }: ContactRoutePageProps
     notFound();
   }
 
-  const [dictionary, data] = await Promise.all([getDictionary(lang), getContactPageData(lang)]);
+  const [dictionary, data, heroSlides] = await Promise.all([
+    getDictionary(lang),
+    getContactPageData(lang),
+    getHomeHeroSlidesFromBackend(lang),
+  ]);
 
   return (
     <div className="flex flex-1 flex-col">
       <main className="flex flex-1 flex-col" lang={lang}>
-        <ContactPage copy={dictionary} locale={lang} data={data} />
+        <ContactPage copy={dictionary} locale={lang} data={data} heroSlides={heroSlides} />
       </main>
     </div>
   );

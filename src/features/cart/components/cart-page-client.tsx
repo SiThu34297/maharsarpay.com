@@ -49,12 +49,7 @@ function toMyanmarDigits(value: string) {
 
 function formatPrice(locale: Locale, value: number) {
   const grouped = groupDigits(Math.round(value));
-
-  if (locale === "my") {
-    return `${toMyanmarDigits(grouped)} ကျပ်`;
-  }
-
-  return `MMK ${grouped}`;
+  return `Ks ${grouped}`;
 }
 
 function replaceCount(template: string, count: number, locale: Locale) {

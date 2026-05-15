@@ -17,7 +17,7 @@ type PrivacyPolicyRoutePageProps = Readonly<{
 }>;
 
 function getPrivacyPageTitle(locale: "en" | "my") {
-  return locale === "my" ? "ကိုယ်ရေးအချက်အလက် မူဝါဒ" : "Privacy Policy";
+  return locale === "my" ? "About" : "Privacy Policy";
 }
 
 function getPrivacyPageDescription(locale: "en" | "my") {

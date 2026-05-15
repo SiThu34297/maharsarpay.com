@@ -86,7 +86,7 @@ export const myDictionary: Dictionary = {
   bookDetail: {
     breadcrumbLabel: "စာအုပ် လမ်းကြောင်း",
     breadcrumbBooks: "စာအုပ်များ",
-    byAuthorLabel: "စာရေးသူ - ",
+    byAuthorLabel: "စာရေးသူ ",
     ratingAriaLabel: "စာအုပ် အဆင့်သတ်မှတ်ချက်",
     inStock: "In Stock",
     outOfStock: "Out Of Stock",
@@ -376,7 +376,7 @@ export const myDictionary: Dictionary = {
     navigationTitle: "လမ်းညွှန်",
     supportTitle: "ကူညီမှု",
     supportFaq: "မေးလေ့ရှိသော မေးခွန်းများ",
-    supportPrivacy: "ကိုယ်ရေးအချက်အလက် မူဝါဒ",
+    supportPrivacy: "About",
     supportHelp: "ကူညီမှုစင်တာ",
     supportContact: "ဆက်သွယ်ရန်",
     supportSubscribe: "Subscribe",

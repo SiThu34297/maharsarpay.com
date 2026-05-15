@@ -53,15 +53,23 @@ const EN_MONTHS = [
   "Nov",
   "Dec",
 ];
+const MY_MONTHS = [
+  "ဇန်နဝါရီလ",
+  "ဖေဖော်ဝါရီလ",
+  "မတ်လ",
+  "ဧပြီလ",
+  "မေလ",
+  "ဇွန်လ",
+  "ဇူလိုင်လ",
+  "ဩဂုတ်လ",
+  "စက်တင်ဘာလ",
+  "အောက်တိုဘာလ",
+  "နိုဝင်ဘာလ",
+  "ဒီဇင်ဘာလ",
+];
 
 function formatPrice(locale: Locale, value: number) {
-  if (locale === "my") {
-    return `${new Intl.NumberFormat("my-MM", {
-      maximumFractionDigits: 0,
-    }).format(value)} ကျပ်`;
-  }
-
-  return `MMK ${new Intl.NumberFormat("en-US", {
+  return `Ks ${new Intl.NumberFormat("en-US", {
     maximumFractionDigits: 0,
   }).format(value)}`;
 }
@@ -113,6 +121,55 @@ function getSafePdfUrl(value: string | null) {
 
 function toMyanmarDigits(value: string) {
   return value.replace(/\d/g, (digit) => String.fromCharCode(0x1040 + Number(digit)));
+}
+
+function toLatinDigits(value: string) {
+  return value.replace(/[\u1040-\u1049]/g, (digit) => String(digit.charCodeAt(0) - 0x1040));
+}
+
+function toMyanmarEditionText(rawEdition: string) {
+  const normalized = rawEdition.trim();
+  const numericMatch = toLatinDigits(normalized).match(/\d+/);
+
+  if (!numericMatch) {
+    return normalized;
+  }
+
+  const editionNumber = Number.parseInt(numericMatch[0], 10);
+
+  if (!Number.isFinite(editionNumber) || editionNumber < 1) {
+    return normalized;
+  }
+
+  if (editionNumber === 1) {
+    return "ပထမအကြိမ်";
+  }
+
+  if (editionNumber === 2) {
+    return "ဒုတိယအကြိမ်";
+  }
+
+  if (editionNumber === 3) {
+    return "တတိယအကြိမ်";
+  }
+
+  return `${toMyanmarDigits(String(editionNumber))} ကြိမ်မြောက်`;
+}
+
+function toMyanmarPrintRecord(releaseDate: string | null | undefined, publishYear: number) {
+  const parsed = releaseDate ? new Date(releaseDate) : null;
+
+  if (parsed && !Number.isNaN(parsed.getTime())) {
+    const month = MY_MONTHS[parsed.getUTCMonth()];
+    const year = toMyanmarDigits(String(parsed.getUTCFullYear()));
+    return `${month} ${year} ခုနှစ်`;
+  }
+
+  if (Number.isFinite(publishYear) && publishYear > 0) {
+    return `${toMyanmarDigits(String(publishYear))} ခုနှစ်`;
+  }
+
+  return null;
 }
 
 function formatDate(locale: Locale, value: string) {
@@ -221,6 +278,14 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
   const hasPreview = Boolean(previewPdfSrc);
   const categorySummary = bookCategories.map((category) => category.name).join(", ");
   const editionLabel = locale === "my" ? "ပုံနှိပ်မှတ်တမ်း" : "Edition";
+  const printRecordValue =
+    locale === "my"
+      ? (() => {
+          const editionText = toMyanmarEditionText(book.edition);
+          const releaseText = toMyanmarPrintRecord(book.bookReleaseDate, book.publishYear);
+          return releaseText ? `${editionText} ၊ ${releaseText}` : editionText;
+        })()
+      : book.edition;
 
   return (
     <div
@@ -292,11 +357,6 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
                 </div>
 
                 <div className="book-detail-spec-row">
-                  <span className="book-detail-spec-label">{editionLabel}</span>
-                  <span className="book-detail-spec-value">{book.edition}</span>
-                </div>
-
-                <div className="book-detail-spec-row">
                   <span className="book-detail-spec-label">{copy.booksList.categoryLabel}</span>
                   <span className="book-detail-spec-value">{categorySummary}</span>
                 </div>
@@ -323,17 +383,28 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
 
                 <div className="book-detail-spec-row">
                   <span className="book-detail-spec-label">{copy.bookDetail.pageCountLabel}</span>
-                  <span className="book-detail-spec-value">{book.pageCount}</span>
+                  <span className="book-detail-spec-value book-detail-spec-value-plain">
+                    {book.pageCount}
+                  </span>
+                </div>
+
+                <div className="book-detail-spec-row">
+                  <span className="book-detail-spec-label">{editionLabel}</span>
+                  <span className="book-detail-spec-value book-detail-spec-value-plain">
+                    {printRecordValue}
+                  </span>
                 </div>
 
                 <div className="book-detail-spec-row">
                   <span className="book-detail-spec-label">{copy.bookDetail.formatLabel}</span>
-                  <span className="book-detail-spec-value">{book.format}</span>
+                  <span className="book-detail-spec-value book-detail-spec-value-plain">
+                    {book.format}
+                  </span>
                 </div>
 
                 <div className="book-detail-spec-row">
                   <span className="book-detail-spec-label">တန်ဖိုး</span>
-                  <span className="book-detail-spec-value book-detail-spec-price">
+                  <span className="book-detail-spec-value book-detail-spec-value-plain">
                     {formatPrice(locale, pricing.salePrice)}
                   </span>
                 </div>
@@ -342,7 +413,7 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
                   <span className="book-detail-spec-label">
                     {copy.bookDetail.doorToDoorAdTitle}
                   </span>
-                  <span className="book-detail-spec-value">
+                  <span className="book-detail-spec-value book-detail-spec-value-plain">
                     {copy.bookDetail.doorToDoorAdContact}
                   </span>
                 </div>
@@ -380,8 +451,8 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
             </div>
           </section>
 
+          <h2 className="book-detail-section-heading">{copy.bookDetail.aboutThisBookLabel}</h2>
           <section className="book-detail-long-description rich-text-content">
-            <h2>{copy.bookDetail.aboutThisBookLabel}</h2>
             {bookDescriptionHtml ? (
               <div
                 className="book-detail-rich-text"
@@ -394,7 +465,7 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
 
           <section className="mt-10">
             <div className="mb-4 flex items-center justify-between gap-3">
-              <h2 className="text-2xl text-[var(--color-text-main)]">
+              <h2 className="book-detail-section-heading text-[var(--color-text-main)]">
                 {copy.bookDetail.bookReviewsTitle}
               </h2>
               <Link href={viewAllBookReviewsHref} className="book-detail-related-all-link">
@@ -438,7 +509,7 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
           {data.relatedBooks.length > 0 ? (
             <section className="book-detail-related">
               <div className="book-detail-related-header">
-                <h2>{copy.bookDetail.relatedBooksTitle}</h2>
+                <h2 className="book-detail-section-heading">{copy.bookDetail.relatedBooksTitle}</h2>
                 <Link href={`/${locale}/books`} className="book-detail-related-all-link">
                   {copy.bookDetail.viewAllBooks}
                 </Link>
@@ -481,16 +552,16 @@ export function BookDetailPage({ copy, locale, data, breadcrumbSource }: BookDet
                           </span>
                         ) : null}
                       </Link>
-                      <h3 className="book-list-title mt-1.5 text-center text-base font-semibold leading-snug text-[var(--color-text-main)] sm:text-[1.05rem]">
+                      <h3 className="book-list-title mt-1.5 text-center text-[var(--color-text-main)]">
                         <Link href={`/${locale}/books/${relatedBook.slug}${detailHrefSuffix}`}>
                           {relatedBook.title}
                         </Link>
                       </h3>
-                      <p className="-mt-0.5 min-h-[1.25rem] line-clamp-1 px-4 text-center text-sm text-[var(--color-text-muted)]">
+                      <p className="-mt-0.5 min-h-[1.25rem] line-clamp-1 px-4 text-center text-[var(--color-text-muted)]">
                         {displayRelatedAuthor}
                       </p>
                       <div className="mt-1 flex items-center justify-center gap-2 pb-2">
-                        <p className="text-[1.15rem] font-semibold leading-none text-[var(--color-brand)] sm:text-[1.3rem]">
+                        <p className="text-[var(--color-brand)]">
                           {formatPrice(locale, relatedPricing.salePrice)}
                         </p>
                         {relatedPricing.originalPrice ? (

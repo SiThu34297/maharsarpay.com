@@ -41,17 +41,9 @@ type ViewAllLinkProps = Readonly<{
 }>;
 
 function formatPrice(locale: Locale, value: number) {
-  if (locale === "my") {
-    return `${new Intl.NumberFormat("my-MM", {
-      maximumFractionDigits: 0,
-    }).format(value)} ကျပ်`;
-  }
-
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "MMK",
+  return `Ks ${new Intl.NumberFormat("en-US", {
     maximumFractionDigits: 0,
-  }).format(value);
+  }).format(value)}`;
 }
 
 function formatAuthorBookCount(template: string, locale: Locale, count: number) {
@@ -225,7 +217,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                         </span>
                       ) : null}
                     </Link>
-                    <h3 className="book-list-title mt-1.5 text-center text-base font-semibold leading-snug text-[var(--color-text-main)] sm:text-[1.05rem]">
+                    <h3 className="book-list-title mt-1.5 text-center text-[var(--color-text-main)]">
                       <Link
                         href={`/${locale}/books/${book.slug}?from=home`}
                         className="line-clamp-2 hover:text-[var(--color-brand)]"
@@ -233,7 +225,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                         {book.title}
                       </Link>
                     </h3>
-                    <p className="-mt-0.5 min-h-[1.25rem] line-clamp-1 px-4 text-center text-sm text-[var(--color-text-muted)]">
+                    <p className="-mt-0.5 min-h-[1.25rem] line-clamp-1 px-4 text-center text-[var(--color-text-muted)]">
                       {authorLinks.map((author, index) => (
                         <span key={author.id}>
                           <Link
@@ -252,7 +244,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                       ))}
                     </p>
                     <div className="mt-1 flex items-center justify-center gap-2 pb-2">
-                      <p className="text-[1.15rem] font-semibold leading-none text-[var(--color-brand)] sm:text-[1.3rem]">
+                      <p className="text-[var(--color-brand)]">
                         {formatPrice(locale, pricing.salePrice)}
                       </p>
                       {pricing.originalPrice ? (
@@ -309,7 +301,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                       </span>
                     ) : null}
                   </Link>
-                  <h3 className="book-list-title mt-1.5 text-center text-base font-semibold leading-snug text-[var(--color-text-main)] sm:text-[1.05rem]">
+                  <h3 className="book-list-title mt-1.5 text-center text-[var(--color-text-main)]">
                     <Link
                       href={`/${locale}/books/${book.slug}?from=home`}
                       className="hover:text-[var(--color-brand)]"
@@ -317,7 +309,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                       {book.title}
                     </Link>
                   </h3>
-                  <p className="-mt-0.5 min-h-[1.25rem] line-clamp-1 px-4 text-center text-sm text-[var(--color-text-muted)]">
+                  <p className="-mt-0.5 min-h-[1.25rem] line-clamp-1 px-4 text-center text-[var(--color-text-muted)]">
                     {authorLinks.map((author, index) => (
                       <span key={author.id}>
                         <Link
@@ -336,7 +328,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                     ))}
                   </p>
                   <div className="mt-1 flex items-center justify-center gap-2 pb-2">
-                    <p className="text-[1.15rem] font-semibold leading-none text-[var(--color-brand)] sm:text-[1.3rem]">
+                    <p className="text-[var(--color-brand)]">
                       {formatPrice(locale, pricing.salePrice)}
                     </p>
                     {pricing.originalPrice ? (
@@ -370,9 +362,9 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                     <Image
                       src={author.imageSrc}
                       alt={author.imageAlt}
-                      width={152}
-                      height={152}
-                      className="mx-auto h-[120px] w-[120px] rounded-full border border-[var(--color-border)] object-cover"
+                      width={220}
+                      height={220}
+                      className="mx-auto h-[172px] w-[172px] rounded-full border border-[var(--color-border)] object-cover"
                     />
                   </Link>
                   <h3 className="mt-4 text-lg">
@@ -411,9 +403,9 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                   <Image
                     src={author.imageSrc}
                     alt={author.imageAlt}
-                    width={160}
-                    height={160}
-                    className="mx-auto h-[124px] w-[124px] rounded-full border border-[var(--color-border)] object-cover"
+                    width={236}
+                    height={236}
+                    className="mx-auto h-[186px] w-[186px] rounded-full border border-[var(--color-border)] object-cover"
                   />
                 </Link>
                 <h3 className="mt-4 text-lg">
@@ -433,17 +425,17 @@ export async function HomePage({ copy, locale }: HomePageProps) {
         </section>
 
         <section id="media" className="home-shell home-section-gap">
-          <SectionHeading
-            title={copy.media.title}
-            description={copy.media.description}
-            actionHref={`/${locale}/multimedia`}
-            actionLabel={copy.multimediaDetail.viewAllMedia}
-          />
-
           <div className="space-y-8 md:space-y-10">
             {photoMediaItems.length > 0 ? (
               <section>
-                <h3 className="mb-4 text-2xl text-[var(--color-text-main)]">Photo Essay</h3>
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <h3 className="text-2xl text-[var(--color-text-main)]">Photo Essay</h3>
+                  <ViewAllLink
+                    href={`/${locale}/multimedia`}
+                    label={copy.multimediaDetail.viewAllMedia}
+                    className="text-sm md:text-base"
+                  />
+                </div>
                 <div className="md:hidden">
                   <ul className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4">
                     {photoMediaItems.map((item) => (
@@ -466,7 +458,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                             <span>{getMediaLabel(copy.media, item.mediaType)}</span>
                           </span>
                         </div>
-                        <h4 className="mt-4 text-lg">
+                        <h4 className="mt-4 text-sm font-semibold">
                           <Link
                             href={getMediaDetailHref(item)}
                             className="hover:text-[var(--color-brand)]"
@@ -503,7 +495,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                           <span>{getMediaLabel(copy.media, item.mediaType)}</span>
                         </span>
                       </div>
-                      <h4 className="mt-4 text-xl">
+                      <h4 className="mt-4 text-base font-semibold">
                         <Link
                           href={getMediaDetailHref(item)}
                           className="hover:text-[var(--color-brand)]"
@@ -522,7 +514,14 @@ export async function HomePage({ copy, locale }: HomePageProps) {
 
             {videoMediaItems.length > 0 ? (
               <section>
-                <h3 className="mb-4 text-2xl text-[var(--color-text-main)]">Blog</h3>
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <h3 className="text-2xl text-[var(--color-text-main)]">Blog</h3>
+                  <ViewAllLink
+                    href={`/${locale}/multimedia`}
+                    label={copy.multimediaDetail.viewAllMedia}
+                    className="text-sm md:text-base"
+                  />
+                </div>
                 <div className="md:hidden">
                   <ul className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4">
                     {videoMediaItems.map((item) => (
@@ -545,7 +544,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                             <span>{getMediaLabel(copy.media, item.mediaType)}</span>
                           </span>
                         </div>
-                        <h4 className="mt-4 text-lg">
+                        <h4 className="mt-4 text-sm font-semibold">
                           <Link
                             href={getMediaDetailHref(item)}
                             className="hover:text-[var(--color-brand)]"
@@ -588,7 +587,7 @@ export async function HomePage({ copy, locale }: HomePageProps) {
                           <span>{getMediaLabel(copy.media, item.mediaType)}</span>
                         </span>
                       </div>
-                      <h4 className="mt-4 text-xl">
+                      <h4 className="mt-4 text-base font-semibold">
                         <Link
                           href={getMediaDetailHref(item)}
                           className="hover:text-[var(--color-brand)]"

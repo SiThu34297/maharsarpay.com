@@ -975,60 +975,65 @@ export async function getBooksByAuthor(
 
 export async function getRelatedBooks(
   locale: Locale,
-  currentBook: Pick<BookListItem, "id" | "categoryId">,
+  currentBook: Pick<BookListItem, "id" | "authorId" | "authors">,
   limit = 4,
 ): Promise<BookListItem[]> {
   const safeLimit = clamp(limit, 1, 12);
+
+  const currentAuthorIds = new Set(currentBook.authors.map((a) => a.id));
+  const currentAuthorNames = new Set(
+    currentBook.authors.map((a) => a.name.trim().toLowerCase()).filter(Boolean),
+  );
+
   try {
     const backendBooks = getActiveBackendBooks(await fetchBooksFromBackend(locale));
-    const sameCategory = backendBooks
+    const sameAuthor = backendBooks
       .filter((book) => {
         if (book.id === currentBook.id) {
           return false;
         }
 
-        const normalizedCategoryId = normalizeCategoryFilterValue(currentBook.categoryId);
-        return book.categories.some((category) => {
-          const categoryCandidates = [category.id, category.name]
-            .map(normalizeCategoryFilterValue)
-            .filter(Boolean);
-          return categoryCandidates.includes(normalizedCategoryId);
+        return book.authors.some((author) => {
+          if (currentAuthorIds.has(author.id)) {
+            return true;
+          }
+          const normalizedName = author.name.trim().toLowerCase();
+          return normalizedName && currentAuthorNames.has(normalizedName);
         });
       })
       .map((book) => toBackendBookListItem(book));
 
-    if (sameCategory.length >= safeLimit) {
-      return sameCategory.slice(0, safeLimit);
+    if (sameAuthor.length >= safeLimit) {
+      return sameAuthor.slice(0, safeLimit);
     }
 
-    const excludedIds = new Set([currentBook.id, ...sameCategory.map((book) => book.id)]);
+    const excludedIds = new Set([currentBook.id, ...sameAuthor.map((book) => book.id)]);
     const fallbackBooks = backendBooks
       .filter((book) => !excludedIds.has(book.id))
       .map((book) => toBackendBookListItem(book));
 
-    return [...sameCategory, ...fallbackBooks].slice(0, safeLimit);
+    return [...sameAuthor, ...fallbackBooks].slice(0, safeLimit);
   } catch {
     // Fall through to seed fallback.
   }
 
-  const sameCategoryFallback = seedBooks
+  const sameAuthorFallback = seedBooks
     .filter(
-      (seedBook) =>
-        seedBook.id !== currentBook.id && seedBook.categoryId === currentBook.categoryId,
+      (seedBook) => seedBook.id !== currentBook.id && seedBook.authorId === currentBook.authorId,
     )
     .map((seedBook) => toLocalizedBook(locale, seedBook));
 
-  if (sameCategoryFallback.length >= safeLimit) {
-    return sameCategoryFallback.slice(0, safeLimit);
+  if (sameAuthorFallback.length >= safeLimit) {
+    return sameAuthorFallback.slice(0, safeLimit);
   }
 
-  const excludedIds = new Set([currentBook.id, ...sameCategoryFallback.map((book) => book.id)]);
+  const excludedIds = new Set([currentBook.id, ...sameAuthorFallback.map((book) => book.id)]);
 
   const fallbackBooks = seedBooks
     .filter((seedBook) => !excludedIds.has(seedBook.id))
     .map((seedBook) => toLocalizedBook(locale, seedBook));
 
-  return [...sameCategoryFallback, ...fallbackBooks].slice(0, safeLimit);
+  return [...sameAuthorFallback, ...fallbackBooks].slice(0, safeLimit);
 }
 
 export async function searchBooks(

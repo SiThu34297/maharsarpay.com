@@ -33,12 +33,7 @@ const SKELETON_COUNT = 4;
 
 function formatPrice(locale: Locale, value: number) {
   const grouped = groupDigits(Math.round(value));
-
-  if (locale === "my") {
-    return `${toMyanmarDigits(grouped)} ကျပ်`;
-  }
-
-  return `MMK ${grouped}`;
+  return `Ks ${grouped}`;
 }
 
 function getDiscountPricing(book: {
@@ -404,7 +399,7 @@ export function BooksListClient({
                       ) : null}
                     </Link>
 
-                    <h3 className="book-list-title mt-1.5 text-center text-base font-semibold text-[var(--color-text-main)] sm:text-[1.05rem]">
+                    <h3 className="book-list-title mt-1.5 text-center text-[var(--color-text-main)]">
                       <Link
                         href={`/${locale}/books/${book.slug}?from=books`}
                         className="hover:text-[var(--color-brand)]"
@@ -412,7 +407,7 @@ export function BooksListClient({
                         {book.title}
                       </Link>
                     </h3>
-                    <p className="-mt-0.5 line-clamp-1 text-center text-sm text-[var(--color-text-muted)]">
+                    <p className="-mt-0.5 line-clamp-1 text-center text-[var(--color-text-muted)]">
                       {authorLinks.map((author, index) => (
                         <span key={author.id}>
                           <Link
@@ -432,7 +427,7 @@ export function BooksListClient({
                     </p>
 
                     <div className="mt-1 flex items-center justify-center gap-2 pb-2">
-                      <p className="text-[1.15rem] font-semibold leading-none text-[var(--color-brand)] sm:text-[1.3rem]">
+                      <p className="text-[var(--color-brand)]">
                         {formatPrice(locale, pricing.salePrice)}
                       </p>
                       {pricing.originalPrice ? (

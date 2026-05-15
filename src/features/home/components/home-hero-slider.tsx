@@ -83,7 +83,7 @@ export function HomeHeroSlider({ slides, previousLabel, nextLabel }: HomeHeroSli
   }
 
   return (
-    <section className="relative aspect-[5/6] w-full overflow-hidden bg-black md:aspect-auto md:h-[64svh] md:min-h-[460px] lg:mx-auto lg:h-[400px] lg:min-h-[400px] lg:max-w-[1500px]">
+    <section className="relative aspect-[1000/837] w-full overflow-hidden bg-black md:aspect-auto md:h-[64svh] md:min-h-[460px] lg:mx-auto lg:h-[400px] lg:min-h-[400px] lg:max-w-[1500px]">
       {slides.map((slide, index) => {
         const isActive = index === safeActiveIndex;
         const imageSrc = isDesktopOrTablet ? slide.imageDesktopSrc : slide.imageMobileSrc;

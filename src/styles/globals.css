@@ -5,6 +5,7 @@
 
   --color-primary: #017bff;
   --color-secondary: #111111;
+  --color-brandColor: #78af1f;
 
   --color-page-bg: #f5f7fa;
   --color-card-bg: #ffffff;
@@ -36,6 +37,7 @@
 
   --color-primary: #4da3ff;
   --color-secondary: #111111;
+  --color-brandColor: #78af1f;
 
   --color-page-bg: #0f1115;
   --color-card-bg: #161a20;
@@ -56,12 +58,14 @@
 @theme inline {
   --color-background: var(--color-page-bg);
   --color-foreground: var(--color-text-main);
-  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
-  --font-heading: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
+  --color-brandColor: #78af1f;
+  --font-sans: var(--font-roboto), "Roboto", sans-serif;
+  --font-heading: var(--font-roboto), "Roboto", sans-serif;
 }
 
 * {
   box-sizing: border-box;
+  font-family: var(--font-roboto), "Roboto", sans-serif;
 }
 
 html {
@@ -77,7 +81,7 @@ html {
 body {
   background: var(--color-page-bg);
   color: var(--color-text-main);
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
+  font-family: var(--font-roboto), "Roboto", sans-serif;
 }
 
 h1,
@@ -86,7 +90,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
+  font-family: var(--font-roboto), "Roboto", sans-serif;
   letter-spacing: -0.02em;
 }
 
@@ -270,6 +274,7 @@ h6 {
   border-radius: 6px;
   border-color: #e7e9ec;
   padding: 0;
+  padding-bottom: 8px;
   box-shadow: 0 20px 42px rgba(15, 23, 42, 0.18);
   overflow: hidden;
 }
@@ -292,14 +297,35 @@ h6 {
 }
 
 .book-list-title {
-  display: -webkit-box;
+  display: block;
   overflow: hidden;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  line-clamp: 2;
-  min-height: 2.8em;
-  line-height: 1.4;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: normal;
   padding-inline: 14px;
+}
+
+.book-list-title a {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.book-list-card-clean .book-list-title + p {
+  color: var(--color-brandColor);
+  font-size: 1.08rem;
+  font-weight: 600;
+}
+
+.book-list-card-clean .book-list-title + p + div {
+  margin-top: 10px;
+}
+
+.book-list-card-clean .book-list-title + p + div > p:first-child {
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.1;
 }
 
 .book-detail-breadcrumb {
@@ -349,8 +375,8 @@ h6 {
   overflow: hidden;
   border-radius: 0;
   cursor: zoom-in;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: #e5e7eb;
+  border: 1px solid #d1d5db;
 }
 
 .book-detail-cover-glow {
@@ -470,12 +496,12 @@ h6 {
 
 .book-detail-spec-value {
   font-size: 1.02rem;
-  color: var(--color-brand);
+  color: var(--color-brandColor);
   font-weight: 500;
 }
 
 .book-detail-spec-link {
-  color: var(--color-brand);
+  color: var(--color-brandColor);
   text-decoration: none;
 }
 
@@ -490,8 +516,8 @@ h6 {
   cursor: pointer;
 }
 
-.book-detail-spec-price {
-  color: #5f6368;
+.book-detail-spec-value-plain {
+  color: #000;
 }
 
 .book-detail-status-line {
@@ -506,7 +532,7 @@ h6 {
 }
 
 .book-detail-status-in {
-  color: #157347;
+  color: var(--color-brandColor);
   font-weight: 600;
 }
 
@@ -636,7 +662,7 @@ h6 {
 
 .book-detail-description {
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.1rem;
   line-height: 1.75;
   color: var(--color-text-main);
   max-width: 64ch;
@@ -721,13 +747,12 @@ h6 {
   background: #ffffff;
 }
 
-.book-detail-long-description h2 {
-  margin: 0;
-  font-size: clamp(1.3rem, 2.2vw, 1.8rem);
+.book-detail-section-heading {
+  margin: clamp(22px, 4vw, 36px) 0 0;
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
 }
 
 .book-detail-rich-text {
-  margin-top: 12px;
   font-size: 1rem;
   line-height: 1.8;
   color: var(--color-text-main);
@@ -1233,7 +1258,6 @@ h6 {
 
 .book-detail-related-header h2 {
   margin: 0;
-  font-size: clamp(1.45rem, 2.4vw, 2rem);
 }
 
 .book-detail-related-all-link {
@@ -2738,6 +2762,19 @@ h6 {
 .locale-my input,
 .locale-my label {
   line-height: 1.9;
+}
+
+.locale-my .book-list-title {
+  font-size: 1.11rem;
+  line-height: normal;
+}
+
+.locale-my .book-list-card-clean .book-list-title + p {
+  font-size: 1.1rem;
+}
+
+.locale-my .book-list-card-clean .book-list-title + p + div > p:first-child {
+  font-size: 1rem;
 }
 
 /* Hide reCAPTCHA badge globally. */

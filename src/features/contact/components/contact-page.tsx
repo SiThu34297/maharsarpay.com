@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 
 import {
@@ -18,6 +17,8 @@ import {
   getMarketingNavigation,
 } from "@/components/layout/marketing";
 import { getBookFilterOptions } from "@/features/books";
+import { HomeHeroSlider } from "@/features/home/components/home-hero-slider";
+import type { HeroSlide } from "@/features/home/schemas/home";
 import type { ContactPageData, ContactSocialIcon } from "@/features/contact/schemas/contact";
 import type { Dictionary, Locale } from "@/lib/i18n";
 
@@ -25,6 +26,7 @@ type ContactPageProps = Readonly<{
   copy: Dictionary;
   locale: Locale;
   data: ContactPageData;
+  heroSlides: HeroSlide[];
 }>;
 
 function getSocialIcon(icon: ContactSocialIcon) {
@@ -62,7 +64,7 @@ function getSocialIcon(icon: ContactSocialIcon) {
   }
 }
 
-export async function ContactPage({ copy, locale, data }: ContactPageProps) {
+export async function ContactPage({ copy, locale, data, heroSlides }: ContactPageProps) {
   const isMyanmar = locale === "my";
   const navigation = getMarketingNavigation(locale);
   const bookFilterOptions = await getBookFilterOptions(locale);
@@ -86,36 +88,15 @@ export async function ContactPage({ copy, locale, data }: ContactPageProps) {
         bookCategoryLinks={bookCategoryLinks}
       />
 
+      {heroSlides.length > 0 ? (
+        <HomeHeroSlider
+          slides={heroSlides}
+          previousLabel={copy.hero.previousSlide}
+          nextLabel={copy.hero.nextSlide}
+        />
+      ) : null}
+
       <main className="home-shell section-gap space-y-8 md:space-y-10">
-        <section className="contact-hero">
-          <Image
-            src={data.cover.imageSrc}
-            alt={data.cover.imageAlt}
-            fill
-            priority
-            sizes="(max-width: 768px) 100vw, 1400px"
-            className="object-cover"
-          />
-          <div className="contact-hero-overlay" />
-
-          <div className="contact-hero-content">
-            <span className="contact-hero-badge">{copy.contactPage.heroBadge}</span>
-            <h1 className="mt-4 text-4xl text-white md:text-5xl">{copy.contactPage.title}</h1>
-            <p className="mt-3 max-w-2xl text-base leading-relaxed text-white/90 md:text-lg">
-              {copy.contactPage.description}
-            </p>
-            <div className="mt-6 inline-flex h-24 w-24 overflow-hidden rounded-full border-2 border-white/90 shadow-[0_12px_24px_rgba(16,24,32,0.35)] md:h-28 md:w-28">
-              <Image
-                src={data.profile.imageSrc}
-                alt={data.profile.imageAlt}
-                width={180}
-                height={180}
-                className="h-full w-full rounded-full object-cover"
-              />
-            </div>
-          </div>
-        </section>
-
         <section className="grid gap-6 lg:grid-cols-2">
           <article className="contact-surface">
             <h2 className="text-2xl md:text-3xl">{copy.contactPage.websiteTitleLabel}</h2>

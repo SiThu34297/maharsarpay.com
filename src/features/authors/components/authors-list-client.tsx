@@ -189,12 +189,12 @@ export function AuthorsListClient({
                       />
                     </Link>
 
-                    <h2 className="mt-3 text-lg font-semibold text-[var(--color-text-main)]">
+                    <h2 className="mt-3 text-xl font-semibold text-[var(--color-text-main)]">
                       <Link href={`/${locale}/authors/${authorDetailSlug}?from=authors`}>
                         {author.name}
                       </Link>
                     </h2>
-                    <p className="mt-1 text-xs font-semibold text-[var(--color-brand)]">
+                    <p className="mt-1 text-xs font-semibold text-[var(--color-brandColor)]">
                       {replaceAuthorBookCount(copy.bookCountTemplate, author.bookCount, locale)}
                     </p>
                   </article>

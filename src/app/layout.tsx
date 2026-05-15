@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import { Roboto } from "next/font/google";
 
 import "@radix-ui/themes/styles.css";
 
@@ -9,16 +9,11 @@ import { siteConfig } from "@/lib/constants/site";
 import { defaultLocale } from "@/lib/i18n";
 import "@/styles/globals.css";
 
-const inter = Inter({
+const roboto = Roboto({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-roboto",
   display: "swap",
-});
-
-const playfairDisplay = Playfair_Display({
-  subsets: ["latin"],
-  variable: "--font-playfair",
-  display: "swap",
+  weight: ["300", "400", "500", "700", "900"],
 });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -50,7 +45,7 @@ export default function RootLayout({
   return (
     <html
       lang={defaultLocale}
-      className={`h-full antialiased ${inter.variable} ${playfairDisplay.variable}`}
+      className={`h-full antialiased ${roboto.variable}`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">

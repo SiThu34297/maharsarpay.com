@@ -135,7 +135,10 @@ export async function GET(request: NextRequest) {
     responseHeaders.set("content-type", "application/pdf");
   }
 
-  responseHeaders.set("content-disposition", 'inline; filename="preview.pdf"');
+  const originalFilename = sourceUrl.pathname.split("/").pop() || "preview.pdf";
+  const safeFilename = originalFilename.replace(/[^\w\-.\s]/g, "_");
+
+  responseHeaders.set("content-disposition", `inline; filename="${safeFilename}"`);
 
   return new NextResponse(upstreamResponse.body, {
     status: upstreamResponse.status,

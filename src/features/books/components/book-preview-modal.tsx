@@ -24,10 +24,39 @@ const FlipBook = dynamic(() => import("react-pageflip").then((module) => module.
   ssr: false,
 }) as unknown as React.ComponentType<Record<string, unknown>>;
 
-const FLIPBOOK_WIDTH = 480;
-const FLIPBOOK_HEIGHT = 640;
-const MOBILE_FLIPBOOK_WIDTH = 340;
-const MOBILE_FLIPBOOK_HEIGHT = 500;
+const FLIPBOOK_WIDTH = 560;
+const FLIPBOOK_HEIGHT = 750;
+const MOBILE_FLIPBOOK_WIDTH = 480;
+const MOBILE_FLIPBOOK_HEIGHT = 680;
+
+function computeFlipbookDimensions(
+  isMobile: boolean,
+  viewportWidth: number,
+  viewportHeight: number,
+) {
+  const targetPageWidth = isMobile ? MOBILE_FLIPBOOK_WIDTH : FLIPBOOK_WIDTH;
+  const targetPageHeight = isMobile ? MOBILE_FLIPBOOK_HEIGHT : FLIPBOOK_HEIGHT;
+  const targetContainerWidth = isMobile ? MOBILE_FLIPBOOK_WIDTH : FLIPBOOK_WIDTH * 2;
+
+  // Reserve space for: modal padding (~32px), header (~56px), toolbar (~50px), stage padding (~22px)
+  const reservedHeight = 32 + 56 + 50 + 22;
+  const reservedWidth = 32;
+
+  const maxHeight = Math.max(300, viewportHeight - reservedHeight);
+  const maxWidth = Math.max(300, viewportWidth - reservedWidth);
+
+  const scale = Math.min(
+    maxWidth / targetContainerWidth,
+    maxHeight / targetPageHeight,
+    1, // never upscale beyond the target size
+  );
+
+  const flipbookWidth = Math.round(targetPageWidth * scale);
+  const flipbookHeight = Math.round(targetPageHeight * scale);
+  const flipbookContainerWidth = Math.round(targetContainerWidth * scale);
+
+  return { flipbookWidth, flipbookHeight, flipbookContainerWidth };
+}
 
 type FlipBookRef = {
   pageFlip: () => {
@@ -88,6 +117,7 @@ export function BookPreviewModal({
   const [currentPage, setCurrentPage] = useState(1);
   const [hasReaderError, setHasReaderError] = useState(false);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
+  const [viewportSize, setViewportSize] = useState({ width: 1200, height: 800 });
   const flipBookRef = useRef<FlipBookRef | null>(null);
   const proxiedPdfSrc = useMemo(() => {
     return `/api/books/preview?src=${encodeURIComponent(pdfSrc)}`;
@@ -110,9 +140,11 @@ export function BookPreviewModal({
   let readerContent: ReactNode = null;
 
   const isMobileReader = isMobileViewport;
-  const flipbookWidth = isMobileReader ? MOBILE_FLIPBOOK_WIDTH : FLIPBOOK_WIDTH;
-  const flipbookHeight = isMobileReader ? MOBILE_FLIPBOOK_HEIGHT : FLIPBOOK_HEIGHT;
-  const flipbookContainerWidth = isMobileReader ? MOBILE_FLIPBOOK_WIDTH : FLIPBOOK_WIDTH * 2;
+  const { flipbookWidth, flipbookHeight, flipbookContainerWidth } = computeFlipbookDimensions(
+    isMobileReader,
+    viewportSize.width,
+    viewportSize.height,
+  );
   const pageWidth = Math.max(220, flipbookWidth - 44);
 
   if (hasReaderError) {
@@ -127,10 +159,10 @@ export function BookPreviewModal({
         ref={flipBookRef}
         width={flipbookWidth}
         height={flipbookHeight}
-        minWidth={isMobileReader ? MOBILE_FLIPBOOK_WIDTH : FLIPBOOK_WIDTH}
+        minWidth={flipbookWidth}
         maxWidth={flipbookWidth}
-        minHeight={isMobileReader ? MOBILE_FLIPBOOK_HEIGHT : FLIPBOOK_HEIGHT}
-        maxHeight={isMobileReader ? MOBILE_FLIPBOOK_HEIGHT : FLIPBOOK_HEIGHT}
+        minHeight={flipbookHeight}
+        maxHeight={flipbookHeight}
         size="stretch"
         maxShadowOpacity={0.35}
         showCover={false}
@@ -144,6 +176,7 @@ export function BookPreviewModal({
           width: `${flipbookContainerWidth}px`,
           height: `${flipbookHeight}px`,
           maxWidth: "100%",
+          maxHeight: "100%",
           marginInline: "auto",
         }}
         onFlip={(event: { data?: number }) => {
@@ -231,6 +264,22 @@ export function BookPreviewModal({
 
     return () => {
       mediaQuery.removeEventListener("change", applyViewportMode);
+    };
+  }, []);
+
+  useEffect(() => {
+    function updateViewportSize() {
+      setViewportSize({
+        width: globalThis.innerWidth,
+        height: globalThis.innerHeight,
+      });
+    }
+
+    updateViewportSize();
+    globalThis.addEventListener("resize", updateViewportSize);
+
+    return () => {
+      globalThis.removeEventListener("resize", updateViewportSize);
     };
   }, []);
 
